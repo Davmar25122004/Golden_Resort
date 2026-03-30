@@ -108,12 +108,27 @@ var FP_CONFIG = {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 
-function init() {
+async function init() {
     AOS.init({ duration: 800, once: true });
     flatpickr('#in-date', FP_CONFIG);
     flatpickr('#out-date', FP_CONFIG);
     setupNavbarScroll();
     setupSearch();
+
+    // Comprobar sesión activa en el servidor
+    try {
+        const res = await fetch('/api/usuario-info');
+        if (res.ok) {
+            const data = await res.json();
+            if (data.nombre && data.nombre !== 'Invitado') {
+                state.user  = { email: data.nombre, roles: data.roles };
+                state.token = 'session';
+                const rol = data.roles.includes('ROLE_ADMIN') ? 'ADMIN' : 'CLIENTE';
+                state.user.rol = rol;
+            }
+        }
+    } catch (_) {}
+
     updateNav();
     loadRooms();
     loadServicios();
@@ -357,7 +372,17 @@ function showAuthError(msg) {
 
 window.handleLogin = async (e) => {
     e.preventDefault();
-    showAuthError('Login pendiente de backend.');
+    const form = new FormData();
+    form.append('username', document.getElementById('login-email').value);
+    form.append('password', document.getElementById('login-password').value);
+
+    const res = await fetch('/login', { method: 'POST', body: form });
+
+    if (res.ok || res.redirected) {
+        window.location.reload();
+    } else {
+        showAuthError('Email o contraseña incorrectos.');
+    }
 };
 
 window.handleRegister = async (e) => {
@@ -371,9 +396,8 @@ function logout() {
     state.user         = null;
     state.pendingRoom  = null;
     state.pendingDates = null;
-    updateNav();
-    showLanding();
-    loadServicios();
+    // Cerrar sesión en el servidor
+    fetch('/logout', { method: 'POST' }).finally(() => window.location.reload());
 }
 
 // ── ROOM LIGHTBOX ─────────────────────────────────────────────────────────────

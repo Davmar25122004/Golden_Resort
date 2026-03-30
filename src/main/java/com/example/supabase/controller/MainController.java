@@ -15,19 +15,19 @@ public class MainController {
 
     @GetMapping("/")
     public String indice() {
-        return "redirect:/home.html";
+        return "index";
     }
 
     @GetMapping("/api/usuario-info")
     @ResponseBody
     public Map<String, Object> info(Authentication auth) {
-        if (auth == null) return Map.of("nombre", "Invitado", "roles", List.of());
-        
+        if (auth == null)
+            return Map.of("nombre", "Invitado", "roles", List.of());
+
         return Map.of(
-            "nombre", auth.getName(),
-            "roles", auth.getAuthorities().stream()
+                "nombre", auth.getName(),
+                "roles", auth.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toList())
-        );
+                        .collect(Collectors.toList()));
     }
 }
