@@ -103,49 +103,65 @@
         <div class="container">
             <div class="text-center mb-5" data-aos="fade-up">
                 <p class="section-label">Estamos aquí</p>
-                <h2 class="section-title">Contacto</h2>
+                <h2 class="section-title">Info. Contacto</h2>
                 <div class="gold-line mx-auto"></div>
             </div>
-            <div class="row g-5">
-                <div class="col-md-5" data-aos="fade-right">
-                    <div class="contact-info-item">
-                        <p class="contact-label">Dirección</p>
-                        <p class="contact-value">Calle del Lujo 1, Madrid, España</p>
+
+            <div class="contacto-inner" data-aos="fade-up" data-aos-delay="100">
+
+                <!-- Mapa -->
+                <a class="contacto-map-col"
+                   href="https://www.google.com/maps/d/viewer?mid=1jIYuxP58n_AiaKZXeQiYcoqo25feC5c"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   title="Ver en Google Maps">
+                    <iframe
+                        class="contacto-map-iframe"
+                        src="https://www.google.com/maps/d/embed?mid=1jIYuxP58n_AiaKZXeQiYcoqo25feC5c"
+                        allowfullscreen
+                        loading="lazy"
+                        title="Ubicación Hotel DAW — Playa de Cullera, Valencia">
+                    </iframe>
+                    <div class="contacto-map-overlay">
+                        <span class="contacto-map-cta">Ver en Google Maps →</span>
                     </div>
-                    <div class="contact-info-item">
-                        <p class="contact-label">Teléfono</p>
-                        <p class="contact-value">+34 900 123 456</p>
-                    </div>
-                    <div class="contact-info-item">
-                        <p class="contact-label">Email</p>
-                        <p class="contact-value">info@hoteldaw.es</p>
-                    </div>
-                    <div class="contact-info-item">
-                        <p class="contact-label">Horario Recepción</p>
-                        <p class="contact-value">24 horas · 365 días</p>
-                    </div>
-                </div>
-                <div class="col-md-7" data-aos="fade-left">
-                    <form id="form-contacto">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <input type="text" class="form-control-dark" placeholder="Nombre">
-                            </div>
-                            <div class="col-md-6">
-                                <input type="email" class="form-control-dark" placeholder="Email">
-                            </div>
-                            <div class="col-12">
-                                <input type="text" class="form-control-dark" placeholder="Asunto">
-                            </div>
-                            <div class="col-12">
-                                <textarea class="form-control-dark" rows="5" placeholder="Mensaje"></textarea>
-                            </div>
-                            <div class="col-12">
-                                <button type="button" class="btn-reservar btn-reservar--full">Enviar Mensaje</button>
+                </a>
+
+                <!-- Info -->
+                <div class="contacto-info-col">
+                    <div class="contacto-grid">
+                        <div class="contact-info-item">
+                            <p class="contact-label">Localización</p>
+                            <p class="contact-value">Playa de Cullera<br>46400 Cullera, Valencia</p>
+                        </div>
+                        <div class="contact-info-item">
+                            <p class="contact-label">Contáctanos</p>
+                            <p class="contact-value">
+                                +34 900 123 456<br>
+                                <a href="mailto:info@hoteldaw.es" class="contacto-email-link">info@hoteldaw.es</a>
+                            </p>
+                        </div>
+                        <div class="contact-info-item">
+                            <p class="contact-label">Coordenadas</p>
+                            <p class="contact-value contact-value--coords">Lat: 39.1620 | Long: -0.2470</p>
+                        </div>
+                        <div class="contact-info-item">
+                            <p class="contact-label">Síguenos</p>
+                            <div class="contacto-social">
+                                <a href="#" class="contacto-social-btn" aria-label="Facebook">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                                </a>
+                                <a href="#" class="contacto-social-btn" aria-label="Twitter / X">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                </a>
+                                <a href="#" class="contacto-social-btn" aria-label="Instagram">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>
+                                </a>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
+
             </div>
         </div>
     </section>
