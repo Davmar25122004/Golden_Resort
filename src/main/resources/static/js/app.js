@@ -1785,7 +1785,26 @@ window.handleLogin = async (e) => {
 
 window.handleRegister = async (e) => {
     e.preventDefault();
-    showAuthError('Registro pendiente de backend.');
+    const nombre   = document.getElementById('reg-nombre').value;
+    const email    = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
+
+    try {
+        const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nombre, email, password })
+        });
+
+        if (res.ok) {
+            window.location.reload();
+        } else {
+            const msg = await res.text();
+            showAuthError(msg || 'Error al registrarse.');
+        }
+    } catch (_) {
+        showAuthError('Error de conexión.');
+    }
 };
 
 function logout() {
