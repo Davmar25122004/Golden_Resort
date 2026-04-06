@@ -528,8 +528,7 @@ async function loadRooms() {
         slidesPerView: 'auto',
         spaceBetween: 24,
         centeredSlides: false,
-        loop: true,
-        autoplay: { delay: 4000, disableOnInteraction: false, pauseOnMouseEnter: true },
+        loop: false,
         pagination:  { el: '.swiper-pagination', clickable: true },
         navigation:  { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
     });
