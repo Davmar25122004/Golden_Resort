@@ -38,7 +38,7 @@ public class MainController {
         return "index";
     }
 
-    @GetMapping({"/habitacion/{tipo}", "/servicio/{slug}"})
+    @GetMapping({"/habitacion/{tipo}", "/servicio/{slug}", "/mis-reservas", "/admin"})
     public String detallePagina() {
         return "index";
     }

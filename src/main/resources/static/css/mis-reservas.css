@@ -1,0 +1,163 @@
+﻿/* ── MIS RESERVAS ──────────────────────────────────────────────────────────── */
+
+.reservas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.reserva-card {
+    display: flex;
+    background: var(--dark-3);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+}
+
+.reserva-card:hover {
+    border-color: rgba(201,168,76,0.5);
+    transform: translateY(-2px);
+}
+
+.reserva-card--pasada {
+    opacity: 0.5;
+}
+
+.reserva-card-img {
+    width: 200px;
+    min-width: 200px;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+}
+
+.reserva-card-body {
+    flex: 1;
+    padding: 20px 24px;
+    border-left: 1px solid rgba(201,168,76,0.12);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.reserva-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.reserva-tipo-label {
+    font-size: 0.6rem;
+    letter-spacing: 3px;
+    color: var(--text-muted-custom);
+    text-transform: uppercase;
+}
+
+.reserva-estado-badge {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-family: 'Montserrat', sans-serif;
+    white-space: nowrap;
+}
+
+.reserva-hab-num {
+    font-size: 0.75rem;
+    color: var(--text-muted-custom);
+    letter-spacing: 1px;
+}
+
+.reserva-dates {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem;
+    color: var(--cream);
+    letter-spacing: 0.5px;
+}
+
+.reserva-dates span {
+    color: var(--gold);
+    margin: 0 8px;
+}
+
+.reserva-meta {
+    font-size: 0.72rem;
+    color: var(--text-muted-custom);
+    letter-spacing: 1px;
+}
+
+.reserva-meta strong {
+    color: var(--cream);
+    font-weight: 500;
+}
+
+.btn-cancelar {
+    align-self: flex-start;
+    background: transparent;
+    border: 1px solid rgba(139,26,26,0.5);
+    color: #c0392b;
+    padding: 6px 18px;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.25s, border-color 0.25s;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.btn-cancelar:hover {
+    background: rgba(139,26,26,0.15);
+    border-color: #c0392b;
+}
+
+.reserva-empty {
+    text-align: center;
+    padding: 80px 20px;
+}
+
+.reserva-empty-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    color: var(--cream);
+    margin-bottom: 12px;
+    font-weight: 400;
+}
+
+.reserva-empty-sub {
+    color: var(--text-muted-custom);
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 32px;
+}
+
+.btn-reserva-empty {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 12px 32px;
+    font-size: 0.7rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    font-family: 'Montserrat', sans-serif;
+    transition: background 0.3s, color 0.3s;
+}
+
+.btn-reserva-empty:hover {
+    background: var(--gold);
+    color: var(--dark);
+}
+
+@media (max-width: 600px) {
+    .reserva-card { flex-direction: column; }
+    .reserva-card-img { width: 100%; min-width: unset; height: 180px; }
+    .reserva-card-body { border-left: none; border-top: 1px solid rgba(201,168,76,0.12); }
+}
+

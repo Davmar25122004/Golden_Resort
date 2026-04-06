@@ -1,0 +1,169 @@
+﻿/* ── ADMIN / MIS RESERVAS ── */
+#main-content {
+    display: none;
+    background: var(--dark);
+    padding-top: 100px;
+    min-height: 80vh;
+}
+.admin-table { color: var(--cream); }
+.admin-table th { color: var(--gold); font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; border-color: rgba(201,168,76,0.2); }
+.admin-table td { border-color: rgba(255,255,255,0.05); color: var(--cream); }
+.reserva-card-luxury {
+    background: var(--dark-2);
+    border: 1px solid rgba(201,168,76,0.15);
+    padding: 28px;
+    margin-bottom: 20px;
+}
+
+/* ── PANEL ADMIN ─────────────────────────────────────────────────────────── */
+
+/* Tabs */
+.admin-tabs-bar {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(185,149,77,0.2);
+    padding-bottom: 0;
+}
+.admin-tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-muted-custom);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 10px 18px 12px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    margin-bottom: -1px;
+}
+.admin-tab-btn:hover { color: var(--cream); }
+.admin-tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* Stats grid */
+.admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+.admin-stat-card {
+    background: rgba(185,149,77,0.07);
+    border: 1px solid rgba(185,149,77,0.2);
+    border-radius: 10px;
+    padding: 20px 24px;
+}
+.admin-stat-label {
+    font-size: 0.68rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted-custom);
+    margin-bottom: 8px;
+}
+.admin-stat-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem;
+    color: var(--gold);
+    line-height: 1;
+}
+
+/* Table */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+.admin-table th {
+    font-size: 0.65rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted-custom);
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.admin-table td {
+    padding: 12px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: var(--text-muted-custom);
+    vertical-align: middle;
+}
+.admin-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+/* Badge */
+.admin-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: rgba(185,149,77,0.12);
+    color: var(--gold);
+    border-radius: 20px;
+    padding: 3px 10px;
+}
+.admin-badge--admin {
+    background: rgba(155,89,182,0.15);
+    color: #bb86fc;
+}
+
+/* Buttons */
+.admin-btn {
+    background: rgba(185,149,77,0.12);
+    border: 1px solid rgba(185,149,77,0.35);
+    color: var(--gold);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-right: 6px;
+}
+.admin-btn:hover { background: rgba(185,149,77,0.22); }
+.admin-btn--danger {
+    background: rgba(192,57,43,0.1);
+    border-color: rgba(192,57,43,0.35);
+    color: #e74c3c;
+}
+.admin-btn--danger:hover { background: rgba(192,57,43,0.2); }
+.admin-btn--ghost {
+    background: transparent;
+    border-color: rgba(255,255,255,0.15);
+    color: var(--text-muted-custom);
+}
+.admin-btn--ghost:hover { background: rgba(255,255,255,0.05); }
+
+/* Form inputs inside modals */
+.admin-form-label {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted-custom);
+    margin-bottom: 6px;
+}
+.admin-form-input {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(185,149,77,0.25);
+    color: var(--cream);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.85rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+.admin-form-input:focus { outline: none; border-color: var(--gold); }
+.admin-form-input option { background: #1a1a1a; }
+.admin-form-error {
+    font-size: 0.78rem;
+    color: #e74c3c;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+}
+

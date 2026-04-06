@@ -1,0 +1,72 @@
+﻿/* ── NAVBAR ── */
+#navbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    padding: 20px 0;
+    transition: all 0.4s ease;
+    background: transparent;
+}
+#navbar.scrolled {
+    background: rgba(13,13,13,0.97);
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    backdrop-filter: blur(10px);
+}
+.navbar-brand-custom {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--gold) !important;
+    letter-spacing: 2px;
+    text-decoration: none;
+}
+.nav-link-custom {
+    color: var(--cream) !important;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 16px !important;
+    transition: color 0.3s;
+    text-decoration: none;
+}
+.nav-link-custom:hover { color: var(--gold) !important; }
+.btn-reservar {
+    background: var(--gold);
+    color: var(--dark) !important;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 24px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+    text-decoration: none;
+}
+.btn-reservar:hover { background: var(--gold-light); }
+.btn-reservar--search { padding: 12px; }
+.btn-reservar--full { width: 100%; padding: 14px; }
+
+/* ── FOOTER ── */
+footer {
+    background: #080808;
+    padding: 40px 0;
+    border-top: 1px solid rgba(201,168,76,0.15);
+}
+.footer-brand { font-size: 1.4rem; color: var(--gold); letter-spacing: 3px; }
+.footer-text { font-size: 0.75rem; color: var(--text-muted-custom); letter-spacing: 1px; }
+
+/* ── NAV ELEMENTOS OCULTOS ── */
+#nav-mis-reservas,
+#nav-admin,
+#btn-reservar-nav,
+#nav-user { display: none; }
+
+#nav-user {
+    font-size: 0.7rem;
+    color: var(--gold-light);
+    letter-spacing: 1px;
+}
+

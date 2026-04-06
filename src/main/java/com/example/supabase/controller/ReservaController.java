@@ -93,6 +93,15 @@ public class ReservaController {
                     BigDecimal totalHabitacion = r.getHabitacion().getPrecioNoche()
                             .multiply(BigDecimal.valueOf(dias));
                     BigDecimal total = totalHabitacion.add(totalServicios).add(subtotalRoomService);
+                    List<PedidoRSDTO> pedidosRS = pedidoRoomServiceRepository.findByReservaId(r.getId())
+                            .stream()
+                            .map(p -> new PedidoRSDTO(
+                                    p.getItem().getNombre(),
+                                    p.getCantidad(),
+                                    p.getItem().getPrecio().multiply(BigDecimal.valueOf(p.getCantidad()))
+                            ))
+                            .collect(Collectors.toList());
+
                     return new ReservaDTO(
                             r.getId(),
                             r.getFechaEntrada(),
@@ -103,6 +112,7 @@ public class ReservaController {
                             serviciosDTOs,
                             total,
                             subtotalRoomService,
+                            pedidosRS,
                             r.getUsuario().getNombre() != null ? r.getUsuario().getNombre() : r.getUsuario().getEmail(),
                             r.getUsuario().getEmail()
                     );
@@ -147,6 +157,15 @@ public class ReservaController {
                             .multiply(BigDecimal.valueOf(dias));
                     BigDecimal total = totalHabitacion.add(totalServicios).add(subtotalRoomService);
 
+                    List<PedidoRSDTO> pedidosRS = pedidoRoomServiceRepository.findByReservaId(r.getId())
+                            .stream()
+                            .map(p -> new PedidoRSDTO(
+                                    p.getItem().getNombre(),
+                                    p.getCantidad(),
+                                    p.getItem().getPrecio().multiply(BigDecimal.valueOf(p.getCantidad()))
+                            ))
+                            .collect(Collectors.toList());
+
                     return new ReservaDTO(
                             r.getId(),
                             r.getFechaEntrada(),
@@ -156,7 +175,8 @@ public class ReservaController {
                             r.getHabitacion().getPrecioNoche(),
                             serviciosDTOs,
                             total,
-                            subtotalRoomService
+                            subtotalRoomService,
+                            pedidosRS
                     );
                 })
                 .collect(Collectors.toList());
@@ -302,6 +322,58 @@ public class ReservaController {
         return ResponseEntity.noContent().build();
     }
 
+    // PUT /api/reservas/{id} → modificar reserva (fechas y servicios básicos)
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity<?> modificar(@PathVariable Long id, @RequestBody ReservaRequest request, Authentication authentication) {
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        Reserva reserva = reservaRepository.findById(id).orElse(null);
+        if (reserva == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (request.fechaEntrada != null && request.fechaSalida != null) {
+            if (!request.fechaEntrada.isBefore(request.fechaSalida)) {
+                return ResponseEntity.badRequest().body("Fechas inválidas");
+            }
+            long solapadas = reservaRepository.contarReservasSolapadasExcluyendo(
+                    reserva.getHabitacion(), request.fechaEntrada, request.fechaSalida, id);
+            
+            if (solapadas > 0) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("La habitación no está disponible para las nuevas fechas");
+            }
+            reserva.setFechaEntrada(request.fechaEntrada);
+            reserva.setFechaSalida(request.fechaSalida);
+        }
+
+        if (request.servicios != null) {
+            reservaServicioRepository.deleteByReservaId(id);
+            reserva.getServicios().clear();
+            List<ReservaServicio> nuevosServicios = new ArrayList<>();
+            
+            for (ServicioRequest sr : request.servicios) {
+                if (sr.cantidad > 0) {
+                    Servicio servicio = servicioRepository.findById(sr.servicioId).orElse(null);
+                    if (servicio != null) {
+                        ReservaServicio rs = new ReservaServicio();
+                        rs.setReserva(reserva);
+                        rs.setServicio(servicio);
+                        rs.setCantidad(sr.cantidad);
+                        nuevosServicios.add(rs);
+                    }
+                }
+            }
+            reserva.getServicios().addAll(nuevosServicios);
+        }
+        return ResponseEntity.ok(reservaRepository.save(reserva));
+    }
+
     // DELETE /api/reservas/{id} → cancelar reserva (admin: cualquiera; cliente: solo la suya)
     @DeleteMapping("/{id}")
     @Transactional
@@ -335,6 +407,18 @@ public class ReservaController {
         }
     }
 
+    static class PedidoRSDTO {
+        public String nombre;
+        public Integer cantidad;
+        public BigDecimal subtotal;
+
+        PedidoRSDTO(String nombre, Integer cantidad, BigDecimal subtotal) {
+            this.nombre   = nombre;
+            this.cantidad = cantidad;
+            this.subtotal = subtotal;
+        }
+    }
+
     static class ReservaDTO {
         public Long id;
         public LocalDate fechaEntrada;
@@ -345,13 +429,15 @@ public class ReservaController {
         public List<ServicioDTO> servicios;
         public BigDecimal total;
         public BigDecimal subtotalRoomService;
+        public List<PedidoRSDTO> pedidosRoomService;
         public String clienteNombre;
         public String clienteEmail;
 
         // Constructor para mis-reservas (sin datos de cliente)
         ReservaDTO(Long id, LocalDate fechaEntrada, LocalDate fechaSalida,
                    String habitacionTipo, String habitacionNumero, BigDecimal precioNoche,
-                   List<ServicioDTO> servicios, BigDecimal total, BigDecimal subtotalRoomService) {
+                   List<ServicioDTO> servicios, BigDecimal total, BigDecimal subtotalRoomService,
+                   List<PedidoRSDTO> pedidosRoomService) {
             this.id = id;
             this.fechaEntrada = fechaEntrada;
             this.fechaSalida = fechaSalida;
@@ -361,15 +447,17 @@ public class ReservaController {
             this.servicios = servicios;
             this.total = total;
             this.subtotalRoomService = subtotalRoomService;
+            this.pedidosRoomService = pedidosRoomService;
         }
 
         // Constructor para admin (con datos de cliente)
         ReservaDTO(Long id, LocalDate fechaEntrada, LocalDate fechaSalida,
                    String habitacionTipo, String habitacionNumero, BigDecimal precioNoche,
                    List<ServicioDTO> servicios, BigDecimal total, BigDecimal subtotalRoomService,
+                   List<PedidoRSDTO> pedidosRoomService,
                    String clienteNombre, String clienteEmail) {
             this(id, fechaEntrada, fechaSalida, habitacionTipo, habitacionNumero, precioNoche,
-                 servicios, total, subtotalRoomService);
+                 servicios, total, subtotalRoomService, pedidosRoomService);
             this.clienteNombre = clienteNombre;
             this.clienteEmail = clienteEmail;
         }
@@ -381,6 +469,7 @@ public class ReservaController {
         public Long habitacionId;
         public LocalDate fechaEntrada;
         public LocalDate fechaSalida;
+        public List<ServicioRequest> servicios;
     }
 
     static class ServicioRequest {

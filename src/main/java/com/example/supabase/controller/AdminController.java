@@ -4,13 +4,14 @@ import com.example.supabase.domain.Reserva;
 import com.example.supabase.domain.ReservaServicio;
 import com.example.supabase.domain.Usuario;
 import com.example.supabase.repository.HabitacionRepository;
+import com.example.supabase.repository.PedidoRoomServiceRepository;
 import com.example.supabase.repository.ReservaRepository;
 import com.example.supabase.repository.ReservaServicioRepository;
 import com.example.supabase.repository.UsuarioRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,15 +31,25 @@ public class AdminController {
     private final HabitacionRepository habitacionRepository;
     private final UsuarioRepository usuarioRepository;
     private final ReservaServicioRepository reservaServicioRepository;
+    private final PedidoRoomServiceRepository pedidoRoomServiceRepository;
 
     public AdminController(ReservaRepository reservaRepository,
                            HabitacionRepository habitacionRepository,
                            UsuarioRepository usuarioRepository,
-                           ReservaServicioRepository reservaServicioRepository) {
+                           ReservaServicioRepository reservaServicioRepository,
+                           PedidoRoomServiceRepository pedidoRoomServiceRepository) {
         this.reservaRepository = reservaRepository;
         this.habitacionRepository = habitacionRepository;
         this.usuarioRepository = usuarioRepository;
         this.reservaServicioRepository = reservaServicioRepository;
+        this.pedidoRoomServiceRepository = pedidoRoomServiceRepository;
+    }
+
+    private String getEmail(Authentication authentication) {
+        if (authentication instanceof OAuth2AuthenticationToken token) {
+            return (String) token.getPrincipal().getAttributes().get("email");
+        }
+        return authentication.getName();
     }
 
     // GET /api/admin/stats → métricas del hotel
@@ -62,7 +73,11 @@ public class AdminController {
                             );
                         }
                     }
-                    return hab.add(servicios);
+                    BigDecimal subtotalRS = pedidoRoomServiceRepository.findByReservaId(r.getId())
+                            .stream()
+                            .map(p -> p.getItem().getPrecio().multiply(BigDecimal.valueOf(p.getCantidad())))
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    return hab.add(servicios).add(subtotalRS);
                 })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -118,15 +133,17 @@ public class AdminController {
     @DeleteMapping("/usuarios/{id}")
     @Transactional
     public ResponseEntity<?> eliminarUsuario(@PathVariable Long id,
-                                              @AuthenticationPrincipal UserDetails adminActual) {
+                                              Authentication authentication) {
+        String adminEmail = getEmail(authentication);
         return usuarioRepository.findById(id).map(u -> {
             // Protección: el admin no puede eliminarse a sí mismo
-            if (u.getEmail().equals(adminActual.getUsername())) {
+            if (u.getEmail().equals(adminEmail)) {
                 return ResponseEntity.badRequest().body("No puedes eliminar tu propia cuenta.");
             }
-            // Borrado en cascada: reserva_servicio → reservas → roles → usuario
+            // Borrado en cascada: pedidos_room_service → reserva_servicio → reservas → roles → usuario
             List<Reserva> reservas = reservaRepository.findByUsuario(u);
             for (Reserva r : reservas) {
+                pedidoRoomServiceRepository.deleteByReservaId(r.getId());
                 reservaServicioRepository.deleteByReservaId(r.getId());
             }
             reservaRepository.deleteAll(reservas);

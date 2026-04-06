@@ -27,6 +27,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/mis-reservas", "/admin").permitAll()
                 .requestMatchers("/css/**", "/js/**", "/lib/**", "/images/**", "/error").permitAll()
                 .requestMatchers("/habitacion/**", "/servicio/**").permitAll()
                 .requestMatchers("/api/habitaciones", "/api/habitaciones/**").permitAll()
@@ -36,6 +37,8 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
+                .loginPage("/")
+                .loginProcessingUrl("/login")
                 .defaultSuccessUrl("/", true)
                 .permitAll()
             )

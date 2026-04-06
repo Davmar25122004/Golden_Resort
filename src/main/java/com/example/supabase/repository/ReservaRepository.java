@@ -24,6 +24,14 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
                                   @Param("fechaEntrada") LocalDate fechaEntrada,
                                   @Param("fechaSalida") LocalDate fechaSalida);
 
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.habitacion = :habitacion " +
+           "AND r.fechaEntrada < :fechaSalida AND r.fechaSalida > :fechaEntrada " +
+           "AND r.id <> :id")
+    long contarReservasSolapadasExcluyendo(@Param("habitacion") Habitacion habitacion,
+                                           @Param("fechaEntrada") LocalDate fechaEntrada,
+                                           @Param("fechaSalida") LocalDate fechaSalida,
+                                           @Param("id") Long id);
+
     // Reservas con llegada en una fecha concreta
     List<Reserva> findByFechaEntrada(LocalDate fechaEntrada);
 

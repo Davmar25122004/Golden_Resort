@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @RestController
 @RequestMapping("/api/room-service")
@@ -75,12 +76,16 @@ public class RoomServiceController {
     // DELETE /api/room-service/items/{id} → eliminar ítem (solo ADMIN)
     @DeleteMapping("/items/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> eliminarItem(@PathVariable Long id) {
+    public ResponseEntity<?> eliminarItem(@PathVariable Long id) {
         if (!itemRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        itemRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+        try {
+            itemRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict");
+        }
     }
 
     // ── PEDIDOS ────────────────────────────────────────────────────────────────
@@ -167,12 +172,20 @@ public class RoomServiceController {
 
     // ── Helper ─────────────────────────────────────────────────────────────────
 
+    private String getEmail(Authentication authentication) {
+        if (authentication instanceof org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken token) {
+            return (String) token.getPrincipal().getAttributes().get("email");
+        }
+        return authentication.getName();
+    }
+
     private boolean puedeAccederReserva(Long reservaId, Authentication auth) {
         boolean isAdmin = auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
         if (isAdmin) return true;
+        String email = getEmail(auth);
         return reservaRepository.findById(reservaId)
-                .map(r -> r.getUsuario().getEmail().equals(auth.getName()))
+                .map(r -> r.getUsuario().getEmail().equals(email))
                 .orElse(false);
     }
 
