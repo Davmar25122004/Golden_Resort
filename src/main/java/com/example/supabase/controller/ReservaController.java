@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,6 +52,13 @@ public class ReservaController {
         this.servicioRepository = servicioRepository;
         this.reservaServicioRepository = reservaServicioRepository;
         this.pedidoRoomServiceRepository = pedidoRoomServiceRepository;
+    }
+
+    private String getEmail(Authentication authentication) {
+        if (authentication instanceof OAuth2AuthenticationToken token) {
+            return (String) token.getPrincipal().getAttributes().get("email");
+        }
+        return authentication.getName();
     }
 
     // GET /api/reservas → todas las reservas enriquecidas (solo ADMIN)
@@ -106,7 +114,7 @@ public class ReservaController {
     // GET /api/reservas/mis-reservas → reservas del usuario autenticado (DTO plano, sin ciclos)
     @GetMapping("/mis-reservas")
     public ResponseEntity<?> misReservas(Authentication authentication) {
-        String email = authentication.getName();
+        String email = getEmail(authentication);
         Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
         if (usuario == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
@@ -160,7 +168,7 @@ public class ReservaController {
     public ResponseEntity<?> porUsuario(@PathVariable Long usuarioId, Authentication authentication) {
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        Usuario solicitante = usuarioRepository.findByEmail(authentication.getName()).orElse(null);
+        Usuario solicitante = usuarioRepository.findByEmail(getEmail(authentication)).orElse(null);
         if (solicitante == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -175,7 +183,7 @@ public class ReservaController {
     // POST /api/reservas → crear reserva por habitacion específica
     @PostMapping
     public ResponseEntity<?> crear(@RequestBody ReservaRequest request, Authentication authentication) {
-        Usuario usuario = usuarioRepository.findByEmail(authentication.getName()).orElse(null);
+        Usuario usuario = usuarioRepository.findByEmail(getEmail(authentication)).orElse(null);
         Habitacion habitacion = habitacionRepository.findById(request.habitacionId).orElse(null);
 
         if (usuario == null || habitacion == null) {
@@ -214,7 +222,7 @@ public class ReservaController {
             return ResponseEntity.badRequest().body("Tipo de habitación inválido");
         }
 
-        String email = authentication.getName();
+        String email = getEmail(authentication);
         Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
         if (usuario == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
@@ -304,7 +312,7 @@ public class ReservaController {
         }
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        if (!isAdmin && !reserva.getUsuario().getEmail().equals(authentication.getName())) {
+        if (!isAdmin && !reserva.getUsuario().getEmail().equals(getEmail(authentication))) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         pedidoRoomServiceRepository.deleteByReservaId(id);

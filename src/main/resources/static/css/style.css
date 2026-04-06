@@ -115,7 +115,7 @@ h1, h2, h3, h4, .serif {
     height: 100vh;
     min-height: 700px;
     background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.65)),
-                url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1920&q=80') center/cover no-repeat;
+                url('/images/hero-bg.jpg') center/cover no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -555,7 +555,7 @@ section { padding: 100px 0; }
 /* ── CONTACTO ── */
 #contacto {
     background: linear-gradient(rgba(0,0,0,0.70), rgba(0,0,0,0.75)),
-                url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1920&q=80') center/cover no-repeat;
+                url('/images/xavier-coiffic-lQ4mfS5Le6M-unsplash.jpg') center/cover no-repeat;
     padding: 100px 0;
 }
 

@@ -4,25 +4,24 @@
 
 var TIPO_IMAGES = {
     NORMAL: [
-        '/images/normal-1.png',
-        '/images/normal-2.png',
-        '/images/normal-3.png',
-        '/images/normal-4.png',
+        '/images/normal-1.jpg',
+        '/images/normal-2.jpg',
+        '/images/normal-3.jpg',
     ],
     DOBLE: [
-        'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800&q=80',
-        'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800&q=80',
-        'https://images.unsplash.com/photo-1629140727571-9b5c6f6267b4?w=800&q=80',
+        '/images/doble-1.jpg',
+        '/images/doble-2.jpg',
+        '/images/doble-3.jpg',
     ],
     SUITE: [
-        '/images/suite-1.png',
-        '/images/suite-2.png',
-        '/images/suite-3.png',
+        '/images/suite-1.jpg',
+        '/images/suite-2.jpg',
+        '/images/suite-3.jpg',
     ],
     LUJO: [
-        '/images/Lujo_1.png',
-        'https://images.unsplash.com/photo-1595576508898-0ad5c879a061?w=800&q=80',
-        '/images/Lujo-3.png',
+        '/images/Lujo_1.jpg',
+        '/images/Lujo-2.jpg',
+        '/images/Lujo-3.jpg',
     ],
 };
 
@@ -41,10 +40,10 @@ var SERVICIO_DATA = {
         horario: '09:00 – 21:00',
         capacidad: 'Hasta 2 personas · Reserva previa',
         images: [
-            'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1200&q=85',
-            'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=1200&q=85',
-            'https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=1200&q=85',
-            'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=1200&q=85',
+            '/images/spa-1.jpg',
+            '/images/spa-2.jpg',
+            '/images/spa-3.jpg',
+            '/images/spa-4.jpg',
         ],
     },
     2: {
@@ -61,10 +60,9 @@ var SERVICIO_DATA = {
         horario: '07:00 – 11:00',
         capacidad: 'Por persona · Incluye bebidas calientes',
         images: [
-            'https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?w=1200&q=85',
-            'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=1200&q=85',
-            'https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=1200&q=85',
-            'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=85',
+            '/images/desayuno-1.jpg',
+            '/images/desayuno-2.jpg',
+            '/images/desayuno-3.jpg',
         ],
     },
     3: {
@@ -81,10 +79,10 @@ var SERVICIO_DATA = {
         horario: '24 horas',
         capacidad: 'Hasta 4 pasajeros · Reserva 2h antes',
         images: [
-            'https://images.unsplash.com/photo-1563720223185-11003d516935?w=1200&q=85',
-            'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1200&q=85',
-            'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1200&q=85',
-            'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=85',
+            '/images/coche-1.jpg',
+            '/images/coche-2.jpg',
+            '/images/coche-3.jpg',
+            '/images/coche-4.jpg',
         ],
     },
     4: {
@@ -101,10 +99,10 @@ var SERVICIO_DATA = {
         horario: '19:30 – 23:00',
         capacidad: 'Máx. 12 comensales · Reserva obligatoria',
         images: [
-            'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=85',
-            'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=1200&q=85',
-            'https://images.unsplash.com/photo-1424847651672-bf20a4b0982b?w=1200&q=85',
-            'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=1200&q=85',
+            '/images/restaurante-1.jpg',
+            '/images/restaurante-2.jpg',
+            '/images/restaurante-3.jpg',
+            '/images/restaurante-4.jpg',
         ],
     },
     5: {
@@ -121,10 +119,10 @@ var SERVICIO_DATA = {
         horario: '24 horas',
         capacidad: 'Acceso libre · Clases con reserva previa',
         images: [
-            'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=85',
-            'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=1200&q=85',
-            'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=1200&q=85',
-            'https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=1200&q=85',
+            '/images/gym-1.jpg',
+            '/images/gym-2.jpg',
+            '/images/gym-3.jpg',
+            '/images/gym-4.jpg',
         ],
     },
     6: {
@@ -141,13 +139,23 @@ var SERVICIO_DATA = {
         horario: '24 horas',
         capacidad: 'Para huéspedes del hotel',
         images: [
-            'https://images.unsplash.com/photo-1584269600464-37b1b58a9fe7?w=1200&q=85',
-            'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=85',
-            'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=1200&q=85',
-            'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=1200&q=85',
+            '/images/roomservice-1.jpg',
+            '/images/roomservice-2.jpg',
         ],
     },
 };
+
+function slugify(str) {
+    return str
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-');
+}
+
+var _suppressHistoryPush = false;
 
 var state = {
     user: JSON.parse(localStorage.getItem('user')) || null,
@@ -239,7 +247,7 @@ var FP_CONFIG = {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 
 async function init() {
-    AOS.init({ duration: 800, once: true });
+    AOS.init({ duration: 800, once: false });
     flatpickr('#in-date', FP_CONFIG);
     flatpickr('#out-date', FP_CONFIG);
     setupNavbarScroll();
@@ -260,8 +268,71 @@ async function init() {
     } catch (_) {}
 
     updateNav();
-    loadRooms();
-    loadServicios();
+
+    // ── URL ROUTING ──────────────────────────────────────────────────────────────
+    var path = window.location.pathname;
+
+    if (path.startsWith('/habitacion/')) {
+        var tipo = path.split('/habitacion/')[1].toUpperCase();
+        history.replaceState({ view: 'habitacion', tipo }, '', path);
+        var rooms = await fetch('/api/habitaciones').then(r => r.json()).catch(() => []);
+        var room  = rooms.find(r => r.tipo === tipo);
+        if (room) {
+            await loadRooms();
+            _suppressHistoryPush = true;
+            await selectRoom(tipo, room.precioNoche, room.descripcion || '');
+            _suppressHistoryPush = false;
+        } else {
+            loadRooms();
+            loadServicios();
+        }
+    } else if (path.startsWith('/servicio/')) {
+        var slug     = path.split('/servicio/')[1];
+        history.replaceState({ view: 'servicio', slug }, '', path);
+        var servicios = await fetchServicios();
+        var servicio  = servicios.find(s => slugify(s.nombre) === slug);
+        if (servicio) {
+            loadRooms();
+            loadServicios();
+            _suppressHistoryPush = true;
+            await openServicioDetail(servicio.id);
+            _suppressHistoryPush = false;
+        } else {
+            loadRooms();
+            loadServicios();
+        }
+    } else {
+        history.replaceState({ view: 'home' }, '', path);
+        loadRooms();
+        loadServicios();
+    }
+
+    // ── POPSTATE (botón atrás/adelante del navegador) ─────────────────────────
+    window.addEventListener('popstate', async (e) => {
+        var ps = e.state;
+        if (!ps || ps.view === 'home') {
+            if (detailSwiper) { detailSwiper.destroy(true, true); detailSwiper = null; }
+            showLanding();
+            loadRooms();
+            loadServicios();
+        } else if (ps.view === 'habitacion') {
+            var rooms = await fetch('/api/habitaciones').then(r => r.json()).catch(() => []);
+            var room  = rooms.find(r => r.tipo === ps.tipo);
+            if (room) {
+                _suppressHistoryPush = true;
+                await selectRoom(ps.tipo, room.precioNoche, room.descripcion || '');
+                _suppressHistoryPush = false;
+            }
+        } else if (ps.view === 'servicio') {
+            var servicios = await fetchServicios();
+            var servicio  = servicios.find(s => slugify(s.nombre) === ps.slug);
+            if (servicio) {
+                _suppressHistoryPush = true;
+                await openServicioDetail(servicio.id);
+                _suppressHistoryPush = false;
+            }
+        }
+    });
 }
 
 // ── NAVBAR ────────────────────────────────────────────────────────────────────
@@ -275,6 +346,7 @@ function setupNavbarScroll() {
 }
 
 window.scrollToSection = (id) => {
+    history.pushState({ view: 'home' }, '', '/');
     showLanding();
     setTimeout(() => {
         var el = document.getElementById(id);
@@ -283,6 +355,7 @@ window.scrollToSection = (id) => {
 };
 
 window.goHome = () => {
+    history.pushState({ view: 'home' }, '', '/');
     showLanding();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
@@ -592,6 +665,10 @@ window.selectRoom = async (tipo, precio, descripcion) => {
     if (!state.token) { openAuthModal(); return; }
     if (state.user && state.user.rol === 'ADMIN') return; // Los admins no reservan
 
+    if (!_suppressHistoryPush) {
+        history.pushState({ view: 'habitacion', tipo }, '', '/habitacion/' + tipo.toLowerCase());
+    }
+
     var tipoLabels = { NORMAL: 'Habitación Normal', DOBLE: 'Habitación Doble', SUITE: 'Suite', LUJO: 'Suite de Lujo' };
     var label = tipoLabels[tipo] || tipo;
     var imgs  = TIPO_IMAGES[tipo] || [];
@@ -844,6 +921,7 @@ window.confirmarReserva = async (tipo) => {
 
 window.backFromDetail = () => {
     if (detailSwiper) { detailSwiper.destroy(true, true); detailSwiper = null; }
+    history.pushState({ view: 'home' }, '', '/');
     showLanding();
     loadRooms();
 };
@@ -1934,6 +2012,11 @@ window.openServicioDetail = async function(id) {
 
     var nombre = servicio.nombre;
     var precio = parseFloat(servicio.precio).toFixed(2);
+    var slug   = slugify(nombre);
+
+    if (!_suppressHistoryPush) {
+        history.pushState({ view: 'servicio', id, slug }, '', '/servicio/' + slug);
+    }
 
     var slidesHtml = '';
     if (data && data.images && data.images.length > 0) {
@@ -1941,7 +2024,7 @@ window.openServicioDetail = async function(id) {
             `<div class="swiper-slide servicio-detail-slide"><img src="${src}" alt="${nombre}"></div>`
         ).join('');
     } else {
-        slidesHtml = `<div class="swiper-slide servicio-detail-slide"><img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=85" alt="${nombre}"></div>`;
+        slidesHtml = `<div class="swiper-slide servicio-detail-slide"><img src="/images/servicio-fallback.jpg" alt="${nombre}"></div>`;
     }
 
     var descripcion     = data ? data.descripcion    : '';
@@ -2013,6 +2096,7 @@ window.openServicioDetail = async function(id) {
 };
 
 window.backToServicios = function() {
+    history.pushState({ view: 'home' }, '', '/');
     showLanding();
     setTimeout(() => {
         var el = document.getElementById('servicios');

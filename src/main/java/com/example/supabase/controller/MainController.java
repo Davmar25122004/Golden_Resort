@@ -38,6 +38,11 @@ public class MainController {
         return "index";
     }
 
+    @GetMapping({"/habitacion/{tipo}", "/servicio/{slug}"})
+    public String detallePagina() {
+        return "index";
+    }
+
     @PostMapping("/api/auth/register")
     @ResponseBody
     public ResponseEntity<?> registrar(@RequestBody Map<String, String> datos, HttpServletRequest request) {

@@ -24,9 +24,9 @@
         <div class="container d-flex align-items-center justify-content-between">
             <a href="#" class="navbar-brand-custom" onclick="goHome()">HOTEL DAW</a>
             <div class="d-flex align-items-center gap-1" id="nav-links">
-                <a href="#habitaciones" class="nav-link-custom" onclick="scrollToSection('habitaciones')">Habitaciones</a>
-                <a href="#servicios" class="nav-link-custom" onclick="scrollToSection('servicios')">Servicios</a>
-                <a href="#contacto" class="nav-link-custom" onclick="scrollToSection('contacto')">Contacto</a>
+                <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('habitaciones')">Habitaciones</a>
+                <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('servicios')">Servicios</a>
+                <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('contacto')">Contacto</a>
                 <span id="nav-mis-reservas">
                     <a href="#" class="nav-link-custom" onclick="showMisReservas()">Mis Reservas</a>
                 </span>
