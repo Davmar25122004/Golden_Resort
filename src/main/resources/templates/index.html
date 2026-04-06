@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel DAW | Lujo y Distinción</title>
+
+    <!-- Bootstrap 5.3 -->
+    <link rel="stylesheet" th:href="@{/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css}">
+    <!-- Swiper.js 12 -->
+    <link rel="stylesheet" th:href="@{/lib/swiper-12.1.3/package/swiper-bundle.min.css}">
+    <!-- AOS -->
+    <link rel="stylesheet" th:href="@{/lib/aos-master/dist/aos.css}">
+    <!-- flatpickr -->
+    <link rel="stylesheet" th:href="@{/lib/flatpickr/flatpickr.min.css}">
+
+    <!-- CSS propio -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav id="navbar">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a href="#" class="navbar-brand-custom" onclick="goHome()">HOTEL DAW</a>
+            <div class="d-flex align-items-center gap-1" id="nav-links">
+                <a href="#habitaciones" class="nav-link-custom" onclick="scrollToSection('habitaciones')">Habitaciones</a>
+                <a href="#servicios" class="nav-link-custom" onclick="scrollToSection('servicios')">Servicios</a>
+                <a href="#contacto" class="nav-link-custom" onclick="scrollToSection('contacto')">Contacto</a>
+                <span id="nav-mis-reservas">
+                    <a href="#" class="nav-link-custom" onclick="showMisReservas()">Mis Reservas</a>
+                </span>
+                <span id="nav-admin">
+                    <a href="#" class="nav-link-custom" onclick="showAdmin()">Admin</a>
+                </span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <span id="nav-user"></span>
+                <button id="btn-reservar-nav" class="btn-reservar" onclick="scrollToSection('habitaciones')">Reservar</button>
+                <button id="btn-auth" class="btn-reservar" onclick="openAuthModal()">Iniciar Sesión</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section id="hero">
+        <div class="container">
+            <p class="hero-subtitle">Bienvenido a</p>
+            <h1 class="hero-title">Hotel DAW</h1>
+            <p class="hero-subtitle hero-tagline">Lujo · Distinción · Confort</p>
+            <div class="search-glass mt-4">
+                <form id="form-search" class="row g-3 align-items-end">
+                    <div class="col-md-5">
+                        <label>Fecha de Entrada</label>
+                        <input type="date" class="form-control" id="in-date" placeholder="DD/MM/AAAA" required>
+                    </div>
+                    <div class="col-md-5">
+                        <label>Fecha de Salida</label>
+                        <input type="date" class="form-control" id="out-date" placeholder="DD/MM/AAAA" required>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn-reservar btn-reservar--search w-100">Buscar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- HABITACIONES -->
+    <section id="habitaciones">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <p class="section-label">Nuestras Suites</p>
+                <h2 class="section-title">Habitaciones</h2>
+                <div class="gold-line mx-auto"></div>
+            </div>
+            <div id="no-rooms-msg">No hay habitaciones disponibles para esas fechas.</div>
+            <div class="swiper roomSwiper" data-aos="fade-up" data-aos-delay="100">
+                <div class="swiper-wrapper" id="rooms-wrapper"></div>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SERVICIOS -->
+    <section id="servicios">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <p class="section-label">Lo que ofrecemos</p>
+                <h2 class="section-title">Servicios</h2>
+                <div class="gold-line mx-auto"></div>
+            </div>
+            <div class="row g-4" id="servicios-grid">
+                <!-- Cargado dinámicamente -->
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACTO -->
+    <section id="contacto">
+        <div class="container">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <p class="section-label">Estamos aquí</p>
+                <h2 class="section-title">Info. Contacto</h2>
+                <div class="gold-line mx-auto"></div>
+            </div>
+
+            <div class="contacto-inner" data-aos="fade-up" data-aos-delay="100">
+
+                <!-- Mapa -->
+                <a class="contacto-map-col"
+                   href="https://www.google.com/maps/d/viewer?mid=1jIYuxP58n_AiaKZXeQiYcoqo25feC5c"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   title="Ver en Google Maps">
+                    <iframe
+                        class="contacto-map-iframe"
+                        src="https://www.google.com/maps/d/embed?mid=1jIYuxP58n_AiaKZXeQiYcoqo25feC5c"
+                        allowfullscreen
+                        loading="lazy"
+                        title="Ubicación Hotel DAW — Playa de Cullera, Valencia">
+                    </iframe>
+                    <div class="contacto-map-overlay">
+                        <span class="contacto-map-cta">Ver en Google Maps →</span>
+                    </div>
+                </a>
+
+                <!-- Info -->
+                <div class="contacto-info-col">
+                    <div class="contacto-grid">
+                        <div class="contact-info-item">
+                            <p class="contact-label">Localización</p>
+                            <p class="contact-value">Playa de Cullera<br>46400 Cullera, Valencia</p>
+                        </div>
+                        <div class="contact-info-item">
+                            <p class="contact-label">Contáctanos</p>
+                            <p class="contact-value">
+                                +34 900 123 456<br>
+                                <a href="mailto:info@hoteldaw.es" class="contacto-email-link">info@hoteldaw.es</a>
+                            </p>
+                        </div>
+                        <div class="contact-info-item">
+                            <p class="contact-label">Coordenadas</p>
+                            <p class="contact-value contact-value--coords">Lat: 39.1620 | Long: -0.2470</p>
+                        </div>
+                        <div class="contact-info-item">
+                            <p class="contact-label">Síguenos</p>
+                            <div class="contacto-social">
+                                <a href="#" class="contacto-social-btn" aria-label="Facebook">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                                </a>
+                                <a href="#" class="contacto-social-btn" aria-label="Twitter / X">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                </a>
+                                <a href="#" class="contacto-social-btn" aria-label="Instagram">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container text-center">
+            <p class="footer-brand serif mb-2">Hotel DAW</p>
+            <p class="footer-text">© 2026 Hotel DAW · Todos los derechos reservados</p>
+        </div>
+    </footer>
+
+    <!-- PANEL ADMIN / MIS RESERVAS / RESERVA FORM (vistas dinámicas) -->
+    <div id="main-content">
+        <div class="container" id="dynamic-view"></div>
+    </div>
+
+    <!-- MODAL AUTH -->
+    <div class="modal fade modal-dark" id="authModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <ul class="nav nav-pills mb-4 justify-content-center border-bottom border-secondary pb-3">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="tab-login" onclick="showAuthTab('login')">Iniciar Sesión</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="tab-register" onclick="showAuthTab('register')">Registrarse</button>
+                        </li>
+                    </ul>
+
+                    <div id="auth-error" class="alert alert-danger d-none py-2" style="font-size:0.8rem;"></div>
+
+                    <form id="form-login" onsubmit="handleLogin(event)">
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="login-email" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="login-password" required>
+                        </div>
+                        <button type="submit" class="btn-gold">Entrar</button>
+                    </form>
+
+                    <form id="form-register" class="d-none" onsubmit="handleRegister(event)">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="reg-nombre" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="reg-email" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Contraseña</label>
+                            <input type="password" class="form-control" id="reg-password" required minlength="6">
+                        </div>
+                        <button type="submit" class="btn-gold">Crear Cuenta</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ROOM LIGHTBOX -->
+    <div id="room-lightbox" class="room-lightbox" style="display:none;" onclick="if(event.target===this)closeRoomLightbox()">
+        <div class="room-lightbox-inner" onclick="event.stopPropagation()">
+            <button class="room-lightbox-close" onclick="closeRoomLightbox()">✕</button>
+            <div class="room-lightbox-imgwrap">
+                <img class="room-lightbox-img" src="" alt="">
+                <img class="room-lightbox-img-next" src="" alt="">
+                <button class="room-lb-arrow room-lb-prev" onclick="lbNav(-1)">&#8249;</button>
+                <button class="room-lb-arrow room-lb-next" onclick="lbNav(1)">&#8250;</button>
+                <div class="room-lb-counter"><span id="lb-current">1</span> / <span id="lb-total">1</span></div>
+            </div>
+            <div class="room-lightbox-caption">
+                <div>
+                    <p class="room-type-badge room-type-badge--lb">Hotel DAW · Habitaciones</p>
+                    <h3 class="serif room-lightbox-name room-lightbox-name-text"></h3>
+                </div>
+                <div class="room-lightbox-caption-right">
+                    <p class="room-lightbox-price room-lightbox-price-text"></p>
+                    <div id="lb-dots" class="room-lb-dots"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Libraries (local) -->
+    <script th:src="@{/lib/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/lib/swiper-12.1.3/package/swiper-bundle.min.js}"></script>
+    <script th:src="@{/lib/aos-master/dist/aos.js}"></script>
+    <script th:src="@{/lib/flatpickr/flatpickr.min.js}"></script>
+    <script th:src="@{/lib/flatpickr/l10n/es.js}"></script>
+
+    <!-- JS propio -->
+    <script th:src="@{/js/app.js}"></script>
+</body>
+</html>
