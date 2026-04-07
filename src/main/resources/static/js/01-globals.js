@@ -1,4 +1,4 @@
-﻿// Hotel DAW | app.js
+// Hotel DAW | app.js
 
 
 
@@ -27,7 +27,6 @@ var TIPO_IMAGES = {
 
 var SERVICIO_DATA = {
     1: {
-        icon: '🛁',
         descripcion: 'Un refugio de paz y armonía en el corazón del hotel. Nuestro Spa & Bienestar te invita a desconectar del mundo y entregarte al arte del cuidado personal. Con tratamientos diseñados por expertos y ambientes de serenidad absoluta, cada visita es una experiencia transformadora.',
         caracteristicas: [
             'Masajes relajantes y terapéuticos personalizados',
@@ -47,7 +46,6 @@ var SERVICIO_DATA = {
         ],
     },
     2: {
-        icon: '🍳',
         descripcion: 'Empieza el día con el mejor desayuno de tu vida. Nuestro Desayuno Premium es un festín de sabores locales e internacionales preparados cada mañana con los ingredientes más frescos. Desde bollería artesanal hasta zumos recién exprimidos, cada detalle está pensado para deleitarte.',
         caracteristicas: [
             'Buffet gourmet con productos locales de temporada',
@@ -66,7 +64,6 @@ var SERVICIO_DATA = {
         ],
     },
     3: {
-        icon: '🚗',
         descripcion: 'Llega y parte con la elegancia que mereces. Nuestro Servicio de Coche privado pone a tu disposición un conductor profesional y un vehículo de alta gama para que cada trayecto sea tan memorable como tu estancia. Traslados al aeropuerto, excursiones o simplemente moverse por la ciudad con estilo.',
         caracteristicas: [
             'Vehículo de lujo (Mercedes Clase E o superior)',
@@ -86,7 +83,6 @@ var SERVICIO_DATA = {
         ],
     },
     4: {
-        icon: '🍷',
         descripcion: 'Una experiencia gastronómica que trasciende la mesa. Nuestra Cena Gourmet es una travesía sensorial diseñada por nuestro chef con inspiración en la alta cocina mediterránea. Cada plato cuenta una historia, cada maridaje es una revelación. Para quienes entienden que cenar es mucho más que comer.',
         caracteristicas: [
             'Menú degustación de 7 platos elaborados al momento',
@@ -106,7 +102,6 @@ var SERVICIO_DATA = {
         ],
     },
     5: {
-        icon: '🏋️',
         descripcion: 'Mantén tu rutina sin sacrificar el lujo. Nuestro Gimnasio 24h cuenta con la maquinaria más avanzada del mercado en un espacio diseñado para inspirar el movimiento. Desde el cardio matutino hasta el entrenamiento de fuerza nocturno, el gimnasio está siempre listo para ti.',
         caracteristicas: [
             'Equipamiento Technogym de última generación',
@@ -126,7 +121,6 @@ var SERVICIO_DATA = {
         ],
     },
     6: {
-        icon: '🌿',
         descripcion: 'El lujo de tenerlo todo sin salir de tu habitación. Nuestro Room Service opera las 24 horas con una carta completa que incluye desde desayunos ligeros hasta cenas elaboradas. Todo presentado con la misma excelencia que esperas de Hotel DAW, entregado en tu puerta en menos de 30 minutos.',
         caracteristicas: [
             'Disponible las 24 horas, todos los días del año',

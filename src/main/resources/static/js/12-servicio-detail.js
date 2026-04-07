@@ -1,4 +1,4 @@
-﻿// ── SERVICIO DETAIL PAGE ─────────────────────────────────────────────────────
+// ── SERVICIO DETAIL PAGE ─────────────────────────────────────────────────────
 
 window.openServicioDetail = async function(id) {
     var servicios = await fetchServicios();
@@ -8,7 +8,8 @@ window.openServicioDetail = async function(id) {
     if (!servicio) return;
 
     var nombre = servicio.nombre;
-    var precio = parseFloat(servicio.precio).toFixed(2);
+    var precioStr = nombre.toLowerCase().includes('room service') ? 'A la carta' : `${parseFloat(servicio.precio).toFixed(2)} €`;
+    var precioLabelHtml = nombre.toLowerCase().includes('room service') ? '' : `<span class="servicio-detail-precio-label">/ servicio</span>`;
     var slug   = slugify(nombre);
 
     if (!_suppressHistoryPush) {
@@ -30,6 +31,17 @@ window.openServicioDetail = async function(id) {
     var caracteristicas = data && data.caracteristicas
         ? data.caracteristicas.map(c => `<li>✦ ${c}</li>`).join('')
         : '';
+        
+    var pdfButtonHtml = '';
+    if (nombre.toLowerCase().includes('room service')) {
+        pdfButtonHtml = `
+            <div style="margin: 30px 0; text-align: center;">
+                <a href="/docs/HotelDAW_RoomService.pdf" target="_blank" class="admin-btn" style="display:inline-block; padding: 14px 28px; text-decoration: none; font-size: 0.9rem; letter-spacing: 2px; border: 1px solid var(--gold);">
+                    📖 VER CARTA COMPLETA (PDF)
+                </a>
+            </div>
+        `;
+    }
 
     showDynamic(`
         <div class="servicio-detail-page">
@@ -42,8 +54,8 @@ window.openServicioDetail = async function(id) {
                     <h2 class="servicio-detail-titulo serif">${nombre}</h2>
                 </div>
                 <div class="servicio-detail-precio-badge">
-                    <span class="servicio-detail-precio">${precio} €</span>
-                    <span class="servicio-detail-precio-label">/ servicio</span>
+                    <span class="servicio-detail-precio">${precioStr}</span>
+                    ${precioLabelHtml}
                 </div>
             </div>
 
@@ -59,6 +71,8 @@ window.openServicioDetail = async function(id) {
             <div class="servicio-detail-body">
 
                 <p class="servicio-detail-description">${descripcion}</p>
+
+                ${pdfButtonHtml}
 
                 <div class="servicio-info-cards">
                     <div class="servicio-info-card">

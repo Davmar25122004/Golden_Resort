@@ -23,6 +23,7 @@ public class OAuth2UserServiceCustom extends DefaultOAuth2UserService {
     private RoleRepository rolRepository;
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
@@ -30,6 +31,7 @@ public class OAuth2UserServiceCustom extends DefaultOAuth2UserService {
         String nombre = oAuth2User.getAttribute("name");
 
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
+        Usuario usuario;
 
         if (usuarioOpt.isEmpty()) {
             Usuario nuevoUsuario = new Usuario();
@@ -44,9 +46,31 @@ public class OAuth2UserServiceCustom extends DefaultOAuth2UserService {
                 nuevoUsuario.getRoles().add(rol);
             });
 
-            usuarioRepository.save(nuevoUsuario);
+            usuario = usuarioRepository.save(nuevoUsuario);
+        } else {
+            usuario = usuarioOpt.get(); // El usuario ya existía en la DB
         }
 
-        return oAuth2User;
+        // Aquí está la solución clave: Fusionar los roles de Supabase (BD) con los de Google
+        java.util.Set<org.springframework.security.core.GrantedAuthority> authorities = new java.util.HashSet<>(oAuth2User.getAuthorities());
+        
+        if (usuario.getRoles() != null) {
+            for (com.example.supabase.domain.Rol rol : usuario.getRoles()) {
+                authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority(rol.getName()));
+            }
+        }
+
+        // Obtener el nombre del atributo de ID (usualmente "sub" o "email")
+        String userNameAttributeName = userRequest.getClientRegistration()
+                                                  .getProviderDetails()
+                                                  .getUserInfoEndpoint()
+                                                  .getUserNameAttributeName();
+
+        // Devolvemos al Contexto de Seguridad al usuario con SUS ROLES de nuestra Base de Datos
+        return new org.springframework.security.oauth2.core.user.DefaultOAuth2User(
+                authorities,
+                oAuth2User.getAttributes(),
+                userNameAttributeName
+        );
     }
 }

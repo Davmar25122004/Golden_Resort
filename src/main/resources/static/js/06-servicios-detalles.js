@@ -1,4 +1,4 @@
-﻿// ── SERVICIOS — cargados desde backend ───────────────────────────────────────
+// ── SERVICIOS — cargados desde backend ───────────────────────────────────────
 
 var _serviciosCache = null;
 
@@ -113,7 +113,7 @@ async function loadServicios() {
                 <div class="servicio-card-overlay"></div>
                 <div class="servicio-card-content">
                     <h4 class="servicio-name serif">${s.nombre}</h4>
-                    <p class="servicio-price">${parseFloat(s.precio).toFixed(2)} €</p>
+                    <p class="servicio-price">${s.nombre.toLowerCase().includes('room service') ? 'A la carta' : parseFloat(s.precio).toFixed(2) + ' €'}</p>
                     <p class="servicio-card-hint">Ver detalle →</p>
                 </div>
             </div>

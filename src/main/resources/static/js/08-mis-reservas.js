@@ -1,4 +1,4 @@
-﻿// ── HELPERS MIS RESERVAS ──────────────────────────────────────────────────────
+// ── HELPERS MIS RESERVAS ──────────────────────────────────────────────────────
 
 function calcularEstado(fechaEntrada, fechaSalida) {
     var hoy   = new Date(); hoy.setHours(0,0,0,0);
@@ -72,14 +72,29 @@ window.showMisReservas = async () => {
         var noches  = Math.max(1, Math.round(
             (new Date(r.fechaSalida + 'T00:00:00') - new Date(r.fechaEntrada + 'T00:00:00')) / 86400000
         ));
-        var total   = r.total ? parseFloat(r.total).toFixed(2) : (parseFloat(r.precioNoche) * noches).toFixed(2);
+        
+        var totalHabitacion = (parseFloat(r.precioNoche) * noches).toFixed(2);
+        var precioTotal       = r.total ? parseFloat(r.total).toFixed(2) : totalHabitacion;
+        
         var img     = (TIPO_IMAGES[r.habitacionTipo] || [])[0] || '';
         var label   = tipoLabels[r.habitacionTipo] || r.habitacionTipo;
-        var serviciosHtml = (r.servicios && r.servicios.length > 0)
-            ? `<p class="reserva-meta" style="margin-top:4px; font-size:0.75rem;">
-                   Servicios: ${r.servicios.map(s => `${s.nombre} ×${s.cantidad}`).join(' · ')}
-               </p>`
-            : '';
+        
+        var serviciosHtml = '';
+        if (r.servicios && r.servicios.length > 0) {
+            var totalServicios = 0;
+            r.servicios.forEach(s => {
+                totalServicios += parseFloat(s.precio) * s.cantidad;
+            });
+            serviciosHtml = `
+               <div style="margin-top:12px;">
+                   <p class="reserva-meta" style="font-size:0.75rem;">
+                       Servicios extras: ${r.servicios.map(s => `${s.nombre} ×${s.cantidad}`).join(' · ')}
+                   </p>
+                   <p class="reserva-meta" style="font-size:0.75rem; margin-top:4px;">
+                       Total Servicios: <strong style="color:var(--gold);">${totalServicios.toFixed(2)} €</strong>
+                   </p>
+               </div>`;
+        }
 
         var badgeStyle, badgeText;
         if (estado === 'EN_CURSO') {
@@ -111,15 +126,15 @@ window.showMisReservas = async () => {
                     <span style="color:var(--text-muted-custom);margin-left:2px;">${parseFloat(p.subtotal).toFixed(2)} €</span>
                 </span>`
             ).join('');
-            rsSubtotalStr = `<div id="rs-info-${r.id}" style="margin-top:8px;">
+            rsSubtotalStr = `<div id="rs-info-${r.id}" style="margin-top:12px;">
                 <p class="reserva-meta" style="font-size:0.7rem;letter-spacing:1px;color:var(--text-muted-custom);margin-bottom:6px;">ROOM SERVICE</p>
                 <div style="display:flex;flex-wrap:wrap;gap:2px;">${itemsHtml}</div>
                 <p class="reserva-meta" style="font-size:0.75rem;margin-top:6px;">
-                    Total: <strong style="color:var(--gold);">${parseFloat(r.subtotalRoomService).toFixed(2)} €</strong>
+                    Total Room Service: <strong style="color:var(--gold);">${parseFloat(r.subtotalRoomService).toFixed(2)} €</strong>
                 </p>
             </div>`;
         } else {
-            rsSubtotalStr = `<p class="reserva-meta" style="font-size:0.75rem;color:var(--text-muted-custom);" id="rs-info-${r.id}">Sin pedido de room service</p>`;
+            rsSubtotalStr = `<div id="rs-info-${r.id}" style="margin-top:12px;"><p class="reserva-meta" style="font-size:0.75rem;color:var(--text-muted-custom);">Sin pedido de room service</p></div>`;
         }
 
         html += `
@@ -133,17 +148,29 @@ window.showMisReservas = async () => {
                         </div>
                         <span class="reserva-estado-badge" style="${badgeStyle}">${badgeText}</span>
                     </div>
+                    
                     <p class="reserva-dates">
                         ${formatFecha(r.fechaEntrada)}
                         <span>→</span>
                         ${formatFecha(r.fechaSalida)}
                     </p>
-                    <p class="reserva-meta">
-                        ${noches} noche${noches > 1 ? 's' : ''} &nbsp;·&nbsp;
-                        Total: <strong>${total} €</strong>
-                    </p>
+                    
+                    <div style="margin-top:12px;">
+                        <p class="reserva-meta" style="font-size:0.8rem;">
+                            ${noches} noche${noches > 1 ? 's' : ''} &nbsp;·&nbsp;
+                            Total Habitación: <strong style="color:var(--gold);">${totalHabitacion} €</strong>
+                        </p>
+                    </div>
+                    
                     ${serviciosHtml}
                     ${rsSubtotalStr}
+                    
+                    <div class="gold-line" style="margin: 16px 0 12px; width: 100%; opacity: 0.2;"></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                        <span style="color:var(--cream); font-size:1.1rem; font-weight: 500;">PRECIO TOTAL</span>
+                        <span style="color:var(--gold); font-size:1.3rem; font-weight: 600;">${precioTotal} €</span>
+                    </div>
+
                     ${gestionRsBtn}
                     ${cancelBtn}
                 </div>

@@ -25,35 +25,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/mis-reservas", "/admin").permitAll()
-                .requestMatchers("/css/**", "/js/**", "/lib/**", "/images/**", "/error").permitAll()
-                .requestMatchers("/habitacion/**", "/servicio/**").permitAll()
-                .requestMatchers("/api/habitaciones", "/api/habitaciones/**").permitAll()
-                .requestMatchers("/api/servicios").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/auth/register", "/api/usuario-info").permitAll()
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/")
-                .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/", true)
-                .permitAll()
-            )
-            .oauth2Login(oauth2 -> oauth2
-                .userInfoEndpoint(userInfo -> userInfo
-                    .userService(oauth2UserService)
-                )
-                .defaultSuccessUrl("/", true)
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll()
-            );
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/mis-reservas", "/mis-reservas/**").hasRole("CLIENTE")
+                        .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/css/**", "/js/**", "/lib/**", "/images/**", "/error").permitAll()
+                        .requestMatchers("/habitacion/**", "/servicio/**").permitAll()
+                        .requestMatchers("/api/habitaciones", "/api/habitaciones/**").permitAll()
+                        .requestMatchers("/api/servicios").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/register", "/api/usuario-info").permitAll()
+                        .anyRequest().authenticated())
+                .formLogin(form -> form
+                        .loginPage("/")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/", true)
+                        .permitAll())
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(oauth2UserService))
+                        .defaultSuccessUrl("/", true))
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll());
 
         return http.build();
     }
