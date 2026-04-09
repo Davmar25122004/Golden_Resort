@@ -32,7 +32,7 @@ window.handleLogin = async (e) => {
     if (res.ok || res.redirected) {
         window.location.reload();
     } else {
-        showAuthError('Email o contraseña incorrectos.');
+        showAuthError(t('auth_error_login'));
     }
 };
 
@@ -53,15 +53,17 @@ window.handleRegister = async (e) => {
             window.location.reload();
         } else {
             const msg = await res.text();
-            showAuthError(msg || 'Error al registrarse.');
+            showAuthError(msg || t('auth_error_reg'));
         }
     } catch (_) {
-        showAuthError('Error de conexión.');
+        showAuthError(t('auth_error_conn'));
     }
 };
 
 function logout() {
+    var savedLang = localStorage.getItem('lang');
     localStorage.clear();
+    if (savedLang) localStorage.setItem('lang', savedLang);
     state.token        = null;
     state.user         = null;
     state.pendingRoom  = null;

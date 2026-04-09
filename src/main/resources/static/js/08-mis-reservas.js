@@ -10,7 +10,9 @@ function calcularEstado(fechaEntrada, fechaSalida) {
 }
 
 function formatFecha(dateStr) {
-    var meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    var meses = LANG === 'en'
+        ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+        : ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
     var parts = dateStr.split('-');
     return parts[2] + ' ' + meses[parseInt(parts[1]) - 1] + ' ' + parts[0];
 }
@@ -20,25 +22,27 @@ function formatFecha(dateStr) {
 window.showMisReservas = async () => {
     history.pushState({ view: 'mis-reservas' }, '', '/mis-reservas');
     showDynamic(`
-        <p class="section-label">Tu historial</p>
-        <h2 class="serif mb-2" style="color:var(--cream); font-size:2.5rem;">Mis Reservas</h2>
+        <p class="section-label">${t('mr_label')}</p>
+        <h2 class="serif mb-2" style="color:var(--cream); font-size:2.5rem;">${t('mr_title')}</h2>
         <div class="gold-line mb-5"></div>
         <div id="reservas-container" style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px;">
-            Cargando...
+            ${t('mr_loading')}
         </div>
     `);
+
+    await fetchRoomServiceItems();
 
     var res;
     try {
         res = await fetch('/api/reservas/mis-reservas');
     } catch (_) {
-        document.getElementById('reservas-container').textContent = 'Error de conexión.';
+        document.getElementById('reservas-container').textContent = t('mr_error_conn');
         return;
     }
 
     if (res.status === 401) { openAuthModal(); return; }
     if (!res.ok) {
-        document.getElementById('reservas-container').textContent = 'No se pudieron cargar las reservas.';
+        document.getElementById('reservas-container').textContent = t('mr_error_load');
         return;
     }
 
@@ -48,9 +52,9 @@ window.showMisReservas = async () => {
     if (!reservas || reservas.length === 0) {
         container.innerHTML = `
             <div class="reserva-empty">
-                <p class="reserva-empty-title">Todavía no tienes reservas</p>
-                <p class="reserva-empty-sub">Explora nuestras habitaciones y encuentra la tuya</p>
-                <button class="btn-reserva-empty" onclick="goHome()">Explorar habitaciones</button>
+                <p class="reserva-empty-title">${t('mr_empty_title')}</p>
+                <p class="reserva-empty-sub">${t('mr_empty_sub')}</p>
+                <button class="btn-reserva-empty" onclick="scrollToSection('habitaciones')">${t('mr_empty_btn')}</button>
             </div>`;
         return;
     }
@@ -64,7 +68,7 @@ window.showMisReservas = async () => {
         return new Date(b.fechaEntrada) - new Date(a.fechaEntrada);
     });
 
-        var tipoLabels = { NORMAL: 'Habitación Normal', DOBLE: 'Habitación Doble', SUITE: 'Suite', LUJO: 'Suite de Lujo' };
+        var tipoLabels = { NORMAL: t('tipo_normal'), DOBLE: t('tipo_doble'), SUITE: t('tipo_suite'), LUJO: t('tipo_lujo') };
 
     var html = '<div class="reservas-list">';
     reservas.forEach(r => {
@@ -88,10 +92,10 @@ window.showMisReservas = async () => {
             serviciosHtml = `
                <div style="margin-top:12px;">
                    <p class="reserva-meta" style="font-size:0.75rem;">
-                       Servicios extras: ${r.servicios.map(s => `${s.nombre} ×${s.cantidad}`).join(' · ')}
+                       ${t('mr_services_extra')}${r.servicios.map(s => { var nombreMostrar = s.nombre; if (typeof LANG !== 'undefined' && LANG === 'en' && typeof _serviciosCache !== 'undefined' && _serviciosCache) { var cached = _serviciosCache.find(c => c.nombre === s.nombre); if (cached && typeof SERVICIO_NOMBRES_EN !== 'undefined' && SERVICIO_NOMBRES_EN[cached.id]) nombreMostrar = SERVICIO_NOMBRES_EN[cached.id]; } return `${nombreMostrar} ×${s.cantidad}`; }).join(' · ')}
                    </p>
                    <p class="reserva-meta" style="font-size:0.75rem; margin-top:4px;">
-                       Total Servicios: <strong style="color:var(--gold);">${totalServicios.toFixed(2)} €</strong>
+                       ${t('mr_services_total')}<strong style="color:var(--gold);">${totalServicios.toFixed(2)} €</strong>
                    </p>
                </div>`;
         }
@@ -99,21 +103,21 @@ window.showMisReservas = async () => {
         var badgeStyle, badgeText;
         if (estado === 'EN_CURSO') {
             badgeStyle = 'background:rgba(39,174,96,0.15); color:#27ae60;';
-            badgeText  = '● EN CURSO';
+            badgeText  = t('mr_badge_active');
         } else if (estado === 'PROXIMA') {
             badgeStyle = 'background:rgba(185,149,77,0.15); color:var(--gold);';
-            badgeText  = '● PRÓXIMA';
+            badgeText  = t('mr_badge_upcoming');
         } else {
             badgeStyle = 'background:rgba(154,154,154,0.1); color:var(--text-muted-custom);';
-            badgeText  = '● PASADA';
+            badgeText  = t('mr_badge_past');
         }
 
         var cancelBtn = estado === 'PROXIMA'
-            ? `<button class="btn-cancelar" onclick="cancelarReserva(${r.id})">Cancelar reserva</button>`
+            ? `<button class="btn-cancelar" onclick="cancelarReserva(${r.id})">${t('mr_cancel')}</button>`
             : '';
 
         var gestionRsBtn = (estado === 'PROXIMA' || estado === 'EN_CURSO')
-            ? `<button class="admin-btn" style="margin-top:8px; font-size:0.75rem; padding:6px 14px;" onclick="abrirGestionRS(${r.id})">🍽 Gestionar Room Service</button>`
+            ? `<button class="admin-btn" style="margin-top:8px; font-size:0.75rem; padding:6px 14px;" onclick="abrirGestionRS(${r.id})">${t('mr_manage_rs')}</button>`
             : '';
 
         var rsSubtotalStr;
@@ -122,19 +126,19 @@ window.showMisReservas = async () => {
                 `<span style="display:inline-flex;align-items:center;gap:4px;margin-right:6px;margin-bottom:4px;
                               background:rgba(185,149,77,0.1);border:1px solid rgba(185,149,77,0.25);
                               border-radius:20px;padding:2px 10px;font-size:0.72rem;color:var(--cream);">
-                    ${p.nombre}&nbsp;<strong style="color:var(--gold);">×${p.cantidad}</strong>
+                    ${(() => { if (typeof LANG !== 'undefined' && LANG === 'en' && typeof _rsItemsCache !== 'undefined' && _rsItemsCache) { var ci = _rsItemsCache.find(c => c.nombre === p.nombre); if (ci && typeof RS_ITEMS_EN !== 'undefined' && RS_ITEMS_EN[ci.id]) return RS_ITEMS_EN[ci.id]; } return p.nombre; })()}&nbsp;<strong style="color:var(--gold);">×${p.cantidad}</strong>
                     <span style="color:var(--text-muted-custom);margin-left:2px;">${parseFloat(p.subtotal).toFixed(2)} €</span>
                 </span>`
             ).join('');
             rsSubtotalStr = `<div id="rs-info-${r.id}" style="margin-top:12px;">
-                <p class="reserva-meta" style="font-size:0.7rem;letter-spacing:1px;color:var(--text-muted-custom);margin-bottom:6px;">ROOM SERVICE</p>
+                <p class="reserva-meta" style="font-size:0.7rem;letter-spacing:1px;color:var(--text-muted-custom);margin-bottom:6px;">${t('mr_rs_label')}</p>
                 <div style="display:flex;flex-wrap:wrap;gap:2px;">${itemsHtml}</div>
                 <p class="reserva-meta" style="font-size:0.75rem;margin-top:6px;">
-                    Total Room Service: <strong style="color:var(--gold);">${parseFloat(r.subtotalRoomService).toFixed(2)} €</strong>
+                    ${t('mr_rs_total')}<strong style="color:var(--gold);">${parseFloat(r.subtotalRoomService).toFixed(2)} €</strong>
                 </p>
             </div>`;
         } else {
-            rsSubtotalStr = `<div id="rs-info-${r.id}" style="margin-top:12px;"><p class="reserva-meta" style="font-size:0.75rem;color:var(--text-muted-custom);">Sin pedido de room service</p></div>`;
+            rsSubtotalStr = `<div id="rs-info-${r.id}" style="margin-top:12px;"><p class="reserva-meta" style="font-size:0.75rem;color:var(--text-muted-custom);">${t('mr_rs_none')}</p></div>`;
         }
 
         html += `
@@ -144,7 +148,7 @@ window.showMisReservas = async () => {
                     <div class="reserva-card-header">
                         <div>
                             <p class="reserva-tipo-label">${label}</p>
-                            <p class="reserva-hab-num">Habitación nº ${r.habitacionNumero}</p>
+                            <p class="reserva-hab-num">${t('mr_room_num')}${r.habitacionNumero}</p>
                         </div>
                         <span class="reserva-estado-badge" style="${badgeStyle}">${badgeText}</span>
                     </div>
@@ -157,8 +161,8 @@ window.showMisReservas = async () => {
                     
                     <div style="margin-top:12px;">
                         <p class="reserva-meta" style="font-size:0.8rem;">
-                            ${noches} noche${noches > 1 ? 's' : ''} &nbsp;·&nbsp;
-                            Total Habitación: <strong style="color:var(--gold);">${totalHabitacion} €</strong>
+                            ${noches} ${noches > 1 ? t('mr_nights') : t('mr_night')} &nbsp;·&nbsp;
+                            ${t('mr_room_total')}<strong style="color:var(--gold);">${totalHabitacion} €</strong>
                         </p>
                     </div>
                     
@@ -167,7 +171,7 @@ window.showMisReservas = async () => {
                     
                     <div class="gold-line" style="margin: 16px 0 12px; width: 100%; opacity: 0.2;"></div>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
-                        <span style="color:var(--cream); font-size:1.1rem; font-weight: 500;">PRECIO TOTAL</span>
+                        <span style="color:var(--cream); font-size:1.1rem; font-weight: 500;">${t('mr_total_price')}</span>
                         <span style="color:var(--gold); font-size:1.3rem; font-weight: 600;">${precioTotal} €</span>
                     </div>
 
@@ -181,16 +185,16 @@ window.showMisReservas = async () => {
 };
 
 window.cancelarReserva = async (id) => {
-    if (!confirm('¿Seguro que quieres cancelar esta reserva?')) return;
+    if (!confirm(t('mr_cancel_confirm'))) return;
     try {
         var res = await fetch('/api/reservas/' + id, { method: 'DELETE' });
         if (res.ok || res.status === 204) {
             showMisReservas();
         } else {
-            alert('No se pudo cancelar la reserva. Inténtalo de nuevo.');
+            alert(t('mr_cancel_error'));
         }
     } catch (_) {
-        alert('Error de conexión al cancelar.');
+        alert(t('mr_cancel_error_conn'));
     }
 };
 
@@ -206,7 +210,7 @@ window.abrirGestionRS = async (reservaId) => {
         items          = resItems.ok  ? await resItems.json()  : [];
         pedidosActuales = resPedidos.ok ? await resPedidos.json() : [];
     } catch (_) {
-        alert('Error al cargar la carta.'); return;
+        alert(t('grs_error_load')); return;
     }
 
     // Mapa pedidoId → cantidad actual para ítems ya pedidos
@@ -214,7 +218,7 @@ window.abrirGestionRS = async (reservaId) => {
     pedidosActuales.forEach(p => { pedidoMap[p.itemId] = { pedidoId: p.pedidoId, cantidad: p.cantidad }; });
 
     var categorias = ['DESAYUNO','ALMUERZO','CENA','SNACKS','BEBIDAS'];
-    var catLabels  = { DESAYUNO:'Desayuno', ALMUERZO:'Almuerzo', CENA:'Cena', SNACKS:'Snacks', BEBIDAS:'Bebidas' };
+    var catLabels  = { DESAYUNO: t('cat_DESAYUNO'), ALMUERZO: t('cat_ALMUERZO'), CENA: t('cat_CENA'), SNACKS: t('cat_SNACKS'), BEBIDAS: t('cat_BEBIDAS') };
     var disponibles = items.filter(i => i.disponible);
 
     var cartaRows = categorias.map(cat => {
@@ -226,7 +230,7 @@ window.abrirGestionRS = async (reservaId) => {
                 var qtyActual = pedidoMap[item.id] ? pedidoMap[item.id].cantidad : 0;
                 return `
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-                    <span style="flex:1;font-size:0.83rem;color:var(--cream);">${item.nombre}</span>
+                    <span style="flex:1;font-size:0.83rem;color:var(--cream);">${(typeof LANG !== 'undefined' && LANG === 'en' && typeof RS_ITEMS_EN !== 'undefined' && RS_ITEMS_EN[item.id]) ? RS_ITEMS_EN[item.id] : item.nombre}</span>
                     <span style="color:var(--gold);font-size:0.83rem;flex-shrink:0;">${parseFloat(item.precio).toFixed(2)} €</span>
                     <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
                         <button type="button" onclick="grsAjustar(${item.id},-1)"
@@ -245,15 +249,15 @@ window.abrirGestionRS = async (reservaId) => {
     modalEl.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
     modalEl.innerHTML = `
         <div style="background:#141414;border:1px solid rgba(185,149,77,0.35);border-radius:14px;padding:28px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;">
-            <p style="font-size:0.65rem;letter-spacing:3px;color:var(--text-muted-custom);margin-bottom:4px;">ROOM SERVICE</p>
-            <h3 class="serif" style="color:var(--cream);font-size:1.4rem;margin-bottom:4px;">Carta del Room Service</h3>
+            <p style="font-size:0.65rem;letter-spacing:3px;color:var(--text-muted-custom);margin-bottom:4px;">${t('mr_rs_label')}</p>
+            <h3 class="serif" style="color:var(--cream);font-size:1.4rem;margin-bottom:4px;">${t('grs_title')}</h3>
             <div class="gold-line mb-4" style="width:60px;"></div>
-            ${cartaRows || '<p style="color:var(--text-muted-custom);font-size:0.8rem;">No hay ítems disponibles.</p>'}
+            ${cartaRows || '<p style="color:var(--text-muted-custom);font-size:0.8rem;">' + t('grs_no_items') + '</p>'}
             <p id="grs-subtotal" style="color:var(--gold);font-size:0.88rem;font-weight:600;margin-top:14px;letter-spacing:1px;"></p>
             <div id="grs-msg" style="display:none;font-size:0.8rem;margin-top:8px;"></div>
             <div style="display:flex;gap:12px;margin-top:20px;">
-                <button class="btn-room" style="flex:1;padding:12px;" onclick="guardarPedidoRS(${reservaId})">Guardar cambios</button>
-                <button class="admin-btn admin-btn--ghost" style="flex:1;" onclick="cerrarGestionRS()">Cancelar</button>
+                <button class="btn-room" style="flex:1;padding:12px;" onclick="guardarPedidoRS(${reservaId})">${t('grs_save')}</button>
+                <button class="admin-btn admin-btn--ghost" style="flex:1;" onclick="cerrarGestionRS()">${t('grs_cancel')}</button>
             </div>
         </div>`;
     document.body.appendChild(modalEl);
@@ -284,7 +288,7 @@ function grsActualizarSubtotal() {
         }
     });
     var el = document.getElementById('grs-subtotal');
-    if (el) el.textContent = subtotal > 0 ? 'Subtotal: ' + subtotal.toFixed(2) + ' €' : '';
+    if (el) el.textContent = subtotal > 0 ? t('grs_subtotal') + subtotal.toFixed(2) + ' €' : '';
 }
 
 window.cerrarGestionRS = () => {
@@ -327,7 +331,7 @@ window.guardarPedidoRS = async (reservaId) => {
     } catch (_) {
         msgEl.style.display = 'block';
         msgEl.style.color   = '#c0392b';
-        msgEl.textContent   = 'Error al guardar. Inténtalo de nuevo.';
+        msgEl.textContent   = t('grs_error_save');
     }
 };
 

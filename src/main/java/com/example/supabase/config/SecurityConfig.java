@@ -30,7 +30,7 @@ public class SecurityConfig {
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/mis-reservas", "/mis-reservas/**").hasRole("CLIENTE")
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/css/**", "/js/**", "/lib/**", "/images/**", "/error").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/lib/**", "/images/**", "/docs/**", "/error").permitAll()
                         .requestMatchers("/habitacion/**", "/servicio/**").permitAll()
                         .requestMatchers("/api/habitaciones", "/api/habitaciones/**").permitAll()
                         .requestMatchers("/api/servicios").permitAll()

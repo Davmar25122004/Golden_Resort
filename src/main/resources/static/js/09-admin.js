@@ -3,20 +3,20 @@
 window.showAdmin = async () => {
     history.pushState({ view: 'admin' }, '', '/admin');
     showDynamic(`
-        <p class="section-label">Panel de Control</p>
-        <h2 class="serif mb-2" style="color:var(--cream); font-size:2.5rem;">Administración</h2>
+        <p class="section-label">${t('admin_label')}</p>
+        <h2 class="serif mb-2" style="color:var(--cream); font-size:2.5rem;">${t('admin_title')}</h2>
         <div class="gold-line mb-4"></div>
 
         <div class="admin-tabs-bar mb-4">
-            <button class="admin-tab-btn active" id="atab-dashboard"    onclick="switchAdminTab('dashboard')">Dashboard</button>
-            <button class="admin-tab-btn"        id="atab-reservas"     onclick="switchAdminTab('reservas')">Reservas</button>
-            <button class="admin-tab-btn"        id="atab-habitaciones" onclick="switchAdminTab('habitaciones')">Habitaciones</button>
-            <button class="admin-tab-btn"        id="atab-servicios"    onclick="switchAdminTab('servicios')">Servicios</button>
-            <button class="admin-tab-btn"        id="atab-roomservice"  onclick="switchAdminTab('roomservice')">Room Service</button>
-            <button class="admin-tab-btn"        id="atab-usuarios"     onclick="switchAdminTab('usuarios')">Usuarios</button>
+            <button class="admin-tab-btn active" id="atab-dashboard"    onclick="switchAdminTab('dashboard')">${t('admin_tab_dashboard')}</button>
+            <button class="admin-tab-btn"        id="atab-reservas"     onclick="switchAdminTab('reservas')">${t('admin_tab_bookings')}</button>
+            <button class="admin-tab-btn"        id="atab-habitaciones" onclick="switchAdminTab('habitaciones')">${t('admin_tab_rooms')}</button>
+            <button class="admin-tab-btn"        id="atab-servicios"    onclick="switchAdminTab('servicios')">${t('admin_tab_services')}</button>
+            <button class="admin-tab-btn"        id="atab-roomservice"  onclick="switchAdminTab('roomservice')">${t('admin_tab_rs')}</button>
+            <button class="admin-tab-btn"        id="atab-usuarios"     onclick="switchAdminTab('usuarios')">${t('admin_tab_users')}</button>
         </div>
 
-        <div id="admin-tab-body" style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px;">Cargando...</div>
+        <div id="admin-tab-body" style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px;">${t('admin_loading')}</div>
     `);
 
     switchAdminTab('dashboard');
@@ -28,7 +28,7 @@ window.switchAdminTab = (tab) => {
     if (btn) btn.classList.add('active');
     var body = document.getElementById('admin-tab-body');
     if (!body) return;
-    body.innerHTML = '<div style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px; padding:20px 0;">Cargando...</div>';
+    body.innerHTML = '<div style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px; padding:20px 0;">' + t('admin_loading') + '</div>';
 
     if (tab === 'dashboard')    loadAdminDashboard();
     if (tab === 'reservas')     loadAdminReservas();
@@ -44,9 +44,9 @@ async function loadAdminDashboard() {
     var body = document.getElementById('admin-tab-body');
     var res;
     try { res = await fetch('/api/admin/stats'); } catch (_) {
-        body.innerHTML = '<p style="color:#c0392b;">Error de conexión.</p>'; return;
+        body.innerHTML = '<p style="color:#c0392b;">' + t('adm_error_conn') + '</p>'; return;
     }
-    if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">No se pudieron cargar las métricas.</p>'; return; }
+    if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">' + t('adm_error_stats') + '</p>'; return; }
     var s = await res.json();
 
     var ocupPct = s.totalHabitaciones > 0
@@ -54,7 +54,7 @@ async function loadAdminDashboard() {
 
     var proximasHtml = s.proximasLlegadas && s.proximasLlegadas.length > 0
         ? `<table class="admin-table mt-3">
-               <thead><tr><th>Cliente</th><th>Habitación</th><th>Tipo</th><th>Llegada</th><th>Salida</th></tr></thead>
+               <thead><tr><th>${t('adm_col_client')}</th><th>${t('adm_col_room')}</th><th>${t('adm_col_type')}</th><th>${t('adm_col_arrival')}</th><th>${t('adm_col_departure')}</th></tr></thead>
                <tbody>
                    ${s.proximasLlegadas.map(p => `
                        <tr>
@@ -66,30 +66,30 @@ async function loadAdminDashboard() {
                        </tr>`).join('')}
                </tbody>
            </table>`
-        : '<p style="color:var(--text-muted-custom); font-size:0.8rem; margin-top:12px; letter-spacing:1px;">No hay llegadas próximas.</p>';
+        : '<p style="color:var(--text-muted-custom); font-size:0.8rem; margin-top:12px; letter-spacing:1px;">' + t('adm_no_arrivals') + '</p>';
 
     body.innerHTML = `
         <div class="admin-stats-grid">
             <div class="admin-stat-card">
-                <p class="admin-stat-label">Reservas hoy</p>
+                <p class="admin-stat-label">${t('adm_stat_today')}</p>
                 <p class="admin-stat-value">${s.reservasHoy}</p>
             </div>
             <div class="admin-stat-card">
-                <p class="admin-stat-label">Reservas este mes</p>
+                <p class="admin-stat-label">${t('adm_stat_month')}</p>
                 <p class="admin-stat-value">${s.reservasMes}</p>
             </div>
             <div class="admin-stat-card">
-                <p class="admin-stat-label">Ingresos este mes</p>
+                <p class="admin-stat-label">${t('adm_stat_revenue')}</p>
                 <p class="admin-stat-value">${parseFloat(s.ingresosMes).toFixed(2)} €</p>
             </div>
             <div class="admin-stat-card">
-                <p class="admin-stat-label">Ocupación hoy</p>
+                <p class="admin-stat-label">${t('adm_stat_occupancy')}</p>
                 <p class="admin-stat-value">${s.ocupadasHoy} / ${s.totalHabitaciones} <small style="font-size:1rem;">(${ocupPct}%)</small></p>
             </div>
         </div>
 
         <div class="mt-5">
-            <p style="font-size:0.75rem; letter-spacing:2px; color:var(--text-muted-custom); margin-bottom:4px;">PRÓXIMAS LLEGADAS</p>
+            <p style="font-size:0.75rem; letter-spacing:2px; color:var(--text-muted-custom); margin-bottom:4px;">${t('adm_upcoming')}</p>
             <div class="gold-line" style="width:60px; margin-bottom:0;"></div>
             ${proximasHtml}
         </div>`;
@@ -101,13 +101,13 @@ async function loadAdminReservas() {
     var body = document.getElementById('admin-tab-body');
     var res;
     try { res = await fetch('/api/reservas'); } catch (_) {
-        body.innerHTML = '<p style="color:#c0392b;">Error de conexión.</p>'; return;
+        body.innerHTML = '<p style="color:#c0392b;">' + t('adm_error_conn') + '</p>'; return;
     }
-    if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">No se pudieron cargar las reservas.</p>'; return; }
+    if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">' + t('adm_res_error') + '</p>'; return; }
     var reservas = await res.json();
 
     if (!reservas || reservas.length === 0) {
-        body.innerHTML = '<p style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px; margin-top:12px;">No hay reservas.</p>';
+        body.innerHTML = '<p style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px; margin-top:12px;">' + t('adm_res_no_data') + '</p>';
         return;
     }
 
@@ -117,8 +117,8 @@ async function loadAdminReservas() {
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>#</th><th>Cliente</th><th>Habitación</th><th>Llegada</th><th>Salida</th>
-                    <th>Servicios</th><th>Total</th><th></th>
+                    <th>#</th><th>${t('adm_col_client')}</th><th>${t('adm_col_room')}</th><th>${t('adm_col_arrival')}</th><th>${t('adm_col_departure')}</th>
+                    <th>${t('adm_res_services')}</th><th>${t('adm_res_total')}</th><th></th>
                 </tr>
             </thead>
             <tbody>
@@ -141,8 +141,8 @@ async function loadAdminReservas() {
                         <td style="color:var(--gold); white-space:nowrap;">${parseFloat(r.total).toFixed(2)} €</td>
                         <td>
                             <div style="display:flex; gap:8px; justify-content:flex-end;">
-                                <button class="admin-btn" style="background:rgba(255,255,255,0.05); color:var(--gold); border:1px solid rgba(185,149,77,0.4);" onclick='adminModificarReserva(${JSON.stringify(r).replace(/'/g, "&#39;")})'>Modificar</button>
-                                <button class="admin-btn admin-btn--danger" onclick="adminCancelarReserva(${r.id})">Cancelar</button>
+                                <button class="admin-btn" style="background:rgba(255,255,255,0.05); color:var(--gold); border:1px solid rgba(185,149,77,0.4);" onclick='adminModificarReserva(${JSON.stringify(r).replace(/'/g, "&#39;")})'>${t('adm_res_modify')}</button>
+                                <button class="admin-btn admin-btn--danger" onclick="adminCancelarReserva(${r.id})">${t('adm_res_cancel')}</button>
                             </div>
                         </td>
                     </tr>`;
@@ -152,15 +152,15 @@ async function loadAdminReservas() {
 }
 
 window.adminCancelarReserva = async (id) => {
-    if (!confirm('¿Cancelar esta reserva? Esta acción no se puede deshacer.')) return;
+    if (!confirm(t('adm_res_confirm_cancel'))) return;
     try {
         var res = await fetch('/api/reservas/' + id, { method: 'DELETE' });
         if (res.ok || res.status === 204) {
             loadAdminReservas();
         } else {
-            alert('No se pudo cancelar la reserva.');
+            alert(t('adm_res_cancel_error'));
         }
-    } catch (_) { alert('Error de conexión.'); }
+    } catch (_) { alert(t('adm_error_conn')); }
 };
 
 window.adminModificarReserva = async (r) => {
@@ -182,32 +182,32 @@ window.adminModificarReserva = async (r) => {
     var modalHtml = `
         <div id="modal-mod-reserva" style="display:flex; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center;">
             <div style="background:#1a1a1a; border:1px solid rgba(185,149,77,0.3); border-radius:12px; padding:32px; width:100%; max-width:460px; margin:16px;">
-                <h3 class="serif mb-1" style="color:var(--cream); font-size:1.4rem;">Modificar Reserva #${r.id}</h3>
+                <h3 class="serif mb-1" style="color:var(--cream); font-size:1.4rem;">${t('adm_mod_title')}${r.id}</h3>
                 <p style="font-size:0.75rem; color:var(--text-muted-custom); margin-bottom:20px;">
                     ${r.clienteNombre} (${r.habitacionTipo} nº ${r.habitacionNumero})
                 </p>
-                
+
                 <div class="mb-3 d-flex gap-2">
                     <div style="flex:1;">
-                        <label class="admin-form-label">Llegada</label>
+                        <label class="admin-form-label">${t('adm_mod_arrival')}</label>
                         <input type="date" id="mod-llegada" class="admin-form-input" value="${dIn}" required>
                     </div>
                     <div style="flex:1;">
-                        <label class="admin-form-label">Salida</label>
+                        <label class="admin-form-label">${t('adm_mod_departure')}</label>
                         <input type="date" id="mod-salida" class="admin-form-input" value="${dOut}" required>
                     </div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="admin-form-label mb-2">Servicios Adicionales</label>
+                    <label class="admin-form-label mb-2">${t('adm_mod_add_services')}</label>
                     <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(185,149,77,0.2); border-radius:8px; padding:16px; max-height:180px; overflow-y:auto;">
-                        ${servHtml || '<p style="color:var(--text-muted-custom);font-size:0.8rem;margin:0;">No hay servicios.</p>'}
+                        ${servHtml || '<p style="color:var(--text-muted-custom);font-size:0.8rem;margin:0;">' + t('adm_mod_no_services') + '</p>'}
                     </div>
                 </div>
 
                 <div class="d-flex gap-3">
-                    <button class="admin-btn" onclick="guardarModificacionReserva(${r.id})">Guardar cambios</button>
-                    <button class="admin-btn admin-btn--ghost" onclick="cerrarModalModRe()">Cancelar</button>
+                    <button class="admin-btn" onclick="guardarModificacionReserva(${r.id})">${t('adm_mod_save')}</button>
+                    <button class="admin-btn admin-btn--ghost" onclick="cerrarModalModRe()">${t('adm_mod_cancel')}</button>
                 </div>
             </div>
         </div>
@@ -250,29 +250,29 @@ window.guardarModificacionReserva = async (id) => {
             if (typeof loadAdminStats === 'function') loadAdminStats();
         } else {
             var msg = await res.text();
-            alert('Error al modificar: ' + msg);
+            alert(t('adm_mod_error') + msg);
         }
     } catch(e) {
-        alert('Error de conexión.');
+        alert(t('adm_mod_error_conn'));
     }
 };
 
 // ── ADMIN: HABITACIONES (por tipo) ───────────────────────────────────────────
 
 var TIPO_LABELS_ADMIN = {
-    NORMAL: { label: 'Habitación Normal' },
-    DOBLE:  { label: 'Habitación Doble'  },
-    SUITE:  { label: 'Suite'             },
-    LUJO:   { label: 'Suite de Lujo'     },
+    NORMAL: { label: 'tipo_normal' },
+    DOBLE:  { label: 'tipo_doble'  },
+    SUITE:  { label: 'tipo_suite'  },
+    LUJO:   { label: 'tipo_lujo'   },
 };
 
 async function loadAdminHabitaciones() {
     var body = document.getElementById('admin-tab-body');
     var res;
     try { res = await fetch('/api/habitaciones'); } catch (_) {
-        body.innerHTML = '<p style="color:#c0392b;">Error de conexión.</p>'; return;
+        body.innerHTML = '<p style="color:#c0392b;">' + t('adm_error_conn') + '</p>'; return;
     }
-    if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">No se pudieron cargar las habitaciones.</p>'; return; }
+    if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">' + t('adm_hab_error') + '</p>'; return; }
     var habitaciones = await res.json();
 
     // Agrupa por tipo
@@ -285,7 +285,8 @@ async function loadAdminHabitaciones() {
 
     var cardsHtml = tipoOrder.map(tipo => {
         var lista = tipos[tipo];
-        var info  = TIPO_LABELS_ADMIN[tipo] || { label: tipo };
+        var _rawInfo = TIPO_LABELS_ADMIN[tipo] || { label: tipo };
+        var info  = { label: t(_rawInfo.label) };
         var precio    = lista.length > 0 ? parseFloat(lista[0].precioNoche).toFixed(2) : '—';
         var desc      = lista.length > 0 ? (lista[0].descripcion || '') : '';
         var count     = lista.length;
@@ -300,15 +301,15 @@ async function loadAdminHabitaciones() {
             <div style="position:absolute; inset:0; background:linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.75) 60%, rgba(0,0,0,0.92) 100%); border-radius:14px;"></div>
             <!-- Badge cantidad -->
             <div style="position:absolute; top:14px; right:14px; font-size:0.68rem; background:rgba(185,149,77,0.85); color:#0a0a0a; padding:4px 12px; border-radius:20px; letter-spacing:1px; font-weight:700;">
-                ${count} hab.
+                ${count}${t('adm_hab_count')}
             </div>
             <!-- Contenido inferior -->
             <div style="position:relative; padding:20px 22px 22px;">
                 <p style="margin:0 0 2px; font-size:0.6rem; letter-spacing:3px; color:rgba(255,255,255,0.5); text-transform:uppercase;">${tipo}</p>
                 <p style="margin:0 0 6px; font-size:1.1rem; color:var(--cream); font-family:'Playfair Display',serif; font-weight:700;">${info.label}</p>
                 <p style="margin:0 0 4px; font-size:1.6rem; color:var(--gold); font-weight:700; line-height:1;">${precio} <small style="font-size:0.85rem; color:rgba(255,255,255,0.5); font-weight:400;">€/noche</small></p>
-                <p style="margin:0 0 16px; font-size:0.75rem; color:rgba(255,255,255,0.55); min-height:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${desc || 'Sin descripción'}</p>
-                <button class="admin-btn" onclick="abrirModalTipo('${tipo}', ${precioVal}, '${descEsc}')" style="width:100%;">Editar habitación</button>
+                <p style="margin:0 0 16px; font-size:0.75rem; color:rgba(255,255,255,0.55); min-height:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${desc || t('adm_hab_no_desc')}</p>
+                <button class="admin-btn" onclick="abrirModalTipo('${tipo}', ${precioVal}, '${descEsc}')" style="width:100%;">${t('adm_hab_edit')}</button>
             </div>
         </div>`;
     }).join('');
@@ -320,21 +321,19 @@ async function loadAdminHabitaciones() {
         <div id="modal-tipo-hab" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center;">
             <div style="background:#1a1a1a; border:1px solid rgba(185,149,77,0.3); border-radius:12px; padding:32px; width:100%; max-width:460px; margin:16px;">
                 <h3 class="serif mb-1" id="modal-tipo-title" style="color:var(--cream); font-size:1.4rem;"></h3>
-                <p style="font-size:0.72rem; letter-spacing:1px; color:var(--text-muted-custom); margin-bottom:24px;">
-                    Los cambios se aplicarán a <strong style="color:var(--gold);">todas</strong> las habitaciones de este tipo.
-                </p>
+                <p style="font-size:0.72rem; letter-spacing:1px; color:var(--text-muted-custom); margin-bottom:24px;" id="modal-tipo-note"></p>
                 <div class="mb-3">
-                    <label class="admin-form-label">Precio / noche (€)</label>
-                    <input type="number" id="tipo-precio" class="admin-form-input" step="0.01" min="0" placeholder="Ej: 120.00">
+                    <label class="admin-form-label" id="modal-tipo-price-lbl"></label>
+                    <input type="number" id="tipo-precio" class="admin-form-input" step="0.01" min="0">
                 </div>
                 <div class="mb-4">
-                    <label class="admin-form-label">Descripción (opcional)</label>
-                    <input type="text" id="tipo-descripcion" class="admin-form-input" placeholder="Descripción breve del tipo">
+                    <label class="admin-form-label" id="modal-tipo-desc-lbl"></label>
+                    <input type="text" id="tipo-descripcion" class="admin-form-input">
                 </div>
                 <div id="modal-tipo-error" class="admin-form-error d-none"></div>
                 <div class="d-flex gap-3">
-                    <button class="admin-btn" id="btn-guardar-tipo" onclick="guardarTipoHabitacion()">Guardar cambios</button>
-                    <button class="admin-btn admin-btn--ghost" onclick="cerrarModalTipo()">Cancelar</button>
+                    <button class="admin-btn" id="btn-guardar-tipo" onclick="guardarTipoHabitacion()"></button>
+                    <button class="admin-btn admin-btn--ghost" onclick="cerrarModalTipo()"></button>
                 </div>
             </div>
         </div>`;
@@ -344,11 +343,18 @@ var _editTipoActual = null;
 
 window.abrirModalTipo = (tipo, precio, descripcion) => {
     _editTipoActual = tipo;
-    var info = TIPO_LABELS_ADMIN[tipo] || { label: tipo, icon: '🏨' };
-    document.getElementById('modal-tipo-title').textContent = info.icon + '  ' + info.label;
+    var _rawInfo = TIPO_LABELS_ADMIN[tipo] || { label: tipo };
+    document.getElementById('modal-tipo-title').textContent = t(_rawInfo.label);
+    document.getElementById('modal-tipo-note').innerHTML    = t('adm_hab_modal_note');
+    document.getElementById('modal-tipo-price-lbl').textContent = t('adm_hab_price_label');
+    document.getElementById('modal-tipo-desc-lbl').textContent  = t('adm_hab_desc_label');
+    document.getElementById('tipo-precio').placeholder      = t('adm_hab_price_placeholder');
+    document.getElementById('tipo-descripcion').placeholder = t('adm_hab_desc_placeholder');
     document.getElementById('tipo-precio').value      = precio || '';
     document.getElementById('tipo-descripcion').value = descripcion || '';
     document.getElementById('modal-tipo-error').classList.add('d-none');
+    document.getElementById('btn-guardar-tipo').textContent = t('adm_hab_save');
+    document.querySelector('#modal-tipo-hab .admin-btn--ghost').textContent = t('adm_hab_cancel');
     var modal = document.getElementById('modal-tipo-hab');
     modal.style.display = 'flex';
 };
@@ -364,12 +370,12 @@ window.guardarTipoHabitacion = async () => {
     var btn         = document.getElementById('btn-guardar-tipo');
 
     if (!precio || parseFloat(precio) <= 0) {
-        errEl.textContent = 'El precio es obligatorio y debe ser mayor que 0.';
+        errEl.textContent = t('adm_hab_price_error');
         errEl.classList.remove('d-none'); return;
     }
 
     btn.disabled    = true;
-    btn.textContent = 'Guardando...';
+    btn.textContent = t('adm_hab_saving');
 
     try {
         var res = await fetch('/api/habitaciones/tipo/' + _editTipoActual, {
@@ -381,18 +387,18 @@ window.guardarTipoHabitacion = async () => {
             cerrarModalTipo();
             loadAdminHabitaciones();
         } else if (res.status === 404) {
-            errEl.textContent = 'No existe ninguna habitación de ese tipo.';
+            errEl.textContent = t('adm_hab_not_found');
             errEl.classList.remove('d-none');
         } else {
-            errEl.textContent = 'Error al guardar. Inténtalo de nuevo.';
+            errEl.textContent = t('adm_hab_save_error');
             errEl.classList.remove('d-none');
         }
     } catch (_) {
-        errEl.textContent = 'Error de conexión.';
+        errEl.textContent = t('adm_hab_conn_error');
         errEl.classList.remove('d-none');
     } finally {
         btn.disabled    = false;
-        btn.textContent = 'Guardar cambios';
+        btn.textContent = t('adm_hab_save');
     }
 };
 
@@ -402,17 +408,17 @@ async function loadAdminServicios() {
     var body = document.getElementById('admin-tab-body');
     var res;
     try { res = await fetch('/api/servicios'); } catch (_) {
-        body.innerHTML = '<p style="color:#c0392b;">Error de conexión.</p>'; return;
+        body.innerHTML = '<p style="color:#c0392b;">' + t('adm_error_conn') + '</p>'; return;
     }
-    if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">No se pudieron cargar los servicios.</p>'; return; }
+    if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">' + t('adm_svc_error') + '</p>'; return; }
     var servicios = await res.json();
 
     body.innerHTML = `
         <div class="mb-3">
-            <button class="admin-btn" onclick="abrirModalServicio(null)">+ Nuevo Servicio</button>
+            <button class="admin-btn" onclick="abrirModalServicio(null)">${t('adm_svc_new')}</button>
         </div>
         <table class="admin-table">
-            <thead><tr><th>#</th><th>Nombre</th><th>Precio</th><th></th></tr></thead>
+            <thead><tr><th>#</th><th>${t('adm_svc_col_name')}</th><th>${t('adm_svc_col_price')}</th><th></th></tr></thead>
             <tbody>
                 ${servicios.map(s => `
                     <tr>
@@ -420,8 +426,8 @@ async function loadAdminServicios() {
                         <td style="color:var(--cream);">${s.nombre}</td>
                         <td style="color:var(--gold);">${parseFloat(s.precio).toFixed(2)} €</td>
                         <td style="white-space:nowrap;">
-                            <button class="admin-btn" onclick='abrirModalServicio(${JSON.stringify(s)})'>Editar</button>
-                            <button class="admin-btn admin-btn--danger" onclick="adminEliminarServicio(${s.id})">Eliminar</button>
+                            <button class="admin-btn" onclick='abrirModalServicio(${JSON.stringify(s)})'>${t('adm_svc_edit')}</button>
+                            <button class="admin-btn admin-btn--danger" onclick="adminEliminarServicio(${s.id})">${t('adm_svc_delete')}</button>
                         </td>
                     </tr>`).join('')}
             </tbody>
@@ -430,19 +436,19 @@ async function loadAdminServicios() {
         <!-- Modal servicio -->
         <div id="modal-servicio" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
             <div style="background:#1a1a1a; border:1px solid rgba(185,149,77,0.3); border-radius:12px; padding:32px; width:100%; max-width:400px;">
-                <h3 class="serif mb-4" id="modal-svc-title" style="color:var(--cream);">Servicio</h3>
+                <h3 class="serif mb-4" id="modal-svc-title" style="color:var(--cream);"></h3>
                 <div class="mb-3">
-                    <label class="admin-form-label">Nombre</label>
-                    <input type="text" id="svc-nombre" class="admin-form-input" placeholder="Ej: Spa Premium">
+                    <label class="admin-form-label" id="svc-name-lbl"></label>
+                    <input type="text" id="svc-nombre" class="admin-form-input">
                 </div>
                 <div class="mb-4">
-                    <label class="admin-form-label">Precio (€)</label>
-                    <input type="number" id="svc-precio" class="admin-form-input" step="0.01" min="0" placeholder="Ej: 45.00">
+                    <label class="admin-form-label" id="svc-price-lbl"></label>
+                    <input type="number" id="svc-precio" class="admin-form-input" step="0.01" min="0">
                 </div>
                 <div id="modal-svc-error" class="admin-form-error d-none"></div>
                 <div class="d-flex gap-3">
-                    <button class="admin-btn" onclick="guardarServicio()">Guardar</button>
-                    <button class="admin-btn admin-btn--ghost" onclick="cerrarModalServicio()">Cancelar</button>
+                    <button class="admin-btn" onclick="guardarServicio()" id="btn-svc-save"></button>
+                    <button class="admin-btn admin-btn--ghost" onclick="cerrarModalServicio()" id="btn-svc-cancel"></button>
                 </div>
             </div>
         </div>`;
@@ -452,10 +458,16 @@ var _editSvcId = null;
 
 window.abrirModalServicio = (svc) => {
     _editSvcId = svc ? svc.id : null;
-    document.getElementById('modal-svc-title').textContent = svc ? 'Editar Servicio' : 'Nuevo Servicio';
+    document.getElementById('modal-svc-title').textContent = svc ? t('adm_svc_modal_edit') : t('adm_svc_modal_new');
+    document.getElementById('svc-name-lbl').textContent    = t('adm_svc_name_label');
+    document.getElementById('svc-price-lbl').textContent   = t('adm_svc_price_label');
+    document.getElementById('svc-nombre').placeholder      = t('adm_svc_name_placeholder');
+    document.getElementById('svc-precio').placeholder      = t('adm_svc_price_placeholder');
     document.getElementById('svc-nombre').value = svc ? svc.nombre : '';
     document.getElementById('svc-precio').value = svc ? svc.precio : '';
     document.getElementById('modal-svc-error').classList.add('d-none');
+    document.getElementById('btn-svc-save').textContent   = t('adm_svc_save');
+    document.getElementById('btn-svc-cancel').textContent = t('adm_svc_cancel');
     var modal = document.getElementById('modal-servicio');
     modal.style.display = 'flex';
 };
@@ -470,7 +482,7 @@ window.guardarServicio = async () => {
     var errEl  = document.getElementById('modal-svc-error');
 
     if (!nombre || !precio) {
-        errEl.textContent = 'Nombre y precio son obligatorios.';
+        errEl.textContent = t('adm_svc_req_error');
         errEl.classList.remove('d-none'); return;
     }
 
@@ -488,29 +500,29 @@ window.guardarServicio = async () => {
             cerrarModalServicio();
             loadAdminServicios();
         } else if (res.status === 409) {
-            errEl.textContent = 'Ya existe un servicio con ese nombre.';
+            errEl.textContent = t('adm_svc_dup_error');
             errEl.classList.remove('d-none');
         } else {
-            errEl.textContent = 'Error al guardar.';
+            errEl.textContent = t('adm_svc_save_error');
             errEl.classList.remove('d-none');
         }
     } catch (_) {
-        errEl.textContent = 'Error de conexión.';
+        errEl.textContent = t('adm_svc_conn_error');
         errEl.classList.remove('d-none');
     }
 };
 
 window.adminEliminarServicio = async (id) => {
-    if (!confirm('¿Eliminar este servicio?')) return;
+    if (!confirm(t('adm_svc_del_confirm'))) return;
     try {
         var res = await fetch('/api/servicios/' + id, { method: 'DELETE' });
         if (res.ok || res.status === 204) {
             _serviciosCache = null;
             loadAdminServicios();
         } else {
-            alert('No se pudo eliminar el servicio.');
+            alert(t('adm_svc_del_error'));
         }
-    } catch (_) { alert('Error de conexión.'); }
+    } catch (_) { alert(t('adm_error_conn')); }
 };
 
 // ── ADMIN: ROOM SERVICE ───────────────────────────────────────────────────────
@@ -519,14 +531,14 @@ async function loadAdminRoomService() {
     var body = document.getElementById('admin-tab-body');
     var res;
     try { res = await fetch('/api/room-service/items'); } catch (_) {
-        body.innerHTML = '<p style="color:#c0392b;">Error de conexión.</p>'; return;
+        body.innerHTML = '<p style="color:#c0392b;">' + t('adm_error_conn') + '</p>'; return;
     }
-    if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">No se pudieron cargar los ítems.</p>'; return; }
+    if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">' + t('adm_rs_error') + '</p>'; return; }
     var items = await res.json();
     _rsItemsCache = null; // invalidar caché del frontend al editar desde admin
 
     var categorias = ['DESAYUNO','ALMUERZO','CENA','SNACKS','BEBIDAS'];
-    var catLabels  = { DESAYUNO:'Desayuno', ALMUERZO:'Almuerzo', CENA:'Cena', SNACKS:'Snacks', BEBIDAS:'Bebidas' };
+    var catLabels  = { DESAYUNO: t('cat_DESAYUNO'), ALMUERZO: t('cat_ALMUERZO'), CENA: t('cat_CENA'), SNACKS: t('cat_SNACKS'), BEBIDAS: t('cat_BEBIDAS') };
 
     var tablasPorCat = categorias.map(cat => {
         var catItems = items.filter(i => i.categoria === cat);
@@ -534,7 +546,7 @@ async function loadAdminRoomService() {
         return `
             <p style="font-size:0.7rem;letter-spacing:2px;color:var(--text-muted-custom);margin:18px 0 6px;text-transform:uppercase;">${catLabels[cat]}</p>
             <table class="admin-table">
-                <thead><tr><th>#</th><th>Nombre</th><th>Descripción</th><th>Precio</th><th>Disponible</th><th></th></tr></thead>
+                <thead><tr><th>#</th><th>${t('adm_rs_col_name')}</th><th>${t('adm_rs_col_desc')}</th><th>${t('adm_rs_col_price')}</th><th>${t('adm_rs_col_avail')}</th><th></th></tr></thead>
                 <tbody>
                     ${catItems.map(item => `
                         <tr>
@@ -542,10 +554,10 @@ async function loadAdminRoomService() {
                             <td style="color:var(--cream);">${item.nombre}</td>
                             <td style="color:var(--text-muted-custom);font-size:0.75rem;">${item.descripcion || '—'}</td>
                             <td style="color:var(--gold);">${parseFloat(item.precio).toFixed(2)} €</td>
-                            <td>${item.disponible ? '<span class="admin-badge" style="color:#27ae60;">Sí</span>' : '<span class="admin-badge" style="color:#c0392b;">No</span>'}</td>
+                            <td>${item.disponible ? '<span class="admin-badge" style="color:#27ae60;">' + t('adm_rs_yes') + '</span>' : '<span class="admin-badge" style="color:#c0392b;">' + t('adm_rs_no') + '</span>'}</td>
                             <td style="white-space:nowrap;">
-                                <button class="admin-btn" onclick='abrirModalRSItem(${JSON.stringify(item)})'>Editar</button>
-                                <button class="admin-btn admin-btn--danger" onclick="adminEliminarRSItem(${item.id})">Eliminar</button>
+                                <button class="admin-btn" onclick='abrirModalRSItem(${JSON.stringify(item)})'>${t('adm_rs_edit')}</button>
+                                <button class="admin-btn admin-btn--danger" onclick="adminEliminarRSItem(${item.id})">${t('adm_rs_delete')}</button>
                             </td>
                         </tr>`).join('')}
                 </tbody>
@@ -554,44 +566,44 @@ async function loadAdminRoomService() {
 
     body.innerHTML = `
         <div class="mb-3">
-            <button class="admin-btn" onclick="abrirModalRSItem(null)">+ Nuevo ítem</button>
+            <button class="admin-btn" onclick="abrirModalRSItem(null)">${t('adm_rs_new')}</button>
         </div>
-        ${tablasPorCat || '<p style="color:var(--text-muted-custom);font-size:0.8rem;letter-spacing:1px;margin-top:12px;">No hay ítems en la carta.</p>'}
+        ${tablasPorCat || '<p style="color:var(--text-muted-custom);font-size:0.8rem;letter-spacing:1px;margin-top:12px;">' + t('adm_rs_empty') + '</p>'}
 
         <!-- Modal ítem room service -->
         <div id="modal-rs-item" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center;">
             <div style="background:#1a1a1a;border:1px solid rgba(185,149,77,0.3);border-radius:12px;padding:32px;width:100%;max-width:460px;margin:16px;max-height:90vh;overflow-y:auto;">
-                <h3 class="serif mb-4" id="modal-rsitem-title" style="color:var(--cream);">Ítem Room Service</h3>
+                <h3 class="serif mb-4" id="modal-rsitem-title" style="color:var(--cream);"></h3>
                 <div class="mb-3">
-                    <label class="admin-form-label">Nombre</label>
-                    <input type="text" id="rsi-nombre" class="admin-form-input" placeholder="Ej: Hamburguesa gourmet">
+                    <label class="admin-form-label" id="rsi-name-lbl"></label>
+                    <input type="text" id="rsi-nombre" class="admin-form-input">
                 </div>
                 <div class="mb-3">
-                    <label class="admin-form-label">Descripción (opcional)</label>
-                    <input type="text" id="rsi-descripcion" class="admin-form-input" placeholder="Breve descripción del plato">
+                    <label class="admin-form-label" id="rsi-desc-lbl"></label>
+                    <input type="text" id="rsi-descripcion" class="admin-form-input">
                 </div>
                 <div class="mb-3">
-                    <label class="admin-form-label">Precio (€)</label>
-                    <input type="number" id="rsi-precio" class="admin-form-input" step="0.01" min="0" placeholder="Ej: 12.50">
+                    <label class="admin-form-label" id="rsi-price-lbl"></label>
+                    <input type="number" id="rsi-precio" class="admin-form-input" step="0.01" min="0">
                 </div>
                 <div class="mb-3">
-                    <label class="admin-form-label">Categoría</label>
+                    <label class="admin-form-label" id="rsi-cat-lbl"></label>
                     <select id="rsi-categoria" class="admin-form-input" style="cursor:pointer;">
-                        <option value="DESAYUNO">Desayuno</option>
-                        <option value="ALMUERZO">Almuerzo</option>
-                        <option value="CENA">Cena</option>
-                        <option value="SNACKS">Snacks</option>
-                        <option value="BEBIDAS">Bebidas</option>
+                        <option value="DESAYUNO"></option>
+                        <option value="ALMUERZO"></option>
+                        <option value="CENA"></option>
+                        <option value="SNACKS"></option>
+                        <option value="BEBIDAS"></option>
                     </select>
                 </div>
                 <div class="mb-4" style="display:flex;align-items:center;gap:10px;">
                     <input type="checkbox" id="rsi-disponible" checked style="accent-color:var(--gold);width:16px;height:16px;cursor:pointer;">
-                    <label for="rsi-disponible" class="admin-form-label" style="margin:0;cursor:pointer;">Disponible</label>
+                    <label for="rsi-disponible" class="admin-form-label" id="rsi-avail-lbl" style="margin:0;cursor:pointer;"></label>
                 </div>
                 <div id="modal-rsitem-error" class="admin-form-error d-none"></div>
                 <div class="d-flex gap-3">
-                    <button class="admin-btn" onclick="guardarRSItem()">Guardar</button>
-                    <button class="admin-btn admin-btn--ghost" onclick="cerrarModalRSItem()">Cancelar</button>
+                    <button class="admin-btn" onclick="guardarRSItem()" id="btn-rsi-save"></button>
+                    <button class="admin-btn admin-btn--ghost" onclick="cerrarModalRSItem()" id="btn-rsi-cancel"></button>
                 </div>
             </div>
         </div>`;
@@ -601,7 +613,19 @@ var _editRSItemId = null;
 
 window.abrirModalRSItem = (item) => {
     _editRSItemId = item ? item.id : null;
-    document.getElementById('modal-rsitem-title').textContent = item ? 'Editar ítem' : 'Nuevo ítem';
+    document.getElementById('modal-rsitem-title').textContent = item ? t('adm_rs_modal_edit') : t('adm_rs_modal_new');
+    document.getElementById('rsi-name-lbl').textContent  = t('adm_rs_name_label');
+    document.getElementById('rsi-desc-lbl').textContent  = t('adm_rs_desc_label');
+    document.getElementById('rsi-price-lbl').textContent = t('adm_rs_price_label');
+    document.getElementById('rsi-cat-lbl').textContent   = t('adm_rs_cat_label');
+    document.getElementById('rsi-avail-lbl').textContent = t('adm_rs_avail_label');
+    document.getElementById('btn-rsi-save').textContent   = t('adm_rs_save');
+    document.getElementById('btn-rsi-cancel').textContent = t('adm_rs_cancel');
+    // Translate select options
+    var catLabels2 = { DESAYUNO: t('cat_DESAYUNO'), ALMUERZO: t('cat_ALMUERZO'), CENA: t('cat_CENA'), SNACKS: t('cat_SNACKS'), BEBIDAS: t('cat_BEBIDAS') };
+    document.querySelectorAll('#rsi-categoria option').forEach(function(opt) {
+        opt.textContent = catLabels2[opt.value] || opt.value;
+    });
     document.getElementById('rsi-nombre').value      = item ? item.nombre      : '';
     document.getElementById('rsi-descripcion').value = item ? (item.descripcion || '') : '';
     document.getElementById('rsi-precio').value      = item ? item.precio      : '';
@@ -624,7 +648,7 @@ window.guardarRSItem = async () => {
     var errEl       = document.getElementById('modal-rsitem-error');
 
     if (!nombre || !precio || parseFloat(precio) <= 0) {
-        errEl.textContent = 'Nombre y precio (mayor que 0) son obligatorios.';
+        errEl.textContent = t('adm_rs_req_error');
         errEl.classList.remove('d-none'); return;
     }
 
@@ -641,31 +665,31 @@ window.guardarRSItem = async () => {
             cerrarModalRSItem();
             loadAdminRoomService();
         } else if (res.status === 404) {
-            errEl.textContent = 'Ítem no encontrado.';
+            errEl.textContent = t('adm_rs_not_found');
             errEl.classList.remove('d-none');
         } else {
-            errEl.textContent = 'Error al guardar.';
+            errEl.textContent = t('adm_rs_save_error');
             errEl.classList.remove('d-none');
         }
     } catch (_) {
-        errEl.textContent = 'Error de conexión.';
+        errEl.textContent = t('adm_rs_conn_error');
         errEl.classList.remove('d-none');
     }
 };
 
 window.adminEliminarRSItem = async (id) => {
-    if (!confirm('¿Eliminar este ítem de la carta?')) return;
+    if (!confirm(t('adm_rs_del_confirm'))) return;
     try {
         var res = await fetch('/api/room-service/items/' + id, { method: 'DELETE' });
         if (res.ok || res.status === 204) {
             _rsItemsCache = null;
             loadAdminRoomService();
         } else if (res.status === 409) {
-            alert('No se puede eliminar: hay pedidos activos que usan este ítem. Márcalo como no disponible primero.');
+            alert(t('adm_rs_del_active'));
         } else {
-            alert('No se pudo eliminar el ítem.');
+            alert(t('adm_rs_del_error'));
         }
-    } catch (_) { alert('Error de conexión.'); }
+    } catch (_) { alert(t('adm_error_conn')); }
 };
 
 // ── ADMIN: USUARIOS ───────────────────────────────────────────────────────────
@@ -674,14 +698,14 @@ async function loadAdminUsuarios() {
     var body = document.getElementById('admin-tab-body');
     var res;
     try { res = await fetch('/api/admin/usuarios'); } catch (_) {
-        body.innerHTML = '<p style="color:#c0392b;">Error de conexión.</p>'; return;
+        body.innerHTML = '<p style="color:#c0392b;">' + t('adm_error_conn') + '</p>'; return;
     }
-    if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">No se pudieron cargar los usuarios.</p>'; return; }
+    if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">' + t('adm_usr_error') + '</p>'; return; }
     var usuarios = await res.json();
 
     body.innerHTML = `
         <table class="admin-table">
-            <thead><tr><th>#</th><th>Nombre</th><th>Email</th><th>Rol</th><th></th></tr></thead>
+            <thead><tr><th>#</th><th>${t('adm_usr_col_name')}</th><th>${t('adm_usr_col_email')}</th><th>${t('adm_usr_col_role')}</th><th></th></tr></thead>
             <tbody>
                 ${usuarios.map(u => `
                     <tr>
@@ -689,24 +713,24 @@ async function loadAdminUsuarios() {
                         <td style="color:var(--cream);">${u.nombre || '—'}</td>
                         <td style="color:var(--text-muted-custom);">${u.email}</td>
                         <td><span class="admin-badge ${u.rol === 'ROLE_ADMIN' ? 'admin-badge--admin' : ''}">${u.rol === 'ROLE_ADMIN' ? 'ADMIN' : 'CLIENTE'}</span></td>
-                        <td><button class="admin-btn admin-btn--danger" onclick="adminEliminarUsuario(${u.id})">Eliminar</button></td>
+                        <td><button class="admin-btn admin-btn--danger" onclick="adminEliminarUsuario(${u.id})">${t('adm_usr_delete')}</button></td>
                     </tr>`).join('')}
             </tbody>
         </table>`;
 }
 
 window.adminEliminarUsuario = async (id) => {
-    if (!confirm('¿Eliminar este usuario? Se cancelarán todas sus reservas.')) return;
+    if (!confirm(t('adm_usr_del_confirm'))) return;
     try {
         var res = await fetch('/api/admin/usuarios/' + id, { method: 'DELETE' });
         if (res.ok || res.status === 204) {
             loadAdminUsuarios();
         } else if (res.status === 400) {
             var data = await res.text();
-            alert(data || 'No se puede eliminar este usuario.');
+            alert(data || t('adm_usr_del_active'));
         } else {
-            alert('No se pudo eliminar el usuario.');
+            alert(t('adm_usr_del_error'));
         }
-    } catch (_) { alert('Error de conexión.'); }
+    } catch (_) { alert(t('adm_error_conn')); }
 };
 

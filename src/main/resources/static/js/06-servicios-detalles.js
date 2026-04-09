@@ -27,18 +27,20 @@ async function fetchRoomServiceItems() {
 // Genera HTML de la carta del Room Service para el modal de reserva
 function buildCartaHtml(items) {
     var categorias = ['DESAYUNO', 'ALMUERZO', 'CENA', 'SNACKS', 'BEBIDAS'];
-    var catLabels  = { DESAYUNO: 'Desayuno', ALMUERZO: 'Almuerzo', CENA: 'Cena', SNACKS: 'Snacks', BEBIDAS: 'Bebidas' };
+    var catLabels  = { DESAYUNO: t('cat_DESAYUNO'), ALMUERZO: t('cat_ALMUERZO'), CENA: t('cat_CENA'), SNACKS: t('cat_SNACKS'), BEBIDAS: t('cat_BEBIDAS') };
     var disponibles = items.filter(i => i.disponible);
-    if (disponibles.length === 0) return '<p style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px;">No hay ítems disponibles en la carta.</p>';
+    if (disponibles.length === 0) return '<p style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px;">' + t('grs_no_items') + '</p>';
 
     return categorias.map(cat => {
         var catItems = disponibles.filter(i => i.categoria === cat);
         if (catItems.length === 0) return '';
         return `
             <p style="font-size:0.65rem; letter-spacing:2px; color:var(--text-muted-custom); margin:14px 0 8px; text-transform:uppercase;">${catLabels[cat]}</p>
-            ${catItems.map(item => `
+            ${catItems.map(item => {
+                var itemNombre = (typeof LANG !== 'undefined' && LANG === 'en' && typeof RS_ITEMS_EN !== 'undefined' && RS_ITEMS_EN[item.id]) ? RS_ITEMS_EN[item.id] : item.nombre;
+                return `
                 <div class="rs-item-row" style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-                    <span style="flex:1; font-size:0.83rem; color:var(--cream);">${item.nombre}</span>
+                    <span style="flex:1; font-size:0.83rem; color:var(--cream);">${itemNombre}</span>
                     <span style="color:var(--gold); font-size:0.83rem; flex-shrink:0;">${parseFloat(item.precio).toFixed(2)} €</span>
                     <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
                         <button type="button" onclick="rsAjustarCantidad(${item.id}, -1)"
@@ -47,7 +49,8 @@ function buildCartaHtml(items) {
                         <button type="button" onclick="rsAjustarCantidad(${item.id}, 1)"
                             style="background:rgba(255,255,255,0.07); border:1px solid rgba(185,149,77,0.3); color:var(--cream); width:24px; height:24px; border-radius:4px; cursor:pointer; font-size:1rem; line-height:1; padding:0;">+</button>
                     </div>
-                </div>`).join('')}`;
+                </div>`;
+            }).join('')}`;
     }).join('');
 }
 
@@ -98,7 +101,7 @@ async function loadServicios() {
     var servicios = await fetchServicios();
 
     if (servicios.length === 0) {
-        grid.innerHTML = '<p style="color:var(--text-muted-custom); text-align:center; letter-spacing:1px; grid-column:1/-1;">No hay servicios disponibles actualmente.</p>';
+        grid.innerHTML = '<p style="color:var(--text-muted-custom); text-align:center; letter-spacing:1px; grid-column:1/-1;">' + t('srv_no_services') + '</p>';
         AOS.refresh();
         return;
     }
@@ -107,14 +110,16 @@ async function loadServicios() {
         var data  = SERVICIO_DATA[s.id];
         var bgImg = data && data.images && data.images[0] ? data.images[0] : '';
         var bgStyle = bgImg ? `style="background-image:url('${bgImg}')"` : '';
+        var nombreMostrar = (typeof LANG !== 'undefined' && LANG === 'en' && typeof SERVICIO_NOMBRES_EN !== 'undefined' && SERVICIO_NOMBRES_EN[s.id])
+            ? SERVICIO_NOMBRES_EN[s.id] : s.nombre;
         return `
         <div class="col-md-4 col-sm-6" data-aos="fade-up" data-aos-delay="${i * 80}">
             <div class="servicio-card servicio-card--clickable servicio-card--img" onclick="openServicioDetail(${s.id})" ${bgStyle}>
                 <div class="servicio-card-overlay"></div>
                 <div class="servicio-card-content">
-                    <h4 class="servicio-name serif">${s.nombre}</h4>
-                    <p class="servicio-price">${s.nombre.toLowerCase().includes('room service') ? 'A la carta' : parseFloat(s.precio).toFixed(2) + ' €'}</p>
-                    <p class="servicio-card-hint">Ver detalle →</p>
+                    <h4 class="servicio-name serif">${nombreMostrar}</h4>
+                    <p class="servicio-price">${s.nombre.toLowerCase().includes('room service') ? t('srv_a_la_carte') : parseFloat(s.precio).toFixed(2) + ' €'}</p>
+                    <p class="servicio-card-hint">${t('srv_hint')}</p>
                 </div>
             </div>
         </div>`;

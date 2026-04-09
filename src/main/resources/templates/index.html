@@ -40,20 +40,25 @@
         <div class="container d-flex align-items-center justify-content-between">
             <a href="#" class="navbar-brand-custom" onclick="goHome()">HOTEL DAW</a>
             <div class="d-flex align-items-center gap-1" id="nav-links">
-                <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('habitaciones')">Habitaciones</a>
-                <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('servicios')">Servicios</a>
-                <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('contacto')">Contacto</a>
+                <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('habitaciones')"><span data-i18n="nav_rooms">Habitaciones</span></a>
+                <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('servicios')"><span data-i18n="nav_services">Servicios</span></a>
+                <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('contacto')"><span data-i18n="nav_contact">Contacto</span></a>
                 <span id="nav-mis-reservas">
-                    <a href="/mis-reservas" class="nav-link-custom" onclick="event.preventDefault(); showMisReservas()">Mis Reservas</a>
+                    <a href="/mis-reservas" class="nav-link-custom" onclick="event.preventDefault(); showMisReservas()"><span data-i18n="nav_my_bookings">Mis Reservas</span></a>
                 </span>
                 <span id="nav-admin">
-                    <a href="/admin" class="nav-link-custom" onclick="event.preventDefault(); showAdmin()">Admin</a>
+                    <a href="/admin" class="nav-link-custom" onclick="event.preventDefault(); showAdmin()"><span data-i18n="nav_admin">Admin</span></a>
                 </span>
             </div>
             <div class="d-flex align-items-center gap-3">
                 <span id="nav-user"></span>
-                <button id="btn-reservar-nav" class="btn-reservar" onclick="scrollToSection('habitaciones')">Reservar</button>
+                <button id="btn-reservar-nav" class="btn-reservar" onclick="scrollToSection('habitaciones')" data-i18n="nav_book">Reservar</button>
                 <button id="btn-auth" class="btn-reservar" onclick="openAuthModal()">Iniciar Sesión</button>
+                <div class="lang-switcher">
+                    <button class="lang-btn lang-btn--active" data-lang="es" onclick="setLang('es')">ES</button>
+                    <span class="lang-sep">|</span>
+                    <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+                </div>
             </div>
         </div>
     </nav>
@@ -61,21 +66,21 @@
     <!-- Fondo principal -->
     <section id="hero">
         <div class="container">
-            <p class="hero-subtitle">Bienvenido a</p>
+            <p class="hero-subtitle" data-i18n="hero_welcome">Bienvenido a</p>
             <h1 class="hero-title">Hotel DAW</h1>
-            <p class="hero-subtitle hero-tagline">Lujo · Distinción · Confort</p>
+            <p class="hero-subtitle hero-tagline" data-i18n="hero_tagline">Lujo · Distinción · Confort</p>
             <div class="search-glass mt-4">
                 <form id="form-search" class="row g-3 align-items-end">
                     <div class="col-md-5">
-                        <label>Fecha de Entrada</label>
+                        <label data-i18n="hero_checkin">Fecha de Entrada</label>
                         <input type="date" class="form-control" id="in-date" placeholder="DD/MM/AAAA" required>
                     </div>
                     <div class="col-md-5">
-                        <label>Fecha de Salida</label>
+                        <label data-i18n="hero_checkout">Fecha de Salida</label>
                         <input type="date" class="form-control" id="out-date" placeholder="DD/MM/AAAA" required>
                     </div>
                     <div class="col-md-2">
-                        <button type="submit" class="btn-reservar btn-reservar--search w-100">Buscar</button>
+                        <button type="submit" class="btn-reservar btn-reservar--search w-100" data-i18n="hero_search">Buscar</button>
                     </div>
                 </form>
             </div>
@@ -86,11 +91,11 @@
     <section id="habitaciones">
         <div class="container">
             <div class="text-center mb-5" data-aos="fade-up">
-                <p class="section-label">Nuestras Suites</p>
-                <h2 class="section-title">Habitaciones</h2>
+                <p class="section-label" data-i18n="rooms_label">Nuestras Suites</p>
+                <h2 class="section-title" data-i18n="rooms_title">Habitaciones</h2>
                 <div class="gold-line mx-auto"></div>
             </div>
-            <div id="no-rooms-msg">No hay habitaciones disponibles para esas fechas.</div>
+            <div id="no-rooms-msg" data-i18n="room_no_rooms">No hay habitaciones disponibles para esas fechas.</div>
             <div class="swiper roomSwiper" data-aos="fade-up" data-aos-delay="100">
                 <div class="swiper-wrapper" id="rooms-wrapper"></div>
                 <div class="swiper-pagination"></div>
@@ -104,8 +109,8 @@
     <section id="servicios">
         <div class="container">
             <div class="text-center mb-5" data-aos="fade-up">
-                <p class="section-label">Lo que ofrecemos</p>
-                <h2 class="section-title">Servicios</h2>
+                <p class="section-label" data-i18n="services_label">Lo que ofrecemos</p>
+                <h2 class="section-title" data-i18n="services_title">Servicios</h2>
                 <div class="gold-line mx-auto"></div>
             </div>
             <div class="row g-4" id="servicios-grid">
@@ -118,8 +123,8 @@
     <section id="contacto">
         <div class="container">
             <div class="text-center mb-5" data-aos="fade-up">
-                <p class="section-label">Estamos aquí</p>
-                <h2 class="section-title">Info. Contacto</h2>
+                <p class="section-label" data-i18n="contact_label">Estamos aquí</p>
+                <h2 class="section-title" data-i18n="contact_title">Info. Contacto</h2>
                 <div class="gold-line mx-auto"></div>
             </div>
 
@@ -127,19 +132,19 @@
 
                 <!-- Mapa -->
                 <a class="contacto-map-col"
-                   href="https://www.google.com/maps/d/viewer?mid=1jIYuxP58n_AiaKZXeQiYcoqo25feC5c"
+                   href="https://maps.app.goo.gl/E87jT3Gvfm4M9EVf7"
                    target="_blank"
                    rel="noopener noreferrer"
                    title="Ver en Google Maps">
                     <iframe
                         class="contacto-map-iframe"
-                        src="https://www.google.com/maps/d/embed?mid=1jIYuxP58n_AiaKZXeQiYcoqo25feC5c"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4106.155563218017!2d-0.24134068636495795!3d39.16841688846856!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd61c8a2e5853133%3A0xc909e48140a17d8b!2sPlaya%20de%20San%20Antonio!5e0!3m2!1ses!2ses!4v1775721471261!5m2!1ses!2ses"
                         allowfullscreen
                         loading="lazy"
                         title="Ubicación Hotel DAW — Playa de Cullera, Valencia">
                     </iframe>
                     <div class="contacto-map-overlay">
-                        <span class="contacto-map-cta">Ver en Google Maps →</span>
+                        <span class="contacto-map-cta" data-i18n="contact_map_cta">Ver en Google Maps →</span>
                     </div>
                 </a>
 
@@ -147,22 +152,22 @@
                 <div class="contacto-info-col">
                     <div class="contacto-grid">
                         <div class="contact-info-item">
-                            <p class="contact-label">Localización</p>
-                            <p class="contact-value">Playa de Cullera<br>46400 Cullera, Valencia</p>
+                            <p class="contact-label" data-i18n="contact_location">Localización</p>
+                            <p class="contact-value">Playa de San Antonio<br>Av.Alacant,  12,  46400 Cullera, Valencia</p>
                         </div>
                         <div class="contact-info-item">
-                            <p class="contact-label">Contáctanos</p>
+                            <p class="contact-label" data-i18n="contact_contact">Contáctanos</p>
                             <p class="contact-value">
                                 +34 900 123 456<br>
                                 <a href="mailto:info@hoteldaw.es" class="contacto-email-link">info@hoteldaw.es</a>
                             </p>
                         </div>
                         <div class="contact-info-item">
-                            <p class="contact-label">Coordenadas</p>
+                            <p class="contact-label" data-i18n="contact_coords">Coordenadas</p>
                             <p class="contact-value contact-value--coords">Lat: 39.1620 | Long: -0.2470</p>
                         </div>
                         <div class="contact-info-item">
-                            <p class="contact-label">Síguenos</p>
+                            <p class="contact-label" data-i18n="contact_follow">Síguenos</p>
                             <div class="contacto-social">
                                 <a href="#" class="contacto-social-btn" aria-label="Facebook">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
@@ -186,7 +191,7 @@
     <footer>
         <div class="container text-center">
             <p class="footer-brand serif mb-2">Hotel DAW</p>
-            <p class="footer-text">© 2026 Hotel DAW · Todos los derechos reservados</p>
+            <p class="footer-text" data-i18n="footer_rights">© 2026 Hotel DAW · Todos los derechos reservados</p>
         </div>
     </footer>
 
@@ -202,10 +207,10 @@
                 <div class="modal-body">
                     <ul class="nav nav-pills mb-4 justify-content-center border-bottom border-secondary pb-3">
                         <li class="nav-item">
-                            <button class="nav-link active" id="tab-login" onclick="showAuthTab('login')">Iniciar Sesión</button>
+                            <button class="nav-link active" id="tab-login" onclick="showAuthTab('login')" data-i18n="auth_signin_tab">Iniciar Sesión</button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link" id="tab-register" onclick="showAuthTab('register')">Registrarse</button>
+                            <button class="nav-link" id="tab-register" onclick="showAuthTab('register')" data-i18n="auth_register_tab">Registrarse</button>
                         </li>
                     </ul>
 
@@ -213,39 +218,39 @@
 
                     <form id="form-login" onsubmit="handleLogin(event)">
                         <div class="mb-3">
-                            <label class="form-label">Email</label>
+                            <label class="form-label" data-i18n="auth_email">Email</label>
                             <input type="email" class="form-control" id="login-email" required>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label">Contraseña</label>
+                            <label class="form-label" data-i18n="auth_password">Contraseña</label>
                             <input type="password" class="form-control" id="login-password" required>
                         </div>
-                        <button type="submit" class="btn-gold">Entrar</button>
-                        <div class="auth-divider"><span>o</span></div>
+                        <button type="submit" class="btn-gold" data-i18n="auth_enter">Entrar</button>
+                        <div class="auth-divider"><span data-i18n="auth_or">o</span></div>
                         <a href="/oauth2/authorization/google" class="btn-google">
                             <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google">
-                            Continuar con Google
+                            <span data-i18n="auth_google">Continuar con Google</span>
                         </a>
                     </form>
 
                     <form id="form-register" class="d-none" onsubmit="handleRegister(event)">
                         <div class="mb-3">
-                            <label class="form-label">Nombre</label>
+                            <label class="form-label" data-i18n="auth_name">Nombre</label>
                             <input type="text" class="form-control" id="reg-nombre" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Email</label>
+                            <label class="form-label" data-i18n="auth_email">Email</label>
                             <input type="email" class="form-control" id="reg-email" required>
                         </div>
                         <div class="mb-4">
-                            <label class="form-label">Contraseña</label>
+                            <label class="form-label" data-i18n="auth_password">Contraseña</label>
                             <input type="password" class="form-control" id="reg-password" required minlength="6">
                         </div>
-                        <button type="submit" class="btn-gold">Crear Cuenta</button>
-                        <div class="auth-divider"><span>o</span></div>
+                        <button type="submit" class="btn-gold" data-i18n="auth_create">Crear Cuenta</button>
+                        <div class="auth-divider"><span data-i18n="auth_or">o</span></div>
                         <a href="/oauth2/authorization/google" class="btn-google">
                             <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google">
-                            Continuar con Google
+                            <span data-i18n="auth_google">Continuar con Google</span>
                         </a>
                     </form>
                 </div>
@@ -286,6 +291,7 @@
 
     <!-- JS -->
     <!-- Scripts  en Orden -->
+    <script th:src="@{/js/14-i18n.js}"></script>
     <script th:src="@{/js/01-globals.js}"></script>
     <script th:src="@{/js/02-flatpickr-config.js}"></script>
     <script th:src="@{/js/03-navegacion.js}"></script>

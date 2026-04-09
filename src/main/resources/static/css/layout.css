@@ -70,3 +70,30 @@ footer {
     letter-spacing: 1px;
 }
 
+/* ── LANGUAGE SWITCHER ── */
+.lang-switcher {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+}
+.lang-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    cursor: pointer;
+    padding: 4px 2px;
+    transition: color 0.3s;
+    text-transform: uppercase;
+}
+.lang-btn:hover { color: var(--cream); }
+.lang-btn--active { color: var(--gold) !important; }
+.lang-sep {
+    color: rgba(255,255,255,0.2);
+    font-size: 0.6rem;
+    user-select: none;
+}
+

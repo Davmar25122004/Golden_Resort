@@ -1,4 +1,4 @@
-﻿/* ── CONTACTO ── */
+/* ── CONTACTO ── */
 #contacto {
     background: linear-gradient(rgba(0,0,0,0.70), rgba(0,0,0,0.75)),
                 url('/images/xavier-coiffic-lQ4mfS5Le6M-unsplash.jpg') center/cover no-repeat;
@@ -13,7 +13,8 @@
 
 .contacto-map-col {
     flex: 0 0 48%;
-    border: 1px solid rgba(201,168,76,0.35);
+    border: 1px solid rgba(201,168,76,0.8);
+    box-shadow: 0 0 25px rgba(201,168,76,0.15);
     overflow: hidden;
     border-radius: 2px;
     position: relative;
@@ -22,27 +23,25 @@
     display: block;
 }
 
-.contacto-map-col::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 52px;
-    background: #263238;
-    pointer-events: none;
-    z-index: 2;
-}
-
 .contacto-map-iframe {
     width: 100%;
-    height: calc(100% + 52px);
+    height: 100%;
     min-height: 432px;
-    margin-top: -52px;
     border: none;
     display: block;
-    filter: grayscale(25%) contrast(1.05);
+    filter: none;
     pointer-events: none;
+    transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.contacto-map-col:hover .contacto-map-iframe {
+    filter: grayscale(0%) contrast(1.1);
+    transform: scale(1.05);
+}
+
+.contacto-map-col:hover {
+    border-color: var(--gold);
+    box-shadow: 0 0 35px rgba(201,168,76,0.3);
 }
 
 .contacto-map-overlay {
@@ -52,9 +51,9 @@
     align-items: flex-end;
     justify-content: center;
     padding-bottom: 20px;
-    background: linear-gradient(transparent 55%, rgba(0,0,0,0.55) 100%);
-    opacity: 0;
-    transition: opacity 0.25s;
+    background: linear-gradient(transparent 60%, rgba(0,0,0,0.45) 100%);
+    opacity: 1;
+    transition: opacity 0.25s, background 0.25s;
 }
 
 .contacto-map-col:hover .contacto-map-overlay { opacity: 1; }

@@ -7,9 +7,10 @@ window.openServicioDetail = async function(id) {
 
     if (!servicio) return;
 
-    var nombre = servicio.nombre;
-    var precioStr = nombre.toLowerCase().includes('room service') ? 'A la carta' : `${parseFloat(servicio.precio).toFixed(2)} €`;
-    var precioLabelHtml = nombre.toLowerCase().includes('room service') ? '' : `<span class="servicio-detail-precio-label">/ servicio</span>`;
+    var nombre = (typeof LANG !== 'undefined' && LANG === 'en' && typeof SERVICIO_NOMBRES_EN !== 'undefined' && SERVICIO_NOMBRES_EN[id])
+        ? SERVICIO_NOMBRES_EN[id] : servicio.nombre;
+    var precioStr = nombre.toLowerCase().includes('room service') ? t('srv_a_la_carte') : `${parseFloat(servicio.precio).toFixed(2)} €`;
+    var precioLabelHtml = nombre.toLowerCase().includes('room service') ? '' : `<span class="servicio-detail-precio-label">${t('srv_per_service')}</span>`;
     var slug   = slugify(nombre);
 
     if (!_suppressHistoryPush) {
@@ -25,19 +26,19 @@ window.openServicioDetail = async function(id) {
         slidesHtml = `<div class="swiper-slide servicio-detail-slide"><img src="/images/servicio-fallback.jpg" alt="${nombre}"></div>`;
     }
 
-    var descripcion     = data ? data.descripcion    : '';
-    var horario         = data ? data.horario        : '–';
-    var capacidad       = data ? data.capacidad      : '–';
-    var caracteristicas = data && data.caracteristicas
-        ? data.caracteristicas.map(c => `<li>✦ ${c}</li>`).join('')
-        : '';
+    var isEn = (typeof LANG !== 'undefined' && LANG === 'en');
+    var descripcion     = data ? (isEn && data.descripcion_en  ? data.descripcion_en  : data.descripcion)  : '';
+    var horario         = data ? (isEn && data.horario_en ? data.horario_en : data.horario) : '–';
+    var capacidad       = data ? (isEn && data.capacidad_en    ? data.capacidad_en    : data.capacidad)    : '–';
+    var caracList       = data ? (isEn && data.caracteristicas_en ? data.caracteristicas_en : data.caracteristicas) : null;
+    var caracteristicas = caracList ? caracList.map(c => `<li>✦ ${c}</li>`).join('') : '';
         
     var pdfButtonHtml = '';
     if (nombre.toLowerCase().includes('room service')) {
         pdfButtonHtml = `
             <div style="margin: 30px 0; text-align: center;">
-                <a href="/docs/HotelDAW_RoomService.pdf" target="_blank" class="admin-btn" style="display:inline-block; padding: 14px 28px; text-decoration: none; font-size: 0.9rem; letter-spacing: 2px; border: 1px solid var(--gold);">
-                    📖 VER CARTA COMPLETA (PDF)
+                <a href="/docs/room-service-menu.html" target="_blank" class="admin-btn" style="display:inline-block; padding: 14px 28px; text-decoration: none; font-size: 0.9rem; letter-spacing: 2px; border: 1px solid var(--gold);">
+                    ${t('srv_pdf_btn')}
                 </a>
             </div>
         `;
@@ -46,11 +47,11 @@ window.openServicioDetail = async function(id) {
     showDynamic(`
         <div class="servicio-detail-page">
 
-            <button class="btn-volver" onclick="backToServicios()">← Volver a Servicios</button>
+            <button class="btn-volver" onclick="backToServicios()">${t('srv_back')}</button>
 
             <div class="servicio-detail-header">
                 <div>
-                    <p class="section-label mb-0">Hotel DAW · Nuestros Servicios</p>
+                    <p class="section-label mb-0">${t('srv_label')}</p>
                     <h2 class="servicio-detail-titulo serif">${nombre}</h2>
                 </div>
                 <div class="servicio-detail-precio-badge">
@@ -76,18 +77,18 @@ window.openServicioDetail = async function(id) {
 
                 <div class="servicio-info-cards">
                     <div class="servicio-info-card">
-                        <p class="servicio-info-card-label">HORARIO</p>
+                        <p class="servicio-info-card-label">${t('srv_schedule')}</p>
                         <p class="servicio-info-card-value">${horario}</p>
                     </div>
                     <div class="servicio-info-card">
-                        <p class="servicio-info-card-label">CONDICIONES</p>
+                        <p class="servicio-info-card-label">${t('srv_conditions')}</p>
                         <p class="servicio-info-card-value">${capacidad}</p>
                     </div>
                 </div>
 
                 ${caracteristicas ? `
                 <div class="servicio-caracteristicas-section">
-                    <p class="servicio-section-label">INCLUYE</p>
+                    <p class="servicio-section-label">${t('srv_includes')}</p>
                     <ul class="servicio-caracteristicas">${caracteristicas}</ul>
                 </div>` : ''}
 

@@ -4,7 +4,7 @@ async function loadRooms() {
     var wrapper = document.getElementById('rooms-wrapper');
     if (!wrapper) return;
 
-    var tipoLabels = { NORMAL: 'Habitación Normal', DOBLE: 'Habitación Doble', SUITE: 'Suite', LUJO: 'Suite de Lujo' };
+    var tipoLabels = { NORMAL: t('tipo_normal'), DOBLE: t('tipo_doble'), SUITE: t('tipo_suite'), LUJO: t('tipo_lujo') };
 
     // Fetch datos reales de la API
     var habitacionesRaw = [];
@@ -52,16 +52,16 @@ async function loadRooms() {
 
         // Badge de disponibilidad
         var badgeStyle = 'background:rgba(185,149,77,0.15); color:var(--gold);';
-        var badgeText  = '● Disponible';
+        var badgeText  = t('room_available');
         var disponible = true;
 
         if (disponibilidadReal !== null) {
             var libres = disponibilidadReal[h.tipo] !== undefined ? disponibilidadReal[h.tipo] : 0;
             if (libres > 0) {
-                badgeText = '● Quedan ' + libres;
+                badgeText = t('room_left') + libres;
             } else {
                 badgeStyle = 'background:rgba(139,26,26,0.2); color:#c0392b;';
-                badgeText  = '● Sin disponibilidad';
+                badgeText  = t('room_no_avail');
                 disponible = false;
             }
         }
@@ -74,20 +74,20 @@ async function loadRooms() {
             <div class="room-card">
                 <div class="room-card-img" onclick="openRoomLightbox('${label}', '${h.tipo}', ${h.precio})">
                     <img src="${thumb}" alt="${label}" loading="lazy">
-                    <div class="room-img-overlay"><span class="room-img-overlay-text">Ver fotos</span></div>
+                    <div class="room-img-overlay"><span class="room-img-overlay-text">${t('room_see_photos')}</span></div>
                 </div>
                 <div class="room-card-body">
                     <p class="room-type-badge">${h.tipo}</p>
                     <h3 class="room-name serif">${label}</h3>
-                    <p class="room-price">${h.precio}€ <small>/ noche</small></p>
+                    <p class="room-price">${h.precio}€ <small>${t('room_per_night')}</small></p>
                     <div style="margin-bottom:12px;">
                         <span style="font-size:0.7rem; letter-spacing:1px; padding:4px 12px; border-radius:20px; ${badgeStyle}">
                             ${badgeText}
                         </span>
                     </div>
                     ${disponible
-                        ? `<button class="btn-room" onclick="selectRoom('${h.tipo}', ${h.precio}, '${descEscaped}')">Reservar</button>`
-                        : `<button class="btn-room" disabled style="opacity:0.4; cursor:not-allowed;">Sin disponibilidad</button>`
+                        ? `<button class="btn-room" onclick="selectRoom('${h.tipo}', ${h.precio}, '${descEscaped}')">${t('room_book')}</button>`
+                        : `<button class="btn-room" disabled style="opacity:0.4; cursor:not-allowed;">${t('room_no_avail')}</button>`
                     }
                 </div>
             </div>

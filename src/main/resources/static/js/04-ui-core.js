@@ -31,7 +31,7 @@ function updateNav() {
     var btnReservarNav = document.getElementById('btn-reservar-nav');
 
     if (state.token && state.user) {
-        btnAuth.textContent = 'Cerrar Sesión';
+        btnAuth.textContent = t('nav_signout');
         btnAuth.onclick     = logout;
         navUser.style.display        = 'inline';
         navUser.textContent          = state.user.email.split('@')[0];
@@ -39,7 +39,7 @@ function updateNav() {
         navAdmin.style.display       = state.user.rol === 'ADMIN' ? 'inline' : 'none';
         if (btnReservarNav) btnReservarNav.style.display = state.user.rol === 'ADMIN' ? 'none' : 'inline';
     } else {
-        btnAuth.textContent = 'Iniciar Sesión';
+        btnAuth.textContent = t('nav_signin');
         btnAuth.onclick     = openAuthModal;
         navUser.style.display        = 'none';
         navMisReservas.style.display = 'none';

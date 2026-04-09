@@ -8,9 +8,14 @@ window.selectRoom = async (tipo, precio, descripcion) => {
         history.pushState({ view: 'habitacion', tipo }, '', '/habitacion/' + tipo.toLowerCase());
     }
 
-    var tipoLabels = { NORMAL: 'Habitación Normal', DOBLE: 'Habitación Doble', SUITE: 'Suite', LUJO: 'Suite de Lujo' };
+    var tipoLabels = { NORMAL: t('tipo_normal'), DOBLE: t('tipo_doble'), SUITE: t('tipo_suite'), LUJO: t('tipo_lujo') };
     var label = tipoLabels[tipo] || tipo;
     var imgs  = TIPO_IMAGES[tipo] || [];
+
+    // Usar descripción en inglés si está disponible y el idioma es inglés
+    if (LANG === 'en' && typeof TIPO_DESCRIPTIONS_EN !== 'undefined' && TIPO_DESCRIPTIONS_EN[tipo]) {
+        descripcion = TIPO_DESCRIPTIONS_EN[tipo];
+    }
 
     var servicios       = await fetchServicios();
     var rsItems         = await fetchRoomServiceItems();
@@ -25,18 +30,18 @@ window.selectRoom = async (tipo, precio, descripcion) => {
 
     var fechasHtml = state.searchDates
         ? `<div style="margin-bottom:16px; color:var(--text-muted-custom); font-size:0.85rem; letter-spacing:1px;">
-               Fechas seleccionadas: <strong style="color:var(--cream);">${fechaEntrada}</strong> → <strong style="color:var(--cream);">${fechaSalida}</strong>
+               ${t('detail_selected_dates')} <strong style="color:var(--cream);">${fechaEntrada}</strong> → <strong style="color:var(--cream);">${fechaSalida}</strong>
            </div>`
         : `<div style="margin-bottom:16px;">
                <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:8px;">
                    <div>
-                       <label style="display:block; font-size:0.7rem; letter-spacing:1px; color:var(--text-muted-custom); margin-bottom:4px;">LLEGADA</label>
+                       <label style="display:block; font-size:0.7rem; letter-spacing:1px; color:var(--text-muted-custom); margin-bottom:4px;">${t('detail_arrival')}</label>
                        <input id="detail-in-date" type="text" placeholder="dd/mm/aaaa"
                            style="background:rgba(255,255,255,0.07); border:1px solid rgba(185,149,77,0.3); color:var(--cream);
                                   padding:8px 14px; border-radius:6px; font-size:0.85rem; cursor:pointer; width:150px;">
                    </div>
                    <div>
-                       <label style="display:block; font-size:0.7rem; letter-spacing:1px; color:var(--text-muted-custom); margin-bottom:4px;">SALIDA</label>
+                       <label style="display:block; font-size:0.7rem; letter-spacing:1px; color:var(--text-muted-custom); margin-bottom:4px;">${t('detail_departure')}</label>
                        <input id="detail-out-date" type="text" placeholder="dd/mm/aaaa"
                            style="background:rgba(255,255,255,0.07); border:1px solid rgba(185,149,77,0.3); color:var(--cream);
                                   padding:8px 14px; border-radius:6px; font-size:0.85rem; cursor:pointer; width:150px;">
@@ -50,7 +55,7 @@ window.selectRoom = async (tipo, precio, descripcion) => {
     var cartaHtml = buildCartaHtml(rsItems);
 
     var serviciosHtml = servicios.length === 0
-        ? '<p style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px;">No hay servicios adicionales disponibles.</p>'
+        ? '<p style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px;">' + t('detail_no_services') + '</p>'
         : servicios.map(s => {
             if (RS_SERVICIO_ID !== null && s.id === RS_SERVICIO_ID) {
                 // Room Service: checkbox + carta desplegable
@@ -61,7 +66,7 @@ window.selectRoom = async (tipo, precio, descripcion) => {
                             data-id="${s.id}" data-precio="0"
                             onchange="toggleCartaRoomService(this.checked)"
                             style="accent-color:var(--gold); width:16px; height:16px; cursor:pointer;">
-                        <span>${s.nombre}</span>
+                        <span>${(typeof LANG !== 'undefined' && LANG === 'en' && typeof SERVICIO_NOMBRES_EN !== 'undefined' && SERVICIO_NOMBRES_EN[s.id]) ? SERVICIO_NOMBRES_EN[s.id] : s.nombre}</span>
                         <span style="color:var(--gold); margin-left:auto; flex-shrink:0;" id="rs-subtotal-label"></span>
                     </label>
                     <div id="carta-room-service" style="display:none; margin-top:10px; padding:12px 14px; background:rgba(255,255,255,0.04); border-left:2px solid rgba(185,149,77,0.4); border-radius:0 8px 8px 0;">
@@ -75,14 +80,14 @@ window.selectRoom = async (tipo, precio, descripcion) => {
                 <input type="checkbox" class="servicio-check"
                     data-id="${s.id}" data-precio="${s.precio}"
                     style="accent-color:var(--gold); width:16px; height:16px; cursor:pointer;">
-                <span>${s.nombre}</span>
+                <span>${(typeof LANG !== 'undefined' && LANG === 'en' && typeof SERVICIO_NOMBRES_EN !== 'undefined' && SERVICIO_NOMBRES_EN[s.id]) ? SERVICIO_NOMBRES_EN[s.id] : s.nombre}</span>
                 <span style="color:var(--gold); margin-left:auto; flex-shrink:0;">${parseFloat(s.precio).toFixed(2)} €</span>
             </label>`;
         }).join('');
 
     showDynamic(`
         <div class="detail-view-container" data-aos="fade-up">
-            <p class="section-label mb-1">Hotel DAW · Nuestras Suites</p>
+            <p class="section-label mb-1">${t('detail_label')}</p>
             <h2 class="serif mb-2" style="color:var(--cream); font-size:2.2rem;">${label}</h2>
             <div class="gold-line mb-5"></div>
 
@@ -93,13 +98,13 @@ window.selectRoom = async (tipo, precio, descripcion) => {
                 <div class="swiper-button-prev"></div>
             </div>
 
-            <p class="detail-price">${precio}€ <small style="font-size:1rem; color:var(--text-muted-custom);">/ noche</small></p>
+            <p class="detail-price">${precio}€ <small style="font-size:1rem; color:var(--text-muted-custom);">${t('room_per_night')}</small></p>
             <p class="detail-description">${descripcion}</p>
 
             ${fechasHtml}
 
             <div style="margin-bottom:20px;">
-                <p style="font-size:0.75rem; letter-spacing:2px; color:var(--text-muted-custom); margin-bottom:12px;">SERVICIOS ADICIONALES</p>
+                <p style="font-size:0.75rem; letter-spacing:2px; color:var(--text-muted-custom); margin-bottom:12px;">${t('detail_add_services')}</p>
                 ${serviciosHtml}
                 <p id="reserva-total-estimado" style="color:var(--gold); font-size:0.9rem; font-weight:600; margin-top:14px; letter-spacing:1px;"></p>
             </div>
@@ -108,7 +113,7 @@ window.selectRoom = async (tipo, precio, descripcion) => {
 
             <button class="btn-room" id="btn-confirmar-reserva"
                 onclick="confirmarReserva('${tipo}')">
-                Confirmar Reserva
+                ${t('detail_confirm')}
             </button>
         </div>
     `);
@@ -152,13 +157,13 @@ window.selectRoom = async (tipo, precio, descripcion) => {
         var subtotalLinea = document.getElementById('rs-subtotal-linea');
         if (subtotalRS > 0) {
             if (subtotalLabel) subtotalLabel.textContent = subtotalRS.toFixed(2) + ' €';
-            if (subtotalLinea) subtotalLinea.textContent = 'Subtotal room service: ' + subtotalRS.toFixed(2) + ' €';
+            if (subtotalLinea) subtotalLinea.textContent = t('detail_rs_subtotal') + subtotalRS.toFixed(2) + ' €';
         } else {
             if (subtotalLabel) subtotalLabel.textContent = '';
             if (subtotalLinea) subtotalLinea.textContent = '';
         }
 
-        totalEl.textContent = `Total estimado: ${(parseFloat(precio) * noches + totalServicios + subtotalRS).toFixed(2)} €`;
+        totalEl.textContent = t('detail_total_estimate') + (parseFloat(precio) * noches + totalServicios + subtotalRS).toFixed(2) + ' €';
     }
 
     // Asignar como función global para que rsAjustarCantidad la pueda llamar
@@ -190,12 +195,12 @@ window.confirmarReserva = async (tipo) => {
     if (!fechaEntrada || !fechaSalida) {
         msg.style.display  = 'block';
         msg.style.color    = '#c0392b';
-        msg.textContent    = 'Por favor selecciona las fechas de entrada y salida.';
+        msg.textContent    = t('detail_select_dates');
         return;
     }
 
     btn.disabled    = true;
-    btn.textContent = 'Reservando...';
+    btn.textContent = t('detail_booking');
     msg.style.display = 'none';
 
     try {
@@ -230,31 +235,31 @@ window.confirmarReserva = async (tipo) => {
 
             msg.style.display = 'block';
             msg.style.color   = 'var(--gold)';
-            msg.textContent   = '¡Reserva confirmada! Tu habitación ha sido reservada.';
-            btn.textContent   = 'Reservado';
+            msg.textContent   = t('detail_confirmed_msg');
+            btn.textContent   = t('detail_booked');
             // Refrescar disponibilidad en la sección principal
             loadRooms();
         } else if (res.status === 409) {
             msg.style.display  = 'block';
             msg.style.color    = '#c0392b';
-            msg.textContent    = 'No hay habitaciones disponibles de ese tipo para las fechas seleccionadas.';
+            msg.textContent    = t('detail_no_rooms_dates');
             btn.disabled       = false;
-            btn.textContent    = 'Confirmar Reserva';
+            btn.textContent    = t('detail_confirm');
         } else if (res.status === 401) {
             openAuthModal();
         } else {
             msg.style.display  = 'block';
             msg.style.color    = '#c0392b';
-            msg.textContent    = 'Error al procesar la reserva. Inténtalo de nuevo.';
+            msg.textContent    = t('detail_error_reserva');
             btn.disabled       = false;
-            btn.textContent    = 'Confirmar Reserva';
+            btn.textContent    = t('detail_confirm');
         }
     } catch (_) {
         msg.style.display  = 'block';
         msg.style.color    = '#c0392b';
-        msg.textContent    = 'Error de conexión. Inténtalo de nuevo.';
+        msg.textContent    = t('detail_error_conn');
         btn.disabled       = false;
-        btn.textContent    = 'Confirmar Reserva';
+        btn.textContent    = t('detail_confirm');
     }
 };
 
