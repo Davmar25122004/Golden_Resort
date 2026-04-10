@@ -153,4 +153,62 @@ public class AdminController {
             return ResponseEntity.noContent().<Void>build();
         }).orElse(ResponseEntity.notFound().build());
     }
+
+    // POST /api/admin/habitaciones/tipo/{tipo}/imagen → subir imagen de habitación
+    @PostMapping("/habitaciones/tipo/{tipo}/imagen")
+    public ResponseEntity<?> uploadImagenHabitacion(
+            @PathVariable String tipo,
+            @RequestParam("filename") String filename,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+
+        if (file.isEmpty()) return ResponseEntity.badRequest().body("File is empty");
+        try {
+            String safeFilename = java.nio.file.Paths.get(filename).getFileName().toString();
+            if (!safeFilename.toLowerCase().endsWith(".jpg") && !safeFilename.toLowerCase().endsWith(".png")) {
+                return ResponseEntity.badRequest().body("Only JPG or PNG images are allowed");
+            }
+
+            java.nio.file.Path srcPath = java.nio.file.Paths.get("src/main/resources/static/images", safeFilename);
+            file.transferTo(srcPath);
+
+            java.nio.file.Path targetPath = java.nio.file.Paths.get("target/classes/static/images", safeFilename);
+            if (java.nio.file.Files.exists(targetPath.getParent())) {
+                java.nio.file.Files.copy(srcPath, targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            return ResponseEntity.ok(Map.of("message", "Uploaded successfully", "filepath", "/images/" + safeFilename));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
+        }
+    }
+
+    // POST /api/admin/servicios/{id}/imagen → subir imagen de servicio
+    @PostMapping("/servicios/{id}/imagen")
+    public ResponseEntity<?> uploadImagenServicio(
+            @PathVariable Long id,
+            @RequestParam("filename") String filename,
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+
+        if (file.isEmpty()) return ResponseEntity.badRequest().body("File is empty");
+        try {
+            String safeFilename = java.nio.file.Paths.get(filename).getFileName().toString();
+            if (!safeFilename.toLowerCase().endsWith(".jpg") && !safeFilename.toLowerCase().endsWith(".png")) {
+                return ResponseEntity.badRequest().body("Only JPG or PNG images are allowed");
+            }
+
+            java.nio.file.Path srcPath = java.nio.file.Paths.get("src/main/resources/static/images", safeFilename);
+            file.transferTo(srcPath);
+
+            java.nio.file.Path targetPath = java.nio.file.Paths.get("target/classes/static/images", safeFilename);
+            if (java.nio.file.Files.exists(targetPath.getParent())) {
+                java.nio.file.Files.copy(srcPath, targetPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            return ResponseEntity.ok(Map.of("message", "Uploaded successfully", "filepath", "/images/" + safeFilename));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
+        }
+    }
 }

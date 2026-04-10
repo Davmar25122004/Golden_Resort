@@ -37,4 +37,8 @@ public class Reserva {
     // Relación con ReservaServicio:
     @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL)
     private List<ReservaServicio> servicios;
+
+    // Petición especial del cliente
+    @Column(name = "peticion_especial", columnDefinition = "TEXT")
+    private String peticionEspecial;
 }

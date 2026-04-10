@@ -44,29 +44,11 @@
     box-shadow: 0 0 35px rgba(201,168,76,0.3);
 }
 
-.contacto-map-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: 20px;
-    background: linear-gradient(transparent 60%, rgba(0,0,0,0.45) 100%);
-    opacity: 1;
-    transition: opacity 0.25s, background 0.25s;
-}
+
 
 .contacto-map-col:hover .contacto-map-overlay { opacity: 1; }
 
-.contacto-map-cta {
-    font-size: 0.72rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--cream);
-    background: rgba(201,168,76,0.85);
-    padding: 8px 20px;
-    border-radius: 2px;
-}
+
 
 .contacto-info-col {
     flex: 1;

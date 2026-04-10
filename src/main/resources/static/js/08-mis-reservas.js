@@ -141,6 +141,34 @@ window.showMisReservas = async () => {
             rsSubtotalStr = `<div id="rs-info-${r.id}" style="margin-top:12px;"><p class="reserva-meta" style="font-size:0.75rem;color:var(--text-muted-custom);">${t('mr_rs_none')}</p></div>`;
         }
 
+        var peticionHtml = '';
+        if (r.peticionEspecial || estado === 'PROXIMA') {
+            peticionHtml = `
+                <div id="peticion-section-${r.id}" style="margin-top:14px; padding:12px 14px; background:rgba(185,149,77,0.06); border-left:2px solid rgba(185,149,77,0.35); border-radius:0 8px 8px 0;">
+                    <p style="font-size:0.65rem; letter-spacing:2px; color:var(--text-muted-custom); margin-bottom:6px;">${t('mr_special_request_label')}</p>
+                    <div id="peticion-display-${r.id}">
+                        <p style="font-size:0.83rem; color:var(--cream); margin:0;">${
+                            r.peticionEspecial
+                                ? r.peticionEspecial.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                                : `<span style="color:var(--text-muted-custom); font-style:italic;">${t('mr_special_request_none')}</span>`
+                        }</p>
+                        ${estado === 'PROXIMA' ? `<button class="admin-btn" style="margin-top:8px; font-size:0.73rem; padding:5px 12px;" onclick="editarPeticion(${r.id}, this)">${t('mr_special_request_edit')}</button>` : ''}
+                    </div>
+                    <div id="peticion-edit-${r.id}" style="display:none;">
+                        <textarea id="peticion-textarea-${r.id}" rows="3"
+                            style="width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(185,149,77,0.3); color:var(--cream);
+                                   padding:8px 12px; border-radius:6px; font-size:0.83rem; resize:vertical;
+                                   font-family:inherit; box-sizing:border-box; margin-bottom:8px;"
+                        >${r.peticionEspecial ? r.peticionEspecial.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : ''}</textarea>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-room" style="padding:7px 16px; font-size:0.75rem;" onclick="guardarPeticion(${r.id})">${t('mr_special_request_save')}</button>
+                            <button class="admin-btn admin-btn--ghost" style="padding:7px 16px; font-size:0.75rem;" onclick="cancelarEditarPeticion(${r.id})">${t('mr_special_request_cancel')}</button>
+                        </div>
+                        <p id="peticion-msg-${r.id}" style="display:none; font-size:0.78rem; margin-top:6px;"></p>
+                    </div>
+                </div>`;
+        }
+
         html += `
             <div class="reserva-card${estado === 'PASADA' ? ' reserva-card--pasada' : ''}">
                 ${img ? `<img class="reserva-card-img" src="${img}" alt="${label}">` : ''}
@@ -168,6 +196,7 @@ window.showMisReservas = async () => {
                     
                     ${serviciosHtml}
                     ${rsSubtotalStr}
+                    ${peticionHtml}
                     
                     <div class="gold-line" style="margin: 16px 0 12px; width: 100%; opacity: 0.2;"></div>
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
@@ -182,6 +211,44 @@ window.showMisReservas = async () => {
     });
     html += '</div>';
     container.innerHTML = html;
+};
+
+// ── EDICIÓN PETICIÓN ESPECIAL ─────────────────────────────────────────────────
+
+window.editarPeticion = (id, btn) => {
+    document.getElementById('peticion-display-' + id).style.display = 'none';
+    document.getElementById('peticion-edit-' + id).style.display = 'block';
+    document.getElementById('peticion-textarea-' + id).focus();
+};
+
+window.cancelarEditarPeticion = (id) => {
+    document.getElementById('peticion-display-' + id).style.display = 'block';
+    document.getElementById('peticion-edit-' + id).style.display = 'none';
+};
+
+window.guardarPeticion = async (id) => {
+    var textarea = document.getElementById('peticion-textarea-' + id);
+    var msgEl    = document.getElementById('peticion-msg-' + id);
+    var valor    = textarea ? textarea.value.trim() : '';
+
+    try {
+        var res = await fetch('/api/reservas/' + id + '/peticion', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ peticionEspecial: valor || null }),
+        });
+        if (res.ok) {
+            showMisReservas(); // Refresca toda la vista
+        } else {
+            msgEl.style.display = 'block';
+            msgEl.style.color   = '#c0392b';
+            msgEl.textContent   = t('mr_special_request_error');
+        }
+    } catch (_) {
+        msgEl.style.display = 'block';
+        msgEl.style.color   = '#c0392b';
+        msgEl.textContent   = t('mr_special_request_error');
+    }
 };
 
 window.cancelarReserva = async (id) => {

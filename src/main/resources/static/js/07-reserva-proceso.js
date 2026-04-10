@@ -1,4 +1,4 @@
-﻿// ── VISTA DE DETALLE POR TIPO ─────────────────────────────────────────────────
+// ── VISTA DE DETALLE POR TIPO ─────────────────────────────────────────────────
 
 window.selectRoom = async (tipo, precio, descripcion) => {
     if (!state.token) { openAuthModal(); return; }
@@ -111,6 +111,17 @@ window.selectRoom = async (tipo, precio, descripcion) => {
 
             <div id="reserva-msg" style="display:none; margin-bottom:14px; font-size:0.85rem; letter-spacing:1px;"></div>
 
+            <div style="margin-bottom:20px;">
+                <p style="font-size:0.75rem; letter-spacing:2px; color:var(--text-muted-custom); margin-bottom:8px;">${t('detail_special_request_label')}</p>
+                <textarea id="peticion-especial-input" placeholder="${t('detail_special_request_placeholder')}" rows="3"
+                    style="width:100%; background:rgba(255,255,255,0.06); border:1px solid rgba(185,149,77,0.3);
+                           color:var(--cream); padding:10px 14px; border-radius:8px; font-size:0.85rem;
+                           resize:vertical; font-family:inherit; letter-spacing:0.5px; box-sizing:border-box;
+                           transition: border-color 0.2s;"
+                    onfocus="this.style.borderColor='rgba(185,149,77,0.7)'"
+                    onblur="this.style.borderColor='rgba(185,149,77,0.3)'"></textarea>
+            </div>
+
             <button class="btn-room" id="btn-confirmar-reserva"
                 onclick="confirmarReserva('${tipo}')">
                 ${t('detail_confirm')}
@@ -215,7 +226,13 @@ window.confirmarReserva = async (tipo) => {
         var res = await fetch('/api/reservas/por-tipo', {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ tipo, fechaEntrada, fechaSalida, servicios: serviciosSeleccionados }),
+            body:    JSON.stringify({
+                tipo,
+                fechaEntrada,
+                fechaSalida,
+                servicios: serviciosSeleccionados,
+                peticionEspecial: (document.getElementById('peticion-especial-input')?.value || '').trim() || null
+            }),
         });
 
         if (res.ok) {

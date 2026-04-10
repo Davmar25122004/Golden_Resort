@@ -83,6 +83,8 @@ window.TRANSLATIONS = {
     detail_error_conn:      'Error de conexión. Inténtalo de nuevo.',
     detail_select_dates:    'Por favor selecciona las fechas de entrada y salida.',
     detail_rs_subtotal:     'Subtotal room service: ',
+    detail_special_request_label:       'PETICIÓN ESPECIAL (OPCIONAL)',
+    detail_special_request_placeholder: 'Ej: habitación en planta alta, cuna para bebé, llegada tardía...',
 
     // MIS RESERVAS
     mr_label:             'Tu historial',
@@ -111,6 +113,12 @@ window.TRANSLATIONS = {
     mr_cancel_confirm:    '¿Seguro que quieres cancelar esta reserva?',
     mr_cancel_error:      'No se pudo cancelar la reserva. Inténtalo de nuevo.',
     mr_cancel_error_conn: 'Error de conexión al cancelar.',
+    mr_special_request_label:  'PETICIÓN ESPECIAL',
+    mr_special_request_none:   'Sin petición especial',
+    mr_special_request_edit:   '✎ Editar petición',
+    mr_special_request_save:   'Guardar',
+    mr_special_request_cancel: 'Cancelar',
+    mr_special_request_error:  'Error al guardar la petición. Inténtalo de nuevo.',
 
     // ROOM SERVICE MODAL (mis reservas)
     grs_title:      'Carta del Room Service',
@@ -349,6 +357,8 @@ window.TRANSLATIONS = {
     detail_error_conn:      'Connection error. Please try again.',
     detail_select_dates:    'Please select check-in and check-out dates.',
     detail_rs_subtotal:     'Room service subtotal: ',
+    detail_special_request_label:       'SPECIAL REQUEST (OPTIONAL)',
+    detail_special_request_placeholder: 'E.g.: high floor room, baby cot, late arrival...',
 
     // MIS RESERVAS
     mr_label:             'Your history',
@@ -377,6 +387,12 @@ window.TRANSLATIONS = {
     mr_cancel_confirm:    'Are you sure you want to cancel this booking?',
     mr_cancel_error:      'Could not cancel the booking. Please try again.',
     mr_cancel_error_conn: 'Connection error while cancelling.',
+    mr_special_request_label:  'SPECIAL REQUEST',
+    mr_special_request_none:   'No special request',
+    mr_special_request_edit:   '✎ Edit request',
+    mr_special_request_save:   'Save',
+    mr_special_request_cancel: 'Cancel',
+    mr_special_request_error:  'Error saving the request. Please try again.',
 
     // ROOM SERVICE MODAL (mis reservas)
     grs_title:      'Room Service Menu',

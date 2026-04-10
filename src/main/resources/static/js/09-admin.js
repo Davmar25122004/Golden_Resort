@@ -97,6 +97,8 @@ async function loadAdminDashboard() {
 
 // ── ADMIN: RESERVAS ───────────────────────────────────────────────────────────
 
+var _cachedReservasAdmin = [];
+
 async function loadAdminReservas() {
     var body = document.getElementById('admin-tab-body');
     var res;
@@ -104,16 +106,74 @@ async function loadAdminReservas() {
         body.innerHTML = '<p style="color:#c0392b;">' + t('adm_error_conn') + '</p>'; return;
     }
     if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">' + t('adm_res_error') + '</p>'; return; }
+    
     var reservas = await res.json();
+    _cachedReservasAdmin = reservas;
 
     if (!reservas || reservas.length === 0) {
         body.innerHTML = '<p style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px; margin-top:12px;">' + t('adm_res_no_data') + '</p>';
         return;
     }
 
+    body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div style="font-size:0.85rem; color:var(--cream);">
+                Filtrar por mes: 
+                <select id="admin-res-month-filter" class="admin-form-input" style="display:inline-block; width:auto; margin-left:10px; padding:6px 12px; cursor:pointer;" onchange="filtrarReservasMes()">
+                    <option value="ALL">Todas</option>
+                    <option value="01">Enero</option>
+                    <option value="02">Febrero</option>
+                    <option value="03">Marzo</option>
+                    <option value="04">Abril</option>
+                    <option value="05">Mayo</option>
+                    <option value="06">Junio</option>
+                    <option value="07">Julio</option>
+                    <option value="08">Agosto</option>
+                    <option value="09">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+            </div>
+        </div>
+        <div id="admin-res-table-container"></div>
+    `;
+
+    renderReservasTable(_cachedReservasAdmin);
+}
+
+window.filtrarReservasMes = () => {
+    var month = document.getElementById('admin-res-month-filter').value;
+    if (month === 'ALL') {
+        renderReservasTable(_cachedReservasAdmin);
+        return;
+    }
+    
+    var targetMonthZeroIndexed = parseInt(month) - 1;
+    var filtered = _cachedReservasAdmin.filter(r => {
+        var dIn = new Date(r.fechaEntrada);
+        var dOut = new Date(r.fechaSalida);
+        var current = new Date(dIn);
+        while(current <= dOut) {
+            if(current.getMonth() === targetMonthZeroIndexed) return true;
+            current.setDate(current.getDate() + 1);
+        }
+        return false;
+    });
+
+    renderReservasTable(filtered);
+};
+
+window.renderReservasTable = (reservas) => {
+    var container = document.getElementById('admin-res-table-container');
+    if (!reservas || reservas.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px; margin-top:12px;">No hay reservas que coincidan con este mes.</p>';
+        return;
+    }
+
     var tipoLabels = { NORMAL: 'Normal', DOBLE: 'Doble', SUITE: 'Suite', LUJO: 'Lujo' };
 
-    body.innerHTML = `
+    container.innerHTML = `
         <table class="admin-table">
             <thead>
                 <tr>
@@ -126,18 +186,27 @@ async function loadAdminReservas() {
                     var serviciosStr = r.servicios && r.servicios.length > 0
                         ? r.servicios.map(s => s.nombre).join(', ')
                         : '';
+
                     if (r.pedidosRoomService && r.pedidosRoomService.length > 0) {
-                        var rsStr = 'Room Service (' + r.pedidosRoomService.map(p => p.cantidad + 'x ' + p.nombre).join(', ') + ')';
-                        serviciosStr = serviciosStr ? serviciosStr + '<br><span style="color:var(--gold);">' + rsStr + '</span>' : '<span style="color:var(--gold);">' + rsStr + '</span>';
+                        window._rsData = window._rsData || {};
+                        window._rsData[r.id] = { items: r.pedidosRoomService, total: r.subtotalRoomService };
                     }
-                    if (!serviciosStr) serviciosStr = '—';
+
+                    var rsBadge = (r.pedidosRoomService && r.pedidosRoomService.length > 0)
+                        ? `<button onclick="toggleRSPopover(event,${r.id})" style="display:inline-flex;align-items:center;gap:5px;margin-top:${serviciosStr ? 6 : 0}px;background:rgba(185,149,77,0.1);border:1px solid rgba(185,149,77,0.35);color:var(--gold);font-size:0.7rem;letter-spacing:1px;padding:4px 10px;border-radius:20px;cursor:pointer;transition:background 0.2s;font-family:inherit;" onmouseover="this.style.background='rgba(185,149,77,0.22)'" onmouseout="this.style.background='rgba(185,149,77,0.1)'"> Room Service <span style="background:rgba(185,149,77,0.28);border-radius:10px;padding:1px 6px;font-size:0.62rem;margin-left:2px;">${r.pedidosRoomService.length}</span></button>`
+                        : '';
+
+                    if (!serviciosStr && !rsBadge) serviciosStr = '—';
                     return `<tr>
                         <td>${r.id}</td>
                         <td><span style="color:var(--cream);">${r.clienteNombre || '—'}</span><br><small style="color:var(--text-muted-custom);">${r.clienteEmail || ''}</small></td>
-                        <td><span class="admin-badge">${tipoLabels[r.habitacionTipo] || r.habitacionTipo}</span> nº ${r.habitacionNumero}</td>
+                        <td>
+                            <span class="admin-badge">${tipoLabels[r.habitacionTipo] || r.habitacionTipo}</span><br>
+                            <small style="color:var(--text-muted-custom); margin-top:4px; display:inline-block;">nº ${r.habitacionNumero}</small>
+                        </td>
                         <td>${formatFecha(r.fechaEntrada)}</td>
                         <td>${formatFecha(r.fechaSalida)}</td>
-                        <td style="font-size:0.75rem;">${serviciosStr}</td>
+                        <td style="font-size:0.75rem;">${serviciosStr}${rsBadge ? (serviciosStr ? '<br>' : '') + rsBadge : ''}</td>
                         <td style="color:var(--gold); white-space:nowrap;">${parseFloat(r.total).toFixed(2)} €</td>
                         <td>
                             <div style="display:flex; gap:8px; justify-content:flex-end;">
@@ -150,6 +219,75 @@ async function loadAdminReservas() {
             </tbody>
         </table>`;
 }
+
+// ── POPOVER ROOM SERVICE ─────────────────────────────────────────────────────
+
+window.toggleRSPopover = (evt, reservaId) => {
+    evt.stopPropagation();
+    var existing = document.getElementById('rs-pop-global');
+    var sameBtn  = window._rsPopBtn === evt.currentTarget;
+    if (existing) { existing.remove(); window._rsPopBtn = null; }
+    if (sameBtn) return;
+
+    window._rsPopBtn = evt.currentTarget;
+    var data = (window._rsData || {})[reservaId];
+    if (!data) return;
+
+    var rect = evt.currentTarget.getBoundingClientRect();
+
+    var itemsHtml = data.items.map(p => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(185,149,77,0.1);">
+            <div>
+                <span style="color:var(--cream);font-size:0.82rem;">${p.nombre}</span>
+                <span style="color:var(--text-muted-custom);font-size:0.7rem;margin-left:4px;">×${p.cantidad}</span>
+            </div>
+            <span style="color:var(--gold);font-size:0.82rem;font-weight:600;white-space:nowrap;margin-left:12px;">
+                ${p.precio ? (parseFloat(p.precio) * p.cantidad).toFixed(2) + ' €' : ''}
+            </span>
+        </div>`).join('');
+
+    var total = data.total ? parseFloat(data.total).toFixed(2) + ' €' : '—';
+
+    var pop = document.createElement('div');
+    pop.id = 'rs-pop-global';
+    pop.innerHTML = `
+        <p style="font-size:0.6rem;letter-spacing:2.5px;color:var(--text-muted-custom);margin-bottom:12px;text-transform:uppercase;"> Pedido Room Service</p>
+        ${itemsHtml}
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(185,149,77,0.25);display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.68rem;letter-spacing:1px;color:var(--text-muted-custom);">SUBTOTAL</span>
+            <span style="color:var(--gold);font-weight:700;font-size:0.95rem;">${total}</span>
+        </div>`;
+
+    Object.assign(pop.style, {
+        position:    'fixed',
+        zIndex:      '99999',
+        background:  'linear-gradient(145deg,#1c1507,#181810)',
+        border:      '1px solid rgba(185,149,77,0.45)',
+        borderRadius:'10px',
+        padding:     '16px 18px',
+        minWidth:    '250px',
+        maxWidth:    '320px',
+        boxShadow:   '0 16px 48px rgba(0,0,0,0.75),0 0 0 1px rgba(185,149,77,0.08)',
+        top:         (rect.bottom + 8) + 'px',
+        left:        Math.min(rect.left, window.innerWidth - 340) + 'px',
+    });
+
+    document.body.appendChild(pop);
+
+    // Animación de entrada
+    pop.animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'translateY(0)'}],{duration:140,easing:'ease-out',fill:'forwards'});
+
+    // Cerrar al click fuera
+    setTimeout(() => {
+        document.addEventListener('click', function closeRS(e) {
+            if (!pop.contains(e.target)) {
+                pop.animate([{opacity:1},{opacity:0,transform:'translateY(-4px)'}],{duration:100,easing:'ease-in',fill:'forwards'}).onfinish = () => pop.remove();
+                window._rsPopBtn = null;
+                document.removeEventListener('click', closeRS);
+            }
+        });
+    }, 10);
+};
 
 window.adminCancelarReserva = async (id) => {
     if (!confirm(t('adm_res_confirm_cancel'))) return;
@@ -330,6 +468,10 @@ async function loadAdminHabitaciones() {
                     <label class="admin-form-label" id="modal-tipo-desc-lbl"></label>
                     <input type="text" id="tipo-descripcion" class="admin-form-input">
                 </div>
+                <div class="mb-4">
+                    <label class="admin-form-label">Gestión de Imágenes (click para cambiar)</label>
+                    <div id="modal-tipo-images" style="display:flex; gap:10px; margin-top:8px;"></div>
+                </div>
                 <div id="modal-tipo-error" class="admin-form-error d-none"></div>
                 <div class="d-flex gap-3">
                     <button class="admin-btn" id="btn-guardar-tipo" onclick="guardarTipoHabitacion()"></button>
@@ -352,6 +494,22 @@ window.abrirModalTipo = (tipo, precio, descripcion) => {
     document.getElementById('tipo-descripcion').placeholder = t('adm_hab_desc_placeholder');
     document.getElementById('tipo-precio').value      = precio || '';
     document.getElementById('tipo-descripcion').value = descripcion || '';
+
+    // Cargar imagenes actuales
+    var imgsContainer = document.getElementById('modal-tipo-images');
+    imgsContainer.innerHTML = '';
+    var images = typeof TIPO_IMAGES !== 'undefined' ? (TIPO_IMAGES[tipo] || []) : [];
+    images.forEach((imgUrl) => {
+        imgsContainer.innerHTML += `
+            <div style="position:relative; width:80px; height:60px; border-radius:6px; overflow:hidden; border:1px solid rgba(185,149,77,0.3);">
+                <img src="${imgUrl}?t=${Date.now()}" style="width:100%; height:100%; object-fit:cover;">
+                <label style="position:absolute; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
+                    <span style="color:white; font-size:0.65rem;">Cambiar</span>
+                    <input type="file" style="display:none;" accept="image/png, image/jpeg" onchange="uploadRoomImage('${tipo}', '${imgUrl}', this)">
+                </label>
+            </div>
+        `;
+    });
     document.getElementById('modal-tipo-error').classList.add('d-none');
     document.getElementById('btn-guardar-tipo').textContent = t('adm_hab_save');
     document.querySelector('#modal-tipo-hab .admin-btn--ghost').textContent = t('adm_hab_cancel');
@@ -361,6 +519,36 @@ window.abrirModalTipo = (tipo, precio, descripcion) => {
 
 window.cerrarModalTipo = () => {
     document.getElementById('modal-tipo-hab').style.display = 'none';
+};
+
+window.uploadRoomImage = async (tipo, imgUrl, input) => {
+    if (!input.files || input.files.length === 0) return;
+    var file = input.files[0];
+    var formData = new FormData();
+    
+    var filename = imgUrl.substring(imgUrl.lastIndexOf('/') + 1);
+    if (filename.indexOf('?') !== -1) {
+        filename = filename.substring(0, filename.indexOf('?'));
+    }
+
+    formData.append('filename', filename);
+    formData.append('file', file);
+
+    try {
+        var res = await fetch('/api/admin/habitaciones/tipo/' + tipo + '/imagen', {
+            method: 'POST',
+            body: formData
+        });
+        if (res.ok) {
+            abrirModalTipo(tipo, document.getElementById('tipo-precio').value, document.getElementById('tipo-descripcion').value);
+            loadAdminHabitaciones();
+        } else {
+            var msg = await res.text();
+            alert('Error al subir imagen: ' + msg);
+        }
+    } catch(e) {
+        alert('Error de conexión al subir la imagen');
+    }
 };
 
 window.guardarTipoHabitacion = async () => {
@@ -445,6 +633,10 @@ async function loadAdminServicios() {
                     <label class="admin-form-label" id="svc-price-lbl"></label>
                     <input type="number" id="svc-precio" class="admin-form-input" step="0.01" min="0">
                 </div>
+                <div class="mb-4" id="svc-images-container" style="display:none;">
+                    <label class="admin-form-label">Gestión de Imágenes (click para cambiar)</label>
+                    <div id="modal-svc-images" style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;"></div>
+                </div>
                 <div id="modal-svc-error" class="admin-form-error d-none"></div>
                 <div class="d-flex gap-3">
                     <button class="admin-btn" onclick="guardarServicio()" id="btn-svc-save"></button>
@@ -465,6 +657,29 @@ window.abrirModalServicio = (svc) => {
     document.getElementById('svc-precio').placeholder      = t('adm_svc_price_placeholder');
     document.getElementById('svc-nombre').value = svc ? svc.nombre : '';
     document.getElementById('svc-precio').value = svc ? svc.precio : '';
+
+    var imagesContainer = document.getElementById('svc-images-container');
+    var imgsDiv = document.getElementById('modal-svc-images');
+    imgsDiv.innerHTML = '';
+    
+    if (svc && typeof SERVICIO_DATA !== 'undefined' && SERVICIO_DATA[svc.id] && SERVICIO_DATA[svc.id].images) {
+        imagesContainer.style.display = 'block';
+        var images = SERVICIO_DATA[svc.id].images;
+        images.forEach((imgUrl) => {
+            imgsDiv.innerHTML += `
+                <div style="position:relative; width:80px; height:60px; border-radius:6px; overflow:hidden; border:1px solid rgba(185,149,77,0.3);">
+                    <img src="${imgUrl}?t=${Date.now()}" style="width:100%; height:100%; object-fit:cover;">
+                    <label style="position:absolute; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:0; transition:opacity 0.2s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0">
+                        <span style="color:white; font-size:0.65rem;">Cambiar</span>
+                        <input type="file" style="display:none;" accept="image/png, image/jpeg" onchange="uploadSvcImage(${svc.id}, '${imgUrl}', this)">
+                    </label>
+                </div>
+            `;
+        });
+    } else {
+        imagesContainer.style.display = 'none';
+    }
+
     document.getElementById('modal-svc-error').classList.add('d-none');
     document.getElementById('btn-svc-save').textContent   = t('adm_svc_save');
     document.getElementById('btn-svc-cancel').textContent = t('adm_svc_cancel');
@@ -474,6 +689,37 @@ window.abrirModalServicio = (svc) => {
 
 window.cerrarModalServicio = () => {
     document.getElementById('modal-servicio').style.display = 'none';
+};
+
+window.uploadSvcImage = async (id, imgUrl, input) => {
+    if (!input.files || input.files.length === 0) return;
+    var file = input.files[0];
+    var formData = new FormData();
+    
+    var filename = imgUrl.substring(imgUrl.lastIndexOf('/') + 1);
+    if (filename.indexOf('?') !== -1) {
+        filename = filename.substring(0, filename.indexOf('?'));
+    }
+
+    formData.append('filename', filename);
+    formData.append('file', file);
+
+    try {
+        var res = await fetch('/api/admin/servicios/' + id + '/imagen', {
+            method: 'POST',
+            body: formData
+        });
+        if (res.ok) {
+            var fakeSvc = { id: id, nombre: document.getElementById('svc-nombre').value, precio: document.getElementById('svc-precio').value };
+            abrirModalServicio(fakeSvc);
+            loadAdminServicios();
+        } else {
+            var msg = await res.text();
+            alert('Error al subir imagen: ' + msg);
+        }
+    } catch(e) {
+        alert('Error de conexión al subir la imagen');
+    }
 };
 
 window.guardarServicio = async () => {
@@ -694,6 +940,8 @@ window.adminEliminarRSItem = async (id) => {
 
 // ── ADMIN: USUARIOS ───────────────────────────────────────────────────────────
 
+var _cachedUsuariosAdmin = [];
+
 async function loadAdminUsuarios() {
     var body = document.getElementById('admin-tab-body');
     var res;
@@ -702,8 +950,49 @@ async function loadAdminUsuarios() {
     }
     if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">' + t('adm_usr_error') + '</p>'; return; }
     var usuarios = await res.json();
+    _cachedUsuariosAdmin = usuarios;
 
     body.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <div style="font-size:0.85rem; color:var(--cream);">
+                Filtrar por rol: 
+                <select id="admin-usr-role-filter" class="admin-form-input" style="display:inline-block; width:auto; margin-left:10px; padding:6px 12px; cursor:pointer;" onchange="filtrarUsuariosRol()">
+                    <option value="ALL">Todos</option>
+                    <option value="ROLE_ADMIN">Admin</option>
+                    <option value="ROLE_USER">Cliente</option>
+                </select>
+            </div>
+        </div>
+        <div id="admin-usr-table-container"></div>
+    `;
+
+    renderUsuariosTable(_cachedUsuariosAdmin);
+}
+
+window.filtrarUsuariosRol = () => {
+    var role = document.getElementById('admin-usr-role-filter').value;
+    if (role === 'ALL') {
+        renderUsuariosTable(_cachedUsuariosAdmin);
+        return;
+    }
+    
+    var filtered = _cachedUsuariosAdmin.filter(u => {
+        if (role === 'ROLE_ADMIN') return u.rol === 'ROLE_ADMIN';
+        if (role === 'ROLE_USER') return u.rol !== 'ROLE_ADMIN';
+        return true;
+    });
+
+    renderUsuariosTable(filtered);
+};
+
+window.renderUsuariosTable = (usuarios) => {
+    var container = document.getElementById('admin-usr-table-container');
+    if (!usuarios || usuarios.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px; margin-top:12px;">No hay usuarios que coincidan con este rol.</p>';
+        return;
+    }
+
+    container.innerHTML = `
         <table class="admin-table">
             <thead><tr><th>#</th><th>${t('adm_usr_col_name')}</th><th>${t('adm_usr_col_email')}</th><th>${t('adm_usr_col_role')}</th><th></th></tr></thead>
             <tbody>

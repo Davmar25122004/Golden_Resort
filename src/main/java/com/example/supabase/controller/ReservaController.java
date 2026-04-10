@@ -114,7 +114,8 @@ public class ReservaController {
                             subtotalRoomService,
                             pedidosRS,
                             r.getUsuario().getNombre() != null ? r.getUsuario().getNombre() : r.getUsuario().getEmail(),
-                            r.getUsuario().getEmail()
+                            r.getUsuario().getEmail(),
+                            r.getPeticionEspecial()
                     );
                 })
                 .collect(Collectors.toList());
@@ -176,7 +177,8 @@ public class ReservaController {
                             serviciosDTOs,
                             total,
                             subtotalRoomService,
-                            pedidosRS
+                            pedidosRS,
+                            r.getPeticionEspecial()
                     );
                 })
                 .collect(Collectors.toList());
@@ -222,6 +224,7 @@ public class ReservaController {
         reserva.setHabitacion(habitacion);
         reserva.setFechaEntrada(request.fechaEntrada);
         reserva.setFechaSalida(request.fechaSalida);
+        reserva.setPeticionEspecial(request.peticionEspecial);
 
         return ResponseEntity.ok(reservaRepository.save(reserva));
     }
@@ -277,6 +280,7 @@ public class ReservaController {
         reserva.setHabitacion(disponibles.get(0));
         reserva.setFechaEntrada(request.fechaEntrada);
         reserva.setFechaSalida(request.fechaSalida);
+        reserva.setPeticionEspecial(request.peticionEspecial);
 
         // Enlazar servicios con la reserva antes de guardar (CascadeType.ALL los persiste)
         if (!serviciosReserva.isEmpty()) {
@@ -374,6 +378,25 @@ public class ReservaController {
         return ResponseEntity.ok(reservaRepository.save(reserva));
     }
 
+    // PATCH /api/reservas/{id}/peticion → actualizar petición especial (cliente o admin)
+    @PatchMapping("/{id}/peticion")
+    public ResponseEntity<?> actualizarPeticion(@PathVariable Long id,
+                                                @RequestBody PeticionRequest request,
+                                                Authentication authentication) {
+        Reserva reserva = reservaRepository.findById(id).orElse(null);
+        if (reserva == null) return ResponseEntity.notFound().build();
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin && !reserva.getUsuario().getEmail().equals(getEmail(authentication))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        reserva.setPeticionEspecial(request.peticionEspecial);
+        reservaRepository.save(reserva);
+        return ResponseEntity.ok(Map.of("mensaje", "Petición actualizada"));
+    }
+
     // DELETE /api/reservas/{id} → cancelar reserva (admin: cualquiera; cliente: solo la suya)
     @DeleteMapping("/{id}")
     @Transactional
@@ -432,12 +455,13 @@ public class ReservaController {
         public List<PedidoRSDTO> pedidosRoomService;
         public String clienteNombre;
         public String clienteEmail;
+        public String peticionEspecial;
 
         // Constructor para mis-reservas (sin datos de cliente)
         ReservaDTO(Long id, LocalDate fechaEntrada, LocalDate fechaSalida,
                    String habitacionTipo, String habitacionNumero, BigDecimal precioNoche,
                    List<ServicioDTO> servicios, BigDecimal total, BigDecimal subtotalRoomService,
-                   List<PedidoRSDTO> pedidosRoomService) {
+                   List<PedidoRSDTO> pedidosRoomService, String peticionEspecial) {
             this.id = id;
             this.fechaEntrada = fechaEntrada;
             this.fechaSalida = fechaSalida;
@@ -448,6 +472,7 @@ public class ReservaController {
             this.total = total;
             this.subtotalRoomService = subtotalRoomService;
             this.pedidosRoomService = pedidosRoomService;
+            this.peticionEspecial = peticionEspecial;
         }
 
         // Constructor para admin (con datos de cliente)
@@ -455,9 +480,9 @@ public class ReservaController {
                    String habitacionTipo, String habitacionNumero, BigDecimal precioNoche,
                    List<ServicioDTO> servicios, BigDecimal total, BigDecimal subtotalRoomService,
                    List<PedidoRSDTO> pedidosRoomService,
-                   String clienteNombre, String clienteEmail) {
+                   String clienteNombre, String clienteEmail, String peticionEspecial) {
             this(id, fechaEntrada, fechaSalida, habitacionTipo, habitacionNumero, precioNoche,
-                 servicios, total, subtotalRoomService, pedidosRoomService);
+                 servicios, total, subtotalRoomService, pedidosRoomService, peticionEspecial);
             this.clienteNombre = clienteNombre;
             this.clienteEmail = clienteEmail;
         }
@@ -470,6 +495,7 @@ public class ReservaController {
         public LocalDate fechaEntrada;
         public LocalDate fechaSalida;
         public List<ServicioRequest> servicios;
+        public String peticionEspecial;
     }
 
     static class ServicioRequest {
@@ -482,5 +508,10 @@ public class ReservaController {
         public LocalDate fechaEntrada;
         public LocalDate fechaSalida;
         public List<ServicioRequest> servicios;
+        public String peticionEspecial;
+    }
+
+    static class PeticionRequest {
+        public String peticionEspecial;
     }
 }
