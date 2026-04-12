@@ -8,9 +8,15 @@ applyTranslations();
 
 // Inicialización común (sesión, navbar, AOS, flatpickr)
 init().then(() => {
-    // Restaurar searchDates desde sessionStorage (persiste al navegar entre páginas)
-    var _sd = sessionStorage.getItem('searchDates');
-    if (_sd) { try { state.searchDates = JSON.parse(_sd); } catch(_) {} }
+    // Restaurar searchDates desde sessionStorage (solo si NO estamos en la home)
+    var _path = window.location.pathname;
+    if (_path === '/' || _path === '') {
+        state.searchDates = null;
+        sessionStorage.removeItem('searchDates');
+    } else {
+        var _sd = sessionStorage.getItem('searchDates');
+        if (_sd) { try { state.searchDates = JSON.parse(_sd); } catch(_) {} }
+    }
 
     // Page-specific init según la ruta actual
     var _path = window.location.pathname;

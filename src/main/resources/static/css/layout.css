@@ -58,6 +58,34 @@ footer {
 .footer-brand { font-size: 1.4rem; color: var(--gold); letter-spacing: 3px; }
 .footer-text { font-size: 0.75rem; color: var(--text-muted-custom); letter-spacing: 1px; }
 
+/* ── NAVBAR DESKTOP (restaurar layout original) ── */
+@media (min-width: 768px) {
+    #navbar .container {
+        display: flex;
+        align-items: center;
+    }
+    #navCollapse {
+        display: flex !important;
+        flex: 1;
+        align-items: center;
+        justify-content: space-between;
+        background: transparent !important;
+        padding: 0 !important;
+        margin-top: 0 !important;
+        border: none !important;
+    }
+    #nav-links {
+        flex-direction: row !important;
+        gap: 4px !important;
+        margin: 0 auto !important;
+    }
+    #navCollapse > div:last-child {
+        flex-direction: row !important;
+        gap: 12px !important;
+        margin: 0 !important;
+    }
+}
+
 /* ── NAV ELEMENTOS OCULTOS ── */
 #nav-mis-reservas,
 #nav-admin,

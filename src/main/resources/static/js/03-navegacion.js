@@ -1,10 +1,10 @@
-﻿// ── INIT ──────────────────────────────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────────────────────────────
 
 async function init() {
     AOS.init({ duration: 800, once: false });
 
-    if (document.getElementById('in-date'))  flatpickr('#in-date',  FP_CONFIG);
-    if (document.getElementById('out-date')) flatpickr('#out-date', FP_CONFIG);
+    if (document.getElementById('in-date'))  flatpickr('#in-date',  { ...FP_CONFIG, onChange: (dates) => { if (!dates.length) { state.searchDates = null; sessionStorage.removeItem('searchDates'); } } });
+    if (document.getElementById('out-date')) flatpickr('#out-date', { ...FP_CONFIG, onChange: (dates) => { if (!dates.length) { state.searchDates = null; sessionStorage.removeItem('searchDates'); } } });
 
     setupNavbarScroll();
     setupSearch();
@@ -24,5 +24,6 @@ async function init() {
     } catch (_) {}
 
     updateNav();
+    checkCookies();
 }
 

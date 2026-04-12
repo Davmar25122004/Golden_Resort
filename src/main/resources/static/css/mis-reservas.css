@@ -231,3 +231,8 @@
     .card-image-side { width: 100%; height: 200px; }
 }
 
+@media (max-width: 600px) {
+    .card-image-side { min-width: unset; height: 180px; }
+    .card-content-side { border-left: none; border-top: 1px solid rgba(201,168,77,0.12); }
+}
+

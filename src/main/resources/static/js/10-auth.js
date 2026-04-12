@@ -23,13 +23,24 @@ function showAuthError(msg) {
 
 window.handleLogin = async (e) => {
     e.preventDefault();
+    const email    = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showAuthError('Por favor, introduce un formato de email válido.');
+        return;
+    }
+
     const form = new FormData();
-    form.append('username', document.getElementById('login-email').value);
-    form.append('password', document.getElementById('login-password').value);
+    form.append('username', email);
+    form.append('password', password);
 
     const res = await fetch('/login', { method: 'POST', body: form });
 
-    if (res.ok || res.redirected) {
+    if (res.url && res.url.includes('error')) {
+        showAuthError('Email o contraseña incorrectos.');
+    } else if (res.ok || res.redirected) {
         window.location.reload();
     } else {
         showAuthError(t('auth_error_login'));
@@ -38,9 +49,27 @@ window.handleLogin = async (e) => {
 
 window.handleRegister = async (e) => {
     e.preventDefault();
-    const nombre   = document.getElementById('reg-nombre').value;
-    const email    = document.getElementById('reg-email').value;
+    const nombre   = document.getElementById('reg-nombre').value.trim();
+    const email    = document.getElementById('reg-email').value.trim();
     const password = document.getElementById('reg-password').value;
+
+    const nombreRegex = /^(?=.{2,50}$)[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+(?:-[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+)*$/;
+    if (!nombreRegex.test(nombre)) {
+        showAuthError('El nombre solo puede contener letras, espacios o guiones. Mínimo 2 caracteres.');
+        return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showAuthError('Por favor, introduce un formato de email válido.');
+        return;
+    }
+
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{6,}$/;
+    if (!passwordRegex.test(password)) {
+        showAuthError('La contraseña debe tener al menos 6 caracteres, una mayúscula y un número.');
+        return;
+    }
 
     try {
         const res = await fetch('/api/auth/register', {

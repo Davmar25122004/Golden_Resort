@@ -27,28 +27,36 @@
 <body>
 
     <!-- NAVBAR -->
-    <nav id="navbar">
-        <div class="container d-flex align-items-center justify-content-between">
+    <nav id="navbar" class="navbar navbar-expand-md navbar-dark">
+        <div class="container">
             <a href="/" class="navbar-brand-custom" onclick="event.preventDefault(); goHome()">HOTEL DAW</a>
-            <div class="d-flex align-items-center gap-1" id="nav-links">
-                <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('habitaciones')"><span data-i18n="nav_rooms">Habitaciones</span></a>
-                <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('servicios')"><span data-i18n="nav_services">Servicios</span></a>
-                <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('contacto')"><span data-i18n="nav_contact">Contacto</span></a>
-                <span id="nav-mis-reservas">
-                    <a href="/mis-reservas" class="nav-link-custom"><span data-i18n="nav_my_bookings">Mis Reservas</span></a>
-                </span>
-                <span id="nav-admin">
-                    <a href="/admin" class="nav-link-custom"><span data-i18n="nav_admin">Admin</span></a>
-                </span>
-            </div>
-            <div class="d-flex align-items-center gap-3">
-                <span id="nav-user"></span>
-                <button id="btn-reservar-nav" class="btn-reservar" onclick="goHome()" data-i18n="nav_book">Reservar</button>
-                <button id="btn-auth" class="btn-reservar" onclick="openAuthModal()">Iniciar Sesión</button>
-                <div class="lang-switcher">
-                    <button class="lang-btn lang-btn--active" data-lang="es" onclick="setLang('es')">ES</button>
-                    <span class="lang-sep">|</span>
-                    <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+
+            <button class="navbar-toggler shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navCollapse"
+                    style="border-color: rgba(201,168,76,0.6); padding: 4px 8px;">
+                <span class="navbar-toggler-icon" style="filter: brightness(0) saturate(100%) invert(77%) sepia(21%) saturate(1450%) hue-rotate(6deg) brightness(88%) contrast(85%); width: 1.2em; height: 1.2em;"></span>
+            </button>
+
+            <div class="collapse navbar-collapse p-3 p-md-0 mt-2 mt-md-0" id="navCollapse">
+                <div class="d-flex flex-column flex-md-row align-items-center gap-2 gap-md-1 my-3 my-md-0 mx-md-auto" id="nav-links">
+                    <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('habitaciones')"><span data-i18n="nav_rooms">Habitaciones</span></a>
+                    <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('servicios')"><span data-i18n="nav_services">Servicios</span></a>
+                    <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('contacto')"><span data-i18n="nav_contact">Contacto</span></a>
+                    <span id="nav-mis-reservas">
+                        <a href="/mis-reservas" class="nav-link-custom"><span data-i18n="nav_my_bookings">Mis Reservas</span></a>
+                    </span>
+                    <span id="nav-admin">
+                        <a href="/admin" class="nav-link-custom"><span data-i18n="nav_admin">Admin</span></a>
+                    </span>
+                </div>
+                <div class="d-flex flex-column flex-md-row align-items-center gap-3">
+                    <span id="nav-user"></span>
+                    <button id="btn-reservar-nav" class="btn-reservar" onclick="goHome()" data-i18n="nav_book">Reservar</button>
+                    <button id="btn-auth" class="btn-reservar" onclick="openAuthModal()">Iniciar Sesión</button>
+                    <div class="lang-switcher">
+                        <button class="lang-btn lang-btn--active" data-lang="es" onclick="setLang('es')">ES</button>
+                        <span class="lang-sep">|</span>
+                        <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -113,6 +121,26 @@
             </div>
         </div>
     </div>
+
+    <!-- COOKIE BANNER -->
+    <div id="cookie-banner" class="cookie-banner" style="display:none;">
+        <div class="cookie-banner-content">
+            <h4 class="serif mb-2" style="color:var(--gold); font-size:1.4rem;">Tu Privacidad</h4>
+            <p style="font-size:0.85rem; color:var(--text-muted-custom); margin-bottom:18px; line-height:1.5;">
+                Utilizamos cookies propias y de terceros para mejorar tu experiencia, analizar la navegación y mostrarte contenidos personalizados acordes a tus preferencias. Puedes aceptarlas todas o continuar solo con las esenciales.
+            </p>
+            <div class="cookie-banner-actions">
+                <button class="btn-reservar" style="padding:10px 24px; font-size:0.85rem; border-radius:6px;" onclick="acceptCookies(true)">Aceptar todas</button>
+                <button class="btn-reservar" style="padding:10px 24px; font-size:0.85rem; border-radius:6px;" onclick="acceptCookies(false)">Solo esenciales</button>
+            </div>
+        </div>
+    </div>
+    <style>
+        .cookie-banner { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); width:90%; max-width:500px; background:#111; border:1px solid rgba(185,149,77,0.4); border-radius:12px; z-index:99999; box-shadow:0 10px 40px rgba(0,0,0,0.8); padding:24px; animation:slideUpCookie 0.5s ease-out forwards; }
+        .cookie-banner-actions { display:flex; gap:12px; justify-content:flex-end; }
+        @keyframes slideUpCookie { from { transform:translate(-50%,100%); opacity:0; } to { transform:translate(-50%,0); opacity:1; } }
+        @media (max-width:576px) { .cookie-banner { bottom:12px; width:95%; padding:20px; } .cookie-banner-actions { flex-direction:column; } .cookie-banner-actions button { width:100%; } }
+    </style>
 
     <!-- JS Libraries -->
     <script th:src="@{/lib/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js}"></script>

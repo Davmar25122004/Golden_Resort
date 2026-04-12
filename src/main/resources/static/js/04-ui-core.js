@@ -90,15 +90,75 @@ function setupSearch() {
             e.preventDefault();
             var inDate  = document.getElementById('in-date').value;
             var outDate = document.getElementById('out-date').value;
+            
+            var errContainer = document.getElementById('search-error-container');
+            var errMsg = document.getElementById('search-error');
+
+            if (!inDate || !outDate) {
+                state.searchDates = null;
+                sessionStorage.removeItem('searchDates');
+                if (errContainer) errContainer.classList.add('d-none');
+                showLanding();
+                setTimeout(() => document.getElementById('habitaciones').scrollIntoView({ behavior: 'smooth' }), 50);
+                await loadRooms();
+                return;
+            }
+
+            var dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateRegex.test(inDate) || !dateRegex.test(outDate)) {
+                if (errContainer) errContainer.classList.remove('d-none');
+                if (errMsg) errMsg.textContent = 'Formato de fecha inválido (AAAA-MM-DD).';
+                return;
+            }
+
+            var hoy = new Date(); 
+            hoy.setHours(0,0,0,0);
+            var dIn = new Date(inDate + 'T00:00:00');
+            var dOut = new Date(outDate + 'T00:00:00');
+
+            if (dIn < hoy) {
+                if (errContainer) errContainer.classList.remove('d-none');
+                if (errMsg) errMsg.textContent = 'La reserva debe ser posterior a hoy.';
+                return;
+            }
+
+            if (dIn >= dOut) {
+                if (errContainer) errContainer.classList.remove('d-none');
+                if (errMsg) errMsg.textContent = 'La fecha de entrada no puede ser posterior a la de salida.';
+                return;
+            }
+
+            if (errContainer) errContainer.classList.add('d-none');
             state.searchDates = { inDate, outDate };
             showLanding();
-            setTimeout(() => {
-                document.getElementById('habitaciones').scrollIntoView({ behavior: 'smooth' });
-            }, 50);
+            setTimeout(() => document.getElementById('habitaciones').scrollIntoView({ behavior: 'smooth' }), 50);
             await loadRooms();
         };
     }
 }
+
+// ── COOKIES ───────────────────────────────────────────────────────────────────
+
+function checkCookies() {
+    if (!document.cookie.includes('hotelDAW_cookies=')) {
+        setTimeout(() => {
+            var banner = document.getElementById('cookie-banner');
+            if (banner) banner.style.display = 'block';
+        }, 1200);
+    }
+}
+
+window.acceptCookies = (all) => {
+    var val = all ? 'all' : 'essential';
+    document.cookie = 'hotelDAW_cookies=' + val + '; max-age=' + (60*60*24*365) + '; path=/';
+    var banner = document.getElementById('cookie-banner');
+    if (banner) {
+        banner.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        banner.style.opacity = '0';
+        banner.style.transform = 'translate(-50%, 20px)';
+        setTimeout(() => banner.style.display = 'none', 400);
+    }
+};
 
 // ── UTILS ─────────────────────────────────────────────────────────────────────
 

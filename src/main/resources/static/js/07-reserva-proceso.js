@@ -20,25 +20,21 @@ window.selectRoom = async (tipo, precio, descripcion) => {
         `<div class="swiper-slide detail-swiper-slide"><img src="${src}" alt="${label}" ${i === 0 ? '' : 'loading="lazy"'}></div>`
     ).join('');
 
-    // Si ya hay fechas de búsqueda, mostrarlas directamente; si no, mostrar selector
+    // Siempre mostrar el selector de fechas, pre-rellenado si ya existen
     var fechaEntrada = state.searchDates ? state.searchDates.inDate : '';
     var fechaSalida  = state.searchDates ? state.searchDates.outDate : '';
 
-    var fechasHtml = state.searchDates
-        ? `<div style="margin-bottom:16px; color:var(--text-muted-custom); font-size:0.85rem; letter-spacing:1px;">
-               ${t('detail_selected_dates')} <strong style="color:var(--cream);">${fechaEntrada}</strong> → <strong style="color:var(--cream);">${fechaSalida}</strong>
-           </div>`
-        : `<div style="margin-bottom:16px;">
+    var fechasHtml = `<div style="margin-bottom:16px;">
                <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:8px;">
                    <div>
                        <label style="display:block; font-size:0.7rem; letter-spacing:1px; color:var(--text-muted-custom); margin-bottom:4px;">${t('detail_arrival')}</label>
-                       <input id="detail-in-date" type="text" placeholder="dd/mm/aaaa"
+                       <input id="detail-in-date" type="text" placeholder="dd/mm/aaaa" value="${fechaEntrada}"
                            style="background:rgba(255,255,255,0.07); border:1px solid rgba(185,149,77,0.3); color:var(--cream);
                                   padding:8px 14px; border-radius:6px; font-size:0.85rem; cursor:pointer; width:150px;">
                    </div>
                    <div>
                        <label style="display:block; font-size:0.7rem; letter-spacing:1px; color:var(--text-muted-custom); margin-bottom:4px;">${t('detail_departure')}</label>
-                       <input id="detail-out-date" type="text" placeholder="dd/mm/aaaa"
+                       <input id="detail-out-date" type="text" placeholder="dd/mm/aaaa" value="${fechaSalida}"
                            style="background:rgba(255,255,255,0.07); border:1px solid rgba(185,149,77,0.3); color:var(--cream);
                                   padding:8px 14px; border-radius:6px; font-size:0.85rem; cursor:pointer; width:150px;">
                    </div>
@@ -140,8 +136,8 @@ window.selectRoom = async (tipo, precio, descripcion) => {
 
     // Recalcula el total estimado en tiempo real (servicios + room service items)
     function recalcularTotal() {
-        var inDate  = state.searchDates ? state.searchDates.inDate  : (document.getElementById('detail-in-date')?.value  || '');
-        var outDate = state.searchDates ? state.searchDates.outDate : (document.getElementById('detail-out-date')?.value || '');
+        var inDate  = document.getElementById('detail-in-date')?.value  || '';
+        var outDate = document.getElementById('detail-out-date')?.value || '';
         var totalEl = document.getElementById('reserva-total-estimado');
         if (!totalEl || !inDate || !outDate) return;
         var noches = Math.round((new Date(outDate + 'T00:00:00') - new Date(inDate + 'T00:00:00')) / 86400000);
@@ -181,31 +177,49 @@ window.selectRoom = async (tipo, precio, descripcion) => {
 
     document.querySelectorAll('.servicio-check').forEach(cb => cb.addEventListener('change', recalcularTotal));
 
-    if (!state.searchDates) {
-        flatpickr('#detail-in-date',  { ...FP_CONFIG, minDate: 'today', onChange: recalcularTotal });
-        flatpickr('#detail-out-date', { ...FP_CONFIG, minDate: 'today', onChange: recalcularTotal });
-    } else {
-        recalcularTotal();
-    }
+    flatpickr('#detail-in-date',  { ...FP_CONFIG, minDate: 'today', onChange: recalcularTotal });
+    flatpickr('#detail-out-date', { ...FP_CONFIG, minDate: 'today', onChange: recalcularTotal });
+    recalcularTotal();
 };
 
 window.confirmarReserva = async (tipo) => {
     var btn = document.getElementById('btn-confirmar-reserva');
     var msg = document.getElementById('reserva-msg');
 
-    var fechaEntrada, fechaSalida;
-    if (state.searchDates) {
-        fechaEntrada = state.searchDates.inDate;
-        fechaSalida  = state.searchDates.outDate;
-    } else {
-        fechaEntrada = document.getElementById('detail-in-date').value;
-        fechaSalida  = document.getElementById('detail-out-date').value;
-    }
+    var fechaEntrada = document.getElementById('detail-in-date').value;
+    var fechaSalida  = document.getElementById('detail-out-date').value;
 
     if (!fechaEntrada || !fechaSalida) {
         msg.style.display  = 'block';
         msg.style.color    = '#c0392b';
         msg.textContent    = t('detail_select_dates');
+        return;
+    }
+
+    var dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(fechaEntrada) || !dateRegex.test(fechaSalida)) {
+        msg.style.display  = 'block';
+        msg.style.color    = '#c0392b';
+        msg.textContent    = 'Formato de fecha inválido (AAAA-MM-DD).';
+        return;
+    }
+
+    var hoy = new Date();
+    hoy.setHours(0,0,0,0);
+    var dIn = new Date(fechaEntrada + 'T00:00:00');
+    var dOut = new Date(fechaSalida + 'T00:00:00');
+
+    if (dIn < hoy) {
+        msg.style.display  = 'block';
+        msg.style.color    = '#c0392b';
+        msg.textContent    = 'La reserva debe ser posterior a hoy.';
+        return;
+    }
+
+    if (dIn >= dOut) {
+        msg.style.display  = 'block';
+        msg.style.color    = '#c0392b';
+        msg.textContent    = 'La fecha de entrada no puede ser posterior a la de salida.';
         return;
     }
 

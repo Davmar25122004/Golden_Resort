@@ -233,9 +233,14 @@ public class ReservaController {
     @PostMapping("/por-tipo")
     public ResponseEntity<?> crearPorTipo(@RequestBody ReservaPorTipoRequest request,
                                           Authentication authentication) {
-        if (request.fechaEntrada == null || request.fechaSalida == null
-                || !request.fechaEntrada.isBefore(request.fechaSalida)) {
-            return ResponseEntity.badRequest().body("Fechas inválidas");
+        if (request.fechaEntrada == null || request.fechaSalida == null) {
+            return ResponseEntity.badRequest().body("Las fechas son obligatorias");
+        }
+        if (request.fechaEntrada.isBefore(LocalDate.now())) {
+            return ResponseEntity.badRequest().body("La reserva debe ser posterior a hoy");
+        }
+        if (!request.fechaEntrada.isBefore(request.fechaSalida)) {
+            return ResponseEntity.badRequest().body("La fecha de entrada no puede ser posterior a la de salida");
         }
 
         TipoHabitacion tipo;
@@ -342,8 +347,11 @@ public class ReservaController {
         }
 
         if (request.fechaEntrada != null && request.fechaSalida != null) {
+            if (request.fechaEntrada.isBefore(LocalDate.now())) {
+                return ResponseEntity.badRequest().body("La reserva debe ser posterior a hoy");
+            }
             if (!request.fechaEntrada.isBefore(request.fechaSalida)) {
-                return ResponseEntity.badRequest().body("Fechas inválidas");
+                return ResponseEntity.badRequest().body("La fecha de entrada no puede ser posterior a la de salida");
             }
             long solapadas = reservaRepository.contarReservasSolapadasExcluyendo(
                     reserva.getHabitacion(), request.fechaEntrada, request.fechaSalida, id);
