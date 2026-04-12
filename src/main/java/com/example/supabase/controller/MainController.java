@@ -38,9 +38,29 @@ public class MainController {
         return "index";
     }
 
-    @GetMapping({"/habitacion/{tipo}", "/servicio/{slug}", "/mis-reservas", "/admin"})
-    public String detallePagina() {
-        return "index";
+    @GetMapping("/habitacion/{tipo}")
+    public String habitacionDetalle() {
+        return "habitacion";
+    }
+
+    @GetMapping("/servicio/{slug}")
+    public String servicioDetalle() {
+        return "servicio";
+    }
+
+    @GetMapping("/mis-reservas")
+    public String misReservas(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) return "redirect:/";
+        return "mis-reservas";
+    }
+
+    @GetMapping("/admin")
+    public String admin(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) return "redirect:/";
+        boolean esAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!esAdmin) return "redirect:/";
+        return "admin";
     }
 
     @PostMapping("/api/auth/register")

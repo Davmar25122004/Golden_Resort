@@ -76,16 +76,18 @@ public class RoomServiceController {
     // DELETE /api/room-service/items/{id} → eliminar ítem (solo ADMIN)
     @DeleteMapping("/items/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public ResponseEntity<?> eliminarItem(@PathVariable Long id) {
         if (!itemRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        try {
-            itemRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict");
-        }
+        // 1. Limpiar pedidos que usen este ítem para que el total de la reserva se recalcule bien
+        pedidoRepository.deleteByItemId(id);
+        
+        // 2. Borrar el ítem de la carta
+        itemRepository.deleteById(id);
+        
+        return ResponseEntity.noContent().build();
     }
 
     // ── PEDIDOS ────────────────────────────────────────────────────────────────

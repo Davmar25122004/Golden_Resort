@@ -1,34 +1,22 @@
 // ── HELPERS MIS RESERVAS ──────────────────────────────────────────────────────
 
-function calcularEstado(fechaEntrada, fechaSalida) {
-    var hoy   = new Date(); hoy.setHours(0,0,0,0);
-    var entrada = new Date(fechaEntrada + 'T00:00:00');
-    var salida  = new Date(fechaSalida  + 'T00:00:00');
-    if (hoy < entrada) return 'PROXIMA';
-    if (hoy >= salida) return 'PASADA';
-    return 'EN_CURSO';
-}
+// (Date helpers moved to 04-ui-core.js for global availability)
 
-function formatFecha(dateStr) {
-    var meses = LANG === 'en'
-        ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-        : ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-    var parts = dateStr.split('-');
-    return parts[2] + ' ' + meses[parseInt(parts[1]) - 1] + ' ' + parts[0];
-}
 
 // ── MIS RESERVAS ──────────────────────────────────────────────────────────────
 
 window.showMisReservas = async () => {
-    history.pushState({ view: 'mis-reservas' }, '', '/mis-reservas');
-    showDynamic(`
+    var _mc = document.getElementById('main-content');
+    var _dv = document.getElementById('dynamic-view');
+    if (_mc) _mc.style.display = 'block';
+    if (_dv) _dv.innerHTML = `
         <p class="section-label">${t('mr_label')}</p>
         <h2 class="serif mb-2" style="color:var(--cream); font-size:2.5rem;">${t('mr_title')}</h2>
         <div class="gold-line mb-5"></div>
         <div id="reservas-container" style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px;">
             ${t('mr_loading')}
         </div>
-    `);
+    `;
 
     await fetchRoomServiceItems();
 
@@ -170,42 +158,84 @@ window.showMisReservas = async () => {
         }
 
         html += `
-            <div class="reserva-card${estado === 'PASADA' ? ' reserva-card--pasada' : ''}">
-                ${img ? `<img class="reserva-card-img" src="${img}" alt="${label}">` : ''}
-                <div class="reserva-card-body">
-                    <div class="reserva-card-header">
+            <div class="reserva-card-luxury${estado === 'PASADA' ? ' reserva-card--pasada' : ''}">
+                <div class="card-image-side">
+                    ${img ? `<img class="card-img-luxury" src="${img}" alt="${label}">` : ''}
+                    <div class="card-img-overlay"></div>
+                    <span class="card-status-badge" style="${badgeStyle}">${badgeText}</span>
+                </div>
+                
+                <div class="card-content-side">
+                    <div class="card-title-row">
                         <div>
-                            <p class="reserva-tipo-label">${label}</p>
-                            <p class="reserva-hab-num">${t('mr_room_num')}${r.habitacionNumero}</p>
+                            <p class="room-type-tag">${label}</p>
+                            <p class="room-id-tag">${t('mr_room_num')}${r.habitacionNumero}</p>
                         </div>
-                        <span class="reserva-estado-badge" style="${badgeStyle}">${badgeText}</span>
                     </div>
                     
-                    <p class="reserva-dates">
-                        ${formatFecha(r.fechaEntrada)}
-                        <span>→</span>
-                        ${formatFecha(r.fechaSalida)}
-                    </p>
-                    
-                    <div style="margin-top:12px;">
-                        <p class="reserva-meta" style="font-size:0.8rem;">
-                            ${noches} ${noches > 1 ? t('mr_nights') : t('mr_night')} &nbsp;·&nbsp;
-                            ${t('mr_room_total')}<strong style="color:var(--gold);">${totalHabitacion} €</strong>
-                        </p>
+                    <div class="ticket-dates">
+                        <div class="date-block">
+                            <span class="d-label">${t('hero_checkin')}</span>
+                            <span class="d-value">${formatFecha(r.fechaEntrada)}</span>
+                        </div>
+                        <div class="date-arrow">→</div>
+                        <div class="date-block">
+                            <span class="d-label">${t('hero_checkout')}</span>
+                            <span class="d-value">${formatFecha(r.fechaSalida)}</span>
+                        </div>
                     </div>
                     
-                    ${serviciosHtml}
-                    ${rsSubtotalStr}
-                    ${peticionHtml}
-                    
-                    <div class="gold-line" style="margin: 16px 0 12px; width: 100%; opacity: 0.2;"></div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
-                        <span style="color:var(--cream); font-size:1.1rem; font-weight: 500;">${t('mr_total_price')}</span>
-                        <span style="color:var(--gold); font-size:1.3rem; font-weight: 600;">${precioTotal} €</span>
+                    <div class="info-grid">
+                        <div class="info-col">
+                            <p class="info-section-title">${t('mr_room_total')}</p>
+                            <div class="service-item-mini">
+                                <span>${noches} ${noches > 1 ? t('mr_nights') : t('mr_night')}</span>
+                                <span>${totalHabitacion} €</span>
+                            </div>
+                        </div>
+                        
+                        <div class="info-col">
+                            <p class="info-section-title">Servicios & Extras</p>
+                            ${r.servicios && r.servicios.length > 0 ? r.servicios.map(s => `
+                                <div class="service-item-mini">
+                                    <span>${s.nombre} x${s.cantidad}</span>
+                                    <span>${(s.precio * s.cantidad).toFixed(2)} €</span>
+                                </div>`).join('') : '<p style="font-size:0.7rem; opacity:0.5;">—</p>'}
+                        </div>
                     </div>
 
-                    ${gestionRsBtn}
-                    ${cancelBtn}
+                    ${r.pedidosRoomService && r.pedidosRoomService.length > 0 ? `
+                        <p class="info-section-title">Room Service</p>
+                        <div style="margin-bottom:20px;">
+                            ${r.pedidosRoomService.map(p => `
+                                <div class="service-item-mini">
+                                    <span>${p.nombre} x${p.cantidad}</span>
+                                    <span>${parseFloat(p.subtotal).toFixed(2)} €</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+
+                    ${peticionHtml}
+                    
+                    <div class="ticket-separator"></div>
+
+                    <div class="total-row-luxury">
+                        <span class="total-label">${t('mr_total_price')}</span>
+                        <span class="total-value">${precioTotal} €</span>
+                    </div>
+
+                    <div class="card-actions">
+                        ${(estado === 'PROXIMA' || estado === 'EN_CURSO') ? `
+                            <button class="btn-manage-rs" onclick="abrirGestionRS(${r.id})">
+                                <i class="fas fa-utensils"></i> ${t('mr_manage_rs')}
+                            </button>` : ''}
+                        
+                        ${estado === 'PROXIMA' ? `
+                            <button class="btn-cancel-luxury" onclick="cancelarReserva(${r.id})">
+                                ${t('mr_cancel')}
+                            </button>` : ''}
+                    </div>
                 </div>
             </div>`;
     });

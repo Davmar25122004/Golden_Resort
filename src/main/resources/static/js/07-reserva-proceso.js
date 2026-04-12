@@ -4,10 +4,6 @@ window.selectRoom = async (tipo, precio, descripcion) => {
     if (!state.token) { openAuthModal(); return; }
     if (state.user && state.user.rol === 'ADMIN') return; // Los admins no reservan
 
-    if (!_suppressHistoryPush) {
-        history.pushState({ view: 'habitacion', tipo }, '', '/habitacion/' + tipo.toLowerCase());
-    }
-
     var tipoLabels = { NORMAL: t('tipo_normal'), DOBLE: t('tipo_doble'), SUITE: t('tipo_suite'), LUJO: t('tipo_lujo') };
     var label = tipoLabels[tipo] || tipo;
     var imgs  = TIPO_IMAGES[tipo] || [];
@@ -85,7 +81,10 @@ window.selectRoom = async (tipo, precio, descripcion) => {
             </label>`;
         }).join('');
 
-    showDynamic(`
+    var _mc = document.getElementById('main-content');
+    if (_mc) _mc.style.display = 'block';
+    var _dv = document.getElementById('dynamic-view');
+    if (_dv) _dv.innerHTML = `
         <div class="detail-view-container" data-aos="fade-up">
             <p class="section-label mb-1">${t('detail_label')}</p>
             <h2 class="serif mb-2" style="color:var(--cream); font-size:2.2rem;">${label}</h2>
@@ -127,7 +126,7 @@ window.selectRoom = async (tipo, precio, descripcion) => {
                 ${t('detail_confirm')}
             </button>
         </div>
-    `);
+    `;
 
     if (detailSwiper) { detailSwiper.destroy(true, true); detailSwiper = null; }
     detailSwiper = new Swiper('.detailSwiper', {
@@ -282,8 +281,16 @@ window.confirmarReserva = async (tipo) => {
 
 window.backFromDetail = () => {
     if (detailSwiper) { detailSwiper.destroy(true, true); detailSwiper = null; }
-    history.pushState({ view: 'home' }, '', '/');
-    showLanding();
-    loadRooms();
+    window.location.href = '/';
+};
+
+window.loadAndShowRoom = async (tipo) => {
+    try {
+        var res = await fetch('/api/habitaciones');
+        var rooms = res.ok ? await res.json() : [];
+        var room = rooms.find(r => r.tipo === tipo.toUpperCase());
+        if (!room) { window.location.href = '/'; return; }
+        await selectRoom(room.tipo, room.precioNoche, room.descripcion || '');
+    } catch (_) { window.location.href = '/'; }
 };
 

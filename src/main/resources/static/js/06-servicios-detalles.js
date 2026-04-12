@@ -112,9 +112,12 @@ async function loadServicios() {
         var bgStyle = bgImg ? `style="background-image:url('${bgImg}')"` : '';
         var nombreMostrar = (typeof LANG !== 'undefined' && LANG === 'en' && typeof SERVICIO_NOMBRES_EN !== 'undefined' && SERVICIO_NOMBRES_EN[s.id])
             ? SERVICIO_NOMBRES_EN[s.id] : s.nombre;
+            
+        var slug = typeof slugify !== 'undefined' ? slugify(nombreMostrar) : encodeURIComponent(nombreMostrar.toLowerCase().replace(/ /g, '-'));
+        
         return `
         <div class="col-md-4 col-sm-6" data-aos="fade-up" data-aos-delay="${i * 80}">
-            <div class="servicio-card servicio-card--clickable servicio-card--img" onclick="openServicioDetail(${s.id})" ${bgStyle}>
+            <div class="servicio-card servicio-card--clickable servicio-card--img" onclick="navigateToServicio('${slug}')" ${bgStyle}>
                 <div class="servicio-card-overlay"></div>
                 <div class="servicio-card-content">
                     <h4 class="servicio-name serif">${nombreMostrar}</h4>
@@ -127,3 +130,6 @@ async function loadServicios() {
     AOS.refresh();
 }
 
+window.navigateToServicio = function(slug) {
+    window.location.href = '/servicio/' + slug;
+};

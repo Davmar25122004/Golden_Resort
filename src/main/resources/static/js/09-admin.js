@@ -1,8 +1,10 @@
 // ── PANEL ADMIN ───────────────────────────────────────────────────────────────
 
 window.showAdmin = async () => {
-    history.pushState({ view: 'admin' }, '', '/admin');
-    showDynamic(`
+    var _mc = document.getElementById('main-content');
+    var _dv = document.getElementById('dynamic-view');
+    if (_mc) _mc.style.display = 'block';
+    if (_dv) _dv.innerHTML = `
         <p class="section-label">${t('admin_label')}</p>
         <h2 class="serif mb-2" style="color:var(--cream); font-size:2.5rem;">${t('admin_title')}</h2>
         <div class="gold-line mb-4"></div>
@@ -17,7 +19,7 @@ window.showAdmin = async () => {
         </div>
 
         <div id="admin-tab-body" style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px;">${t('admin_loading')}</div>
-    `);
+    `;
 
     switchAdminTab('dashboard');
 };
@@ -792,13 +794,13 @@ async function loadAdminRoomService() {
         return `
             <p style="font-size:0.7rem;letter-spacing:2px;color:var(--text-muted-custom);margin:18px 0 6px;text-transform:uppercase;">${catLabels[cat]}</p>
             <table class="admin-table">
-                <thead><tr><th>#</th><th>${t('adm_rs_col_name')}</th><th>${t('adm_rs_col_desc')}</th><th>${t('adm_rs_col_price')}</th><th>${t('adm_rs_col_avail')}</th><th></th></tr></thead>
+                <thead><tr><th>#</th><th>${t('adm_rs_col_name')}</th><th>${t('adm_rs_col_price')}</th><th>${t('adm_rs_col_avail')}</th><th></th></tr></thead>
                 <tbody>
                     ${catItems.map(item => `
                         <tr>
                             <td>${item.id}</td>
                             <td style="color:var(--cream);">${item.nombre}</td>
-                            <td style="color:var(--text-muted-custom);font-size:0.75rem;">${item.descripcion || '—'}</td>
+
                             <td style="color:var(--gold);">${parseFloat(item.precio).toFixed(2)} €</td>
                             <td>${item.disponible ? '<span class="admin-badge" style="color:#27ae60;">' + t('adm_rs_yes') + '</span>' : '<span class="admin-badge" style="color:#c0392b;">' + t('adm_rs_no') + '</span>'}</td>
                             <td style="white-space:nowrap;">
@@ -824,10 +826,7 @@ async function loadAdminRoomService() {
                     <label class="admin-form-label" id="rsi-name-lbl"></label>
                     <input type="text" id="rsi-nombre" class="admin-form-input">
                 </div>
-                <div class="mb-3">
-                    <label class="admin-form-label" id="rsi-desc-lbl"></label>
-                    <input type="text" id="rsi-descripcion" class="admin-form-input">
-                </div>
+
                 <div class="mb-3">
                     <label class="admin-form-label" id="rsi-price-lbl"></label>
                     <input type="number" id="rsi-precio" class="admin-form-input" step="0.01" min="0">
@@ -861,7 +860,7 @@ window.abrirModalRSItem = (item) => {
     _editRSItemId = item ? item.id : null;
     document.getElementById('modal-rsitem-title').textContent = item ? t('adm_rs_modal_edit') : t('adm_rs_modal_new');
     document.getElementById('rsi-name-lbl').textContent  = t('adm_rs_name_label');
-    document.getElementById('rsi-desc-lbl').textContent  = t('adm_rs_desc_label');
+
     document.getElementById('rsi-price-lbl').textContent = t('adm_rs_price_label');
     document.getElementById('rsi-cat-lbl').textContent   = t('adm_rs_cat_label');
     document.getElementById('rsi-avail-lbl').textContent = t('adm_rs_avail_label');
@@ -873,7 +872,7 @@ window.abrirModalRSItem = (item) => {
         opt.textContent = catLabels2[opt.value] || opt.value;
     });
     document.getElementById('rsi-nombre').value      = item ? item.nombre      : '';
-    document.getElementById('rsi-descripcion').value = item ? (item.descripcion || '') : '';
+
     document.getElementById('rsi-precio').value      = item ? item.precio      : '';
     document.getElementById('rsi-categoria').value   = item ? item.categoria   : 'SNACKS';
     document.getElementById('rsi-disponible').checked = item ? item.disponible : true;
@@ -887,7 +886,7 @@ window.cerrarModalRSItem = () => {
 
 window.guardarRSItem = async () => {
     var nombre      = document.getElementById('rsi-nombre').value.trim();
-    var descripcion = document.getElementById('rsi-descripcion').value.trim();
+
     var precio      = document.getElementById('rsi-precio').value;
     var categoria   = document.getElementById('rsi-categoria').value;
     var disponible  = document.getElementById('rsi-disponible').checked;
@@ -904,7 +903,7 @@ window.guardarRSItem = async () => {
     try {
         var res = await fetch(url, {
             method, headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nombre, descripcion: descripcion || null, precio: parseFloat(precio), categoria, disponible }),
+            body: JSON.stringify({ nombre, precio: parseFloat(precio), categoria, disponible }),
         });
         if (res.ok || res.status === 201) {
             _rsItemsCache = null;
@@ -954,13 +953,26 @@ async function loadAdminUsuarios() {
 
     body.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <div style="font-size:0.85rem; color:var(--cream);">
-                Filtrar por rol: 
-                <select id="admin-usr-role-filter" class="admin-form-input" style="display:inline-block; width:auto; margin-left:10px; padding:6px 12px; cursor:pointer;" onchange="filtrarUsuariosRol()">
-                    <option value="ALL">Todos</option>
-                    <option value="ROLE_ADMIN">Admin</option>
-                    <option value="ROLE_USER">Cliente</option>
-                </select>
+            <div style="display:flex; align-items:center; gap:20px;">
+                <!-- Buscador por nombre/email -->
+                <div style="font-size:0.85rem; color:var(--cream);">
+                    Buscar: 
+                    <input type="text" id="admin-usr-search" class="admin-form-input" 
+                           placeholder="Nombre o email..." 
+                           style="display:inline-block; width:200px; margin-left:10px; padding:6px 12px;" 
+                           oninput="filtrarUsuarios()">
+                </div>
+                <!-- Filtro por rol -->
+                <div style="font-size:0.85rem; color:var(--cream);">
+                    Filtrar por rol: 
+                    <select id="admin-usr-role-filter" class="admin-form-input" 
+                            style="display:inline-block; width:auto; margin-left:10px; padding:6px 12px; cursor:pointer;" 
+                            onchange="filtrarUsuarios()">
+                        <option value="ALL">Todos</option>
+                        <option value="ROLE_ADMIN">Admin</option>
+                        <option value="ROLE_USER">Cliente</option>
+                    </select>
+                </div>
             </div>
         </div>
         <div id="admin-usr-table-container"></div>
@@ -969,21 +981,27 @@ async function loadAdminUsuarios() {
     renderUsuariosTable(_cachedUsuariosAdmin);
 }
 
-window.filtrarUsuariosRol = () => {
-    var role = document.getElementById('admin-usr-role-filter').value;
-    if (role === 'ALL') {
-        renderUsuariosTable(_cachedUsuariosAdmin);
-        return;
-    }
+window.filtrarUsuarios = () => {
+    var query = (document.getElementById('admin-usr-search').value || "").toLowerCase();
+    var role  = (document.getElementById('admin-usr-role-filter').value || "ALL");
     
     var filtered = _cachedUsuariosAdmin.filter(u => {
-        if (role === 'ROLE_ADMIN') return u.rol === 'ROLE_ADMIN';
-        if (role === 'ROLE_USER') return u.rol !== 'ROLE_ADMIN';
-        return true;
+        // 1. Filtro por búsqueda de texto
+        var nombre = (u.nombre || "").toLowerCase();
+        var email  = (u.email  || "").toLowerCase();
+        var matchesText = nombre.includes(query) || email.includes(query);
+        
+        // 2. Filtro por rol
+        var matchesRole = true;
+        if (role === 'ROLE_ADMIN') matchesRole = (u.rol === 'ROLE_ADMIN');
+        if (role === 'ROLE_USER')  matchesRole = (u.rol !== 'ROLE_ADMIN');
+        
+        return matchesText && matchesRole;
     });
 
     renderUsuariosTable(filtered);
 };
+
 
 window.renderUsuariosTable = (usuarios) => {
     var container = document.getElementById('admin-usr-table-container');

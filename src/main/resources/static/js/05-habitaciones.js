@@ -66,8 +66,6 @@ async function loadRooms() {
             }
         }
 
-        var descEscaped = h.descripcion.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-
         var slide = document.createElement('div');
         slide.className = 'swiper-slide';
         slide.innerHTML = `
@@ -86,7 +84,7 @@ async function loadRooms() {
                         </span>
                     </div>
                     ${disponible
-                        ? `<button class="btn-room" onclick="selectRoom('${h.tipo}', ${h.precio}, '${descEscaped}')">${t('room_book')}</button>`
+                        ? `<button class="btn-room" onclick="navigateToRoom('${h.tipo}')">${t('room_book')}</button>`
                         : `<button class="btn-room" disabled style="opacity:0.4; cursor:not-allowed;">${t('room_no_avail')}</button>`
                     }
                 </div>
@@ -104,5 +102,10 @@ async function loadRooms() {
         pagination:  { el: '.swiper-pagination', clickable: true },
         navigation:  { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
     });
+}
+
+function navigateToRoom(tipo) {
+    if (state.searchDates) sessionStorage.setItem('searchDates', JSON.stringify(state.searchDates));
+    window.location.href = '/habitacion/' + tipo.toLowerCase();
 }
 

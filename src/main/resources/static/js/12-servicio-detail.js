@@ -11,11 +11,6 @@ window.openServicioDetail = async function(id) {
         ? SERVICIO_NOMBRES_EN[id] : servicio.nombre;
     var precioStr = nombre.toLowerCase().includes('room service') ? t('srv_a_la_carte') : `${parseFloat(servicio.precio).toFixed(2)} €`;
     var precioLabelHtml = nombre.toLowerCase().includes('room service') ? '' : `<span class="servicio-detail-precio-label">${t('srv_per_service')}</span>`;
-    var slug   = slugify(nombre);
-
-    if (!_suppressHistoryPush) {
-        history.pushState({ view: 'servicio', id, slug }, '', '/servicio/' + slug);
-    }
 
     var slidesHtml = '';
     if (data && data.images && data.images.length > 0) {
@@ -44,7 +39,10 @@ window.openServicioDetail = async function(id) {
         `;
     }
 
-    showDynamic(`
+    var _mc = document.getElementById('main-content');
+    var _dv = document.getElementById('dynamic-view');
+    if (_mc) _mc.style.display = 'block';
+    if (_dv) _dv.innerHTML = `
         <div class="servicio-detail-page">
 
             <button class="btn-volver" onclick="backToServicios()">${t('srv_back')}</button>
@@ -94,7 +92,7 @@ window.openServicioDetail = async function(id) {
 
             </div>
         </div>
-    `);
+    `;
 
     if (detailSwiper) { detailSwiper.destroy(true, true); detailSwiper = null; }
     detailSwiper = new Swiper('.servicioDetailSwiper', {
@@ -108,11 +106,17 @@ window.openServicioDetail = async function(id) {
 };
 
 window.backToServicios = function() {
-    history.pushState({ view: 'home' }, '', '/');
-    showLanding();
-    setTimeout(() => {
-        var el = document.getElementById('servicios');
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-    }, 50);
+    window.location.href = '/#servicios';
+};
+
+window.loadAndShowServicio = async function(slug) {
+    var servicios = await fetchServicios();
+    var s = servicios.find(sv => {
+        var nombre = (typeof LANG !== 'undefined' && LANG === 'en' && typeof SERVICIO_NOMBRES_EN !== 'undefined' && SERVICIO_NOMBRES_EN[sv.id])
+            ? SERVICIO_NOMBRES_EN[sv.id] : sv.nombre;
+        return slugify(nombre) === slug;
+    });
+    if (!s) { window.location.href = '/'; return; }
+    await openServicioDetail(s.id);
 };
 
