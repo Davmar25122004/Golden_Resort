@@ -23,6 +23,8 @@ public class Usuario {
     
     private String nombre;
 
+    private String supabaseUid;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "usuarios_roles",

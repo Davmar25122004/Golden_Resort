@@ -1,52 +1,43 @@
 package com.example.supabase.controller;
 
-import com.example.supabase.domain.Usuario;
-import com.example.supabase.domain.Rol;
 import com.example.supabase.repository.UsuarioRepository;
-import com.example.supabase.repository.RoleRepository;
-import jakarta.servlet.ServletException;
+import com.example.supabase.service.SupabaseAuthService;
+import com.example.supabase.service.UsuarioService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
 public class MainController {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioService usuarioService;
+    private final UsuarioRepository usuarioRepository;
+    private final SupabaseAuthService supabaseAuthService;
 
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public MainController(UsuarioService usuarioService,
+                          UsuarioRepository usuarioRepository,
+                          SupabaseAuthService supabaseAuthService) {
+        this.usuarioService      = usuarioService;
+        this.usuarioRepository   = usuarioRepository;
+        this.supabaseAuthService = supabaseAuthService;
+    }
 
     @GetMapping("/")
-    public String indice() {
-        return "index";
-    }
+    public String indice() { return "index"; }
 
     @GetMapping("/habitacion/{tipo}")
-    public String habitacionDetalle() {
-        return "habitacion";
-    }
+    public String habitacionDetalle() { return "habitacion"; }
 
     @GetMapping("/servicio/{slug}")
-    public String servicioDetalle() {
-        return "servicio";
-    }
+    public String servicioDetalle() { return "servicio"; }
 
     @GetMapping("/mis-reservas")
     public String misReservas(Authentication auth) {
@@ -63,43 +54,51 @@ public class MainController {
         return "admin";
     }
 
+    @GetMapping("/verificar-email")
+    public String verificarEmail() {
+        return "verificar-email";
+    }
+
     @PostMapping("/api/auth/register")
     @ResponseBody
-    public ResponseEntity<?> registrar(@RequestBody Map<String, String> datos, HttpServletRequest request) {
+    public ResponseEntity<?> registrar(@RequestBody Map<String, String> datos,
+                                       HttpServletRequest request) {
         try {
-            String email = datos.get("email");
-            String nombre = datos.get("nombre");
+            String email    = datos.get("email");
+            String nombre   = datos.get("nombre");
             String password = datos.get("password");
 
-            if (usuarioRepository.findByEmail(email).isPresent()) {
-                return ResponseEntity.badRequest().body("El email ya está registrado.");
-            }
+            usuarioService.registrar(nombre, email, password);
 
-            Usuario nuevoUsuario = new Usuario();
-            nuevoUsuario.setNombre(nombre);
-            nuevoUsuario.setEmail(email);
-            nuevoUsuario.setPassword(passwordEncoder.encode(password));
-            if (nuevoUsuario.getRoles() == null) {
-                nuevoUsuario.setRoles(new HashSet<>());
-            }
+            // No hacemos auto-login: el usuario debe verificar su email primero
+            return ResponseEntity.ok(Map.of("message", "CHECK_EMAIL"));
 
-            Rol rolCliente = roleRepository.findById(2L)
-                    .orElseThrow(() -> new RuntimeException("Error: Rol ROLE_CLIENTE no encontrado."));
-
-            nuevoUsuario.getRoles().add(rolCliente);
-            usuarioRepository.save(nuevoUsuario);
-
-            try {
-                request.login(email, password);
-            } catch (ServletException e) {
-                return ResponseEntity.ok(Map.of("message", "Usuario creado, pero error al iniciar sesión automática."));
-            }
-
-            return ResponseEntity.ok(Map.of("message", "OK"));
-
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
+    }
+
+    @PostMapping("/api/auth/confirmar-verificacion")
+    @ResponseBody
+    public ResponseEntity<?> confirmarVerificacion(@RequestBody Map<String, String> datos) {
+        String accessToken = datos.get("accessToken");
+        if (accessToken == null || accessToken.isBlank()) {
+            return ResponseEntity.badRequest().body("Token no proporcionado.");
+        }
+
+        String email = supabaseAuthService.getEmailFromToken(accessToken);
+        if (email == null) {
+            return ResponseEntity.status(401).body("Token inválido o expirado.");
+        }
+
+        boolean ok = usuarioService.confirmarVerificacion(email);
+        if (!ok) {
+            return ResponseEntity.status(404).body("Usuario no encontrado.");
+        }
+
+        return ResponseEntity.ok(Map.of("message", "OK"));
     }
 
     @GetMapping("/api/usuario-info")
@@ -108,19 +107,16 @@ public class MainController {
         if (auth == null || !auth.isAuthenticated()) {
             return Map.of("nombre", "Invitado", "roles", List.of());
         }
+        String email = auth instanceof OAuth2AuthenticationToken token
+                ? (String) token.getPrincipal().getAttributes().get("email")
+                : auth.getName();
 
-        String email;
-        if (auth instanceof OAuth2AuthenticationToken token) {
-            email = (String) token.getPrincipal().getAttributes().get("email");
-        } else {
-            email = auth.getName();
-        }
-
-        Optional<Usuario> userOpt = usuarioRepository.findByEmail(email);
-        String nombreAMostrar = userOpt.isPresent() ? userOpt.get().getNombre() : email;
+        String nombre = usuarioRepository.findByEmail(email)
+                .map(u -> u.getNombre() != null ? u.getNombre() : email)
+                .orElse(email);
 
         return Map.of(
-                "nombre", nombreAMostrar,
+                "nombre", nombre,
                 "roles", auth.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toList()));

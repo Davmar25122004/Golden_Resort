@@ -179,12 +179,25 @@ window.renderReservasTable = (reservas) => {
         <table class="admin-table">
             <thead>
                 <tr>
-                    <th>#</th><th>${t('adm_col_client')}</th><th>${t('adm_col_room')}</th><th>${t('adm_col_arrival')}</th><th>${t('adm_col_departure')}</th>
+                    <th>#</th><th>${t('adm_col_client')}</th><th>${t('adm_col_room')}</th><th>ESTADO</th><th>${t('adm_col_arrival')}</th><th>${t('adm_col_departure')}</th>
                     <th>${t('adm_res_services')}</th><th>${t('adm_res_total')}</th><th></th>
                 </tr>
             </thead>
             <tbody>
                 ${reservas.map(r => {
+                    var estado = calcularEstado(r.fechaEntrada, r.fechaSalida);
+                    var badgeStyle, badgeText;
+                    if (estado === 'EN_CURSO') {
+                        badgeStyle = 'background:rgba(39,174,96,0.15); color:#27ae60;';
+                        badgeText  = 'EN CURSO';
+                    } else if (estado === 'PROXIMA') {
+                        badgeStyle = 'background:rgba(185,149,77,0.15); color:var(--gold);';
+                        badgeText  = 'PRÓXIMA';
+                    } else {
+                        badgeStyle = 'background:rgba(154,154,154,0.1); color:var(--text-muted-custom);';
+                        badgeText  = 'PASADA';
+                    }
+
                     var serviciosStr = r.servicios && r.servicios.length > 0
                         ? r.servicios.map(s => s.nombre).join(', ')
                         : '';
@@ -206,6 +219,7 @@ window.renderReservasTable = (reservas) => {
                             <span class="admin-badge">${tipoLabels[r.habitacionTipo] || r.habitacionTipo}</span><br>
                             <small style="color:var(--text-muted-custom); margin-top:4px; display:inline-block;">nº ${r.habitacionNumero}</small>
                         </td>
+                        <td><span style="font-size:0.65rem; font-weight:bold; padding:4px 8px; border-radius:4px; letter-spacing:1px; ${badgeStyle}">${badgeText}</span></td>
                         <td>${formatFecha(r.fechaEntrada)}</td>
                         <td>${formatFecha(r.fechaSalida)}</td>
                         <td style="font-size:0.75rem;">${serviciosStr}${rsBadge ? (serviciosStr ? '<br>' : '') + rsBadge : ''}</td>

@@ -79,7 +79,21 @@ window.handleRegister = async (e) => {
         });
 
         if (res.ok) {
-            window.location.reload();
+            const data = await res.json();
+            if (data.message === 'CHECK_EMAIL') {
+                // Ocultar formulario y mostrar mensaje de verificación pendiente
+                document.getElementById('form-register').innerHTML = `
+                    <div class="text-center py-3">
+                        <div style="font-size:2.5rem">📧</div>
+                        <h6 class="mt-2 mb-1" style="color:#c9a96e">¡Revisa tu correo!</h6>
+                        <p class="small text-secondary mb-0">
+                            Te hemos enviado un enlace de verificación a <strong>${email}</strong>.<br>
+                            Haz clic en él para activar tu cuenta.
+                        </p>
+                    </div>`;
+            } else {
+                window.location.reload();
+            }
         } else {
             const msg = await res.text();
             showAuthError(msg || t('auth_error_reg'));

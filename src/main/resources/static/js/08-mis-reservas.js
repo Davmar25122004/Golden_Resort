@@ -6,6 +6,7 @@
 // ── MIS RESERVAS ──────────────────────────────────────────────────────────────
 
 window.showMisReservas = async () => {
+    console.log("🟢 EVENTO: MIS RESERVAS CARGADO");
     var _mc = document.getElementById('main-content');
     var _dv = document.getElementById('dynamic-view');
     if (_mc) _mc.style.display = 'block';
@@ -40,9 +41,24 @@ window.showMisReservas = async () => {
     if (!reservas || reservas.length === 0) {
         container.innerHTML = `
             <div class="reserva-empty">
+                <div class="reserva-empty-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+                        <rect x="8" y="28" width="48" height="26" rx="3" stroke="currentColor" stroke-width="2"/>
+                        <path d="M8 38h48" stroke="currentColor" stroke-width="2"/>
+                        <rect x="16" y="38" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <rect x="38" y="38" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M20 28v-6a12 12 0 0 1 24 0v6" stroke="currentColor" stroke-width="2"/>
+                        <circle cx="32" cy="33" r="2" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="reserva-empty-deco">
+                    <span></span><span class="reserva-empty-diamond">◆</span><span></span>
+                </div>
                 <p class="reserva-empty-title">${t('mr_empty_title')}</p>
                 <p class="reserva-empty-sub">${t('mr_empty_sub')}</p>
-                <button class="btn-reserva-empty" onclick="scrollToSection('habitaciones')">${t('mr_empty_btn')}</button>
+                <button class="btn-reserva-empty" onclick="goHome(); setTimeout(()=>scrollToSection('habitaciones'),300)">
+                    ${t('mr_empty_btn')}
+                </button>
             </div>`;
         return;
     }

@@ -1,0 +1,291 @@
+/* ============================================================
+   ACCESIBILIDAD — Icono flotante + Panel lateral (Versión Turismo)
+   ============================================================ */
+
+:root {
+    --acc-primary: #c9a96e;
+    --acc-primary-hover: #b8956a;
+    --acc-bg-panel: #141414;
+    --acc-text-main: #e0d8cc;
+    --acc-border: #2a2a2a;
+}
+
+/* ---------- Botón flotante (Sticky) ---------- */
+#acc-toggle-btn {
+    position: fixed;
+    left: 0;
+    top: 25%;
+    z-index: 100000;
+    width: 44px;
+    height: 44px;
+    border-radius: 0 8px 8px 0;
+    background: #1a1610;
+    border: 1px solid #c9a96e;
+    border-left: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.5);
+    transition: background 0.25s, transform 0.2s;
+    color: #c9a96e;
+    outline: none;
+    overflow: hidden;
+    padding: 0;
+}
+
+#acc-toggle-btn:hover,
+#acc-toggle-btn:focus-visible {
+    background: #2a2010;
+    transform: scale(1.05);
+}
+
+#acc-toggle-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+/* ---------- Panel lateral ---------- */
+#acc-panel {
+    position: fixed;
+    left: -400px;
+    top: 0;
+    height: 100dvh;
+    width: clamp(300px, 90vw, 360px);
+    background: var(--acc-bg-panel);
+    border-right: 1px solid var(--acc-border);
+    box-shadow: 5px 0 30px rgba(0,0,0,0.1);
+    z-index: 100001;
+    display: flex;
+    flex-direction: column;
+    transition: left 0.35s cubic-bezier(0.4,0,0.2,1);
+    color: var(--acc-text-main);
+}
+
+#acc-panel.acc-panel-open {
+    left: 0;
+}
+
+/* Encabezado */
+.acc-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    background: var(--acc-primary);
+    color: #fff;
+}
+
+.acc-panel-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.acc-close-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    font-size: 1.1rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.acc-close-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+/* Cuerpo */
+.acc-panel-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    overflow-y: auto;
+}
+
+.acc-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.acc-section-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #c9a96e;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 1px solid #2a2a2a;
+    padding-bottom: 5px;
+    margin: 0;
+}
+
+.acc-btn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.acc-btn-single {
+    margin-top: 12px;
+}
+
+.acc-btn {
+    width: 100%;
+    padding: 12px 10px;
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    color: #b0a090;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    min-height: 80px;
+    height: auto;
+}
+
+.acc-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.acc-btn-split {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.acc-icon-text {
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-right: 5px;
+}
+
+.acc-btn:hover:not(:disabled) {
+    background: #2a2010;
+    border-color: #c9a96e;
+    color: #c9a96e;
+}
+
+.acc-btn.acc-active {
+    background: #2a2010;
+    border-color: #c9a96e;
+    color: #c9a96e;
+}
+
+.acc-btn--small {
+    min-height: 44px !important;
+    padding: 8px 12px !important;
+    flex-direction: row !important;
+    font-size: 0.75rem !important;
+    gap: 8px !important;
+}
+
+.acc-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Reset */
+.acc-reset-btn {
+    padding: 14px;
+    width: 100%;
+    background: #1e1e1e;
+    border: 1px solid #3a3a3a;
+    border-radius: 6px;
+    color: #6b6050;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.acc-reset-btn:hover {
+    border-color: #c9a96e;
+    color: #c9a96e;
+}
+
+/* Overlay */
+#acc-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    z-index: 100000;
+}
+
+#acc-overlay.acc-overlay-visible {
+    display: block;
+}
+
+/* -------- Clases Aplicadas -------- */
+
+/* Fuente Legible - Más agresivo para sobrescribir todo */
+body.acc-legible-font,
+body.acc-legible-font *,
+body.acc-legible-font h1,
+body.acc-legible-font h2,
+body.acc-legible-font h3,
+body.acc-legible-font h4,
+body.acc-legible-font .serif {
+    font-family: 'Open Sans', Arial, Verdana, sans-serif !important;
+    letter-spacing: 0.01em !important;
+}
+
+/* Resaltar Enlaces */
+body.acc-underline-links a {
+    text-decoration: underline !important;
+    background-color: rgba(255, 255, 0, 0.2) !important;
+    color: #0000ee !important;
+}
+
+/* Desactivar Animaciones */
+body.acc-no-animations *,
+body.acc-no-animations *::before,
+body.acc-no-animations *::after {
+    animation: none !important;
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 0 !important;
+    transition: none !important;
+    transition-duration: 0ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+}
+
+/* Neutralización total de AOS (Animate On Scroll) */
+body.acc-no-animations [data-aos] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    transition-delay: 0s !important;
+    visibility: visible !important;
+}
+
+body.acc-no-animations [data-aos*="fade"],
+body.acc-no-animations [data-aos*="slide"],
+body.acc-no-animations [data-aos*="zoom"] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition-delay: 0s !important;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    #acc-panel {
+        width: 100%;
+        left: -100%;
+    }
+}

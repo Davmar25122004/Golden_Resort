@@ -109,13 +109,13 @@ window.TRANSLATIONS = {
     mr_room_total:        'Total Habitación: ',
     mr_total_price:       'PRECIO TOTAL',
     mr_cancel:            'Cancelar reserva',
-    mr_manage_rs:         '🍽 Gestionar Room Service',
+    mr_manage_rs:         ' Gestionar Room Service',
     mr_cancel_confirm:    '¿Seguro que quieres cancelar esta reserva?',
     mr_cancel_error:      'No se pudo cancelar la reserva. Inténtalo de nuevo.',
     mr_cancel_error_conn: 'Error de conexión al cancelar.',
     mr_special_request_label:  'PETICIÓN ESPECIAL',
     mr_special_request_none:   'Sin petición especial',
-    mr_special_request_edit:   '✎ Editar petición',
+    mr_special_request_edit:   ' Editar petición',
     mr_special_request_save:   'Guardar',
     mr_special_request_cancel: 'Cancelar',
     mr_special_request_error:  'Error al guardar la petición. Inténtalo de nuevo.',
@@ -383,13 +383,13 @@ window.TRANSLATIONS = {
     mr_room_total:        'Room Total: ',
     mr_total_price:       'TOTAL PRICE',
     mr_cancel:            'Cancel booking',
-    mr_manage_rs:         '🍽 Manage Room Service',
+    mr_manage_rs:         ' Manage Room Service',
     mr_cancel_confirm:    'Are you sure you want to cancel this booking?',
     mr_cancel_error:      'Could not cancel the booking. Please try again.',
     mr_cancel_error_conn: 'Connection error while cancelling.',
     mr_special_request_label:  'SPECIAL REQUEST',
     mr_special_request_none:   'No special request',
-    mr_special_request_edit:   '✎ Edit request',
+    mr_special_request_edit:   ' Edit request',
     mr_special_request_save:   'Save',
     mr_special_request_cancel: 'Cancel',
     mr_special_request_error:  'Error saving the request. Please try again.',
@@ -565,12 +565,10 @@ window.setLang = function(lang) {
   localStorage.setItem('lang', lang);
   document.documentElement.lang = lang;
 
-  // Actualiza botones del selector
   document.querySelectorAll('.lang-btn').forEach(function(btn) {
     btn.classList.toggle('lang-btn--active', btn.dataset.lang === lang);
   });
 
-  // Actualiza locale de flatpickr y reinicia los calendarios del hero
   if (typeof FP_CONFIG !== 'undefined') {
     FP_CONFIG.locale = lang === 'en' ? 'default' : 'es';
     ['#in-date', '#out-date'].forEach(function(sel) {
@@ -582,10 +580,8 @@ window.setLang = function(lang) {
     });
   }
 
-  // Aplica traducciones a elementos estáticos
   applyTranslations();
 
-  // Re-renderiza la vista actual
   var path = window.location.pathname;
   if (path === '/mis-reservas') {
     showMisReservas();
@@ -598,7 +594,6 @@ window.setLang = function(lang) {
       if (room) selectRoom(tipo, room.precioNoche, room.descripcion || '');
     });
   } else if (path.startsWith('/servicio/')) {
-    // Busca el servicio actual y lo re-abre
     fetchServicios().then(function(servicios) {
       var slug = path.split('/servicio/')[1];
       var serv = servicios.find(function(s) { return slugify(s.nombre) === slug; });

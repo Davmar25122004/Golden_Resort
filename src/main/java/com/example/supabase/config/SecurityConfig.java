@@ -41,7 +41,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/habitaciones", "/api/habitaciones/**").permitAll()
                         .requestMatchers("/api/servicios").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/auth/register", "/api/usuario-info").permitAll()
+                        .requestMatchers("/api/auth/register", "/api/auth/confirmar-verificacion", "/api/usuario-info").permitAll()
+                        .requestMatchers("/verificar-email").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/")
