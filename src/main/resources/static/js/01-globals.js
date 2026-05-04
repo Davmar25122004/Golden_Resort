@@ -1,6 +1,23 @@
-// Hotel DAW | app.js
+// Golden Resort | app.js
 
+// ── Horario fijo del hotel (cargado al inicio desde /api/hotel/info) ─────────
+window.HOTEL_INFO = { checkinTime: '15:00', checkoutTime: '11:00' };
+(function loadHotelInfo() {
+    fetch('/api/hotel/info')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (j) { if (j) window.HOTEL_INFO = j; })
+        .catch(function () { /* fallback a defaults */ });
+})();
 
+// Helpers para mostrar fecha + hora de check-in / check-out
+window.fmtFechaCheckin = function (ymd) {
+    if (!ymd) return '—';
+    return ymd + ' · ' + (window.HOTEL_INFO.checkinTime || '15:00') + ' h';
+};
+window.fmtFechaCheckout = function (ymd) {
+    if (!ymd) return '—';
+    return ymd + ' · ' + (window.HOTEL_INFO.checkoutTime || '11:00') + ' h';
+};
 
 var TIPO_IMAGES = {
     NORMAL: [
@@ -203,8 +220,8 @@ var SERVICIO_DATA = {
         ],
     },
     6: {
-        descripcion: 'El lujo de tenerlo todo sin salir de tu habitación. Nuestro Room Service opera las 24 horas con una carta completa que incluye desde desayunos ligeros hasta cenas elaboradas. Todo presentado con la misma excelencia que esperas de Hotel DAW, entregado en tu puerta en menos de 30 minutos.',
-        descripcion_en: 'The luxury of having everything without leaving your room. Our Room Service operates 24 hours a day with a full menu ranging from light breakfasts to elaborate dinners. Presented with the same excellence you expect from Hotel DAW, delivered to your door in under 30 minutes.',
+        descripcion: 'El lujo de tenerlo todo sin salir de tu habitación. Nuestro Room Service opera las 24 horas con una carta completa que incluye desde desayunos ligeros hasta cenas elaboradas. Todo presentado con la misma excelencia que esperas de Golden Resort, entregado en tu puerta en menos de 30 minutos.',
+        descripcion_en: 'The luxury of having everything without leaving your room. Our Room Service operates 24 hours a day with a full menu ranging from light breakfasts to elaborate dinners. Presented with the same excellence you expect from Golden Resort, delivered to your door in under 30 minutes.',
         caracteristicas: [
             'Disponible las 24 horas, todos los días del año',
             'Carta completa: desayuno, almuerzo, cena y snacks',

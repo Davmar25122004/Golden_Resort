@@ -43,6 +43,53 @@ public class AdminService {
         this.reservaService = reservaService;
     }
 
+    /**
+     * Series temporales para gráficos del dashboard.
+     *  type = "monthly" → 12 meses (ene–dic) del año indicado (o el actual).
+     *  type = "yearly"  → un punto por cada año con reservas (ascendente).
+     * Devuelve: { labels[], reservas[], ingresos[] }
+     */
+    public Map<String, Object> getSeries(String type, Integer year) {
+        java.util.List<String>     labels   = new java.util.ArrayList<>();
+        java.util.List<Long>       reservas = new java.util.ArrayList<>();
+        java.util.List<BigDecimal> ingresos = new java.util.ArrayList<>();
+
+        if ("yearly".equalsIgnoreCase(type)) {
+            java.util.Map<Integer, Long>       cuentaPorAnyo  = new java.util.TreeMap<>();
+            java.util.Map<Integer, BigDecimal> ingresoPorAnyo = new java.util.TreeMap<>();
+            for (Reserva r : reservaRepository.findAll()) {
+                int a = r.getFechaEntrada().getYear();
+                cuentaPorAnyo.merge(a, 1L, Long::sum);
+                ingresoPorAnyo.merge(a, reservaService.calcularTotal(r), BigDecimal::add);
+            }
+            int actual = LocalDate.now().getYear();
+            if (cuentaPorAnyo.isEmpty()) cuentaPorAnyo.put(actual, 0L);
+            for (Integer a : cuentaPorAnyo.keySet()) {
+                labels.add(String.valueOf(a));
+                reservas.add(cuentaPorAnyo.get(a));
+                ingresos.add(ingresoPorAnyo.getOrDefault(a, BigDecimal.ZERO));
+            }
+        } else {
+            int y = (year != null && year > 1900) ? year : LocalDate.now().getYear();
+            String[] meses = {"Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"};
+            for (int m = 1; m <= 12; m++) {
+                List<Reserva> lista = reservaRepository.findByMes(y, m);
+                labels.add(meses[m - 1]);
+                reservas.add((long) lista.size());
+                ingresos.add(lista.stream().map(reservaService::calcularTotal)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add));
+            }
+        }
+
+        Map<String, Object> res = new java.util.LinkedHashMap<>();
+        res.put("type", "yearly".equalsIgnoreCase(type) ? "yearly" : "monthly");
+        res.put("year", year != null ? year : LocalDate.now().getYear());
+        res.put("labels",   labels);
+        res.put("reservas", reservas);
+        res.put("ingresos", ingresos);
+        return res;
+    }
+
     public Map<String, Object> getStats() {
         LocalDate hoy = LocalDate.now();
 
@@ -87,16 +134,23 @@ public class AdminService {
     public List<Map<String, Object>> getUsuarios() {
         return usuarioRepository.findAll().stream()
                 .map(u -> {
-                    String rol = u.getRoles().stream()
+                    java.util.List<String> roles = u.getRoles().stream()
                             .map(r -> r.getName())
-                            .findFirst().orElse("SIN ROL");
-                    return Map.<String, Object>of(
-                            "id",     u.getId(),
-                            "nombre", u.getNombre() != null ? u.getNombre() : "",
-                            "email",  u.getEmail(),
-                            "rol",    rol
-                    );
+                            .sorted()
+                            .collect(Collectors.toList());
+                    String rolPrincipal = roles.stream()
+                            .filter(n -> !"ROLE_CLIENTE".equals(n))
+                            .findFirst()
+                            .orElse(roles.isEmpty() ? "SIN ROL" : roles.get(0));
+                    java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
+                    m.put("id",     u.getId());
+                    m.put("nombre", u.getNombre() != null ? u.getNombre() : "");
+                    m.put("email",  u.getEmail());
+                    m.put("rol",    rolPrincipal);
+                    m.put("roles",  roles);
+                    return m;
                 })
+                .sorted((a, b) -> Long.compare((long) b.get("id"), (long) a.get("id")))
                 .collect(Collectors.toList());
     }
 

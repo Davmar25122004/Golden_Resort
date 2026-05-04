@@ -23,17 +23,20 @@ public class UsuarioService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final SupabaseAuthService supabaseAuthService;
+    private final MensajeriaService mensajeriaService;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
                           PendingRegistrationRepository pendingRepository,
                           RoleRepository roleRepository,
                           PasswordEncoder passwordEncoder,
-                          SupabaseAuthService supabaseAuthService) {
+                          SupabaseAuthService supabaseAuthService,
+                          MensajeriaService mensajeriaService) {
         this.usuarioRepository  = usuarioRepository;
         this.pendingRepository  = pendingRepository;
         this.roleRepository     = roleRepository;
         this.passwordEncoder    = passwordEncoder;
         this.supabaseAuthService = supabaseAuthService;
+        this.mensajeriaService  = mensajeriaService;
     }
 
     public void registrar(String nombre, String email, String password) {
@@ -60,6 +63,24 @@ public class UsuarioService {
     }
 
     @Transactional
+    public void actualizarNombre(String email, String nombre) {
+        Usuario u = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
+        u.setNombre(nombre);
+        usuarioRepository.save(u);
+    }
+
+    @Transactional
+    public boolean cambiarPassword(String email, String actual, String nueva) {
+        Usuario u = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
+        if (!passwordEncoder.matches(actual, u.getPassword())) return false;
+        u.setPassword(passwordEncoder.encode(nueva));
+        usuarioRepository.save(u);
+        return true;
+    }
+
+    @Transactional
     public boolean confirmarVerificacion(String email) {
         PendingRegistration pending = pendingRepository.findByEmail(email).orElse(null);
         if (pending == null) return false;
@@ -74,9 +95,14 @@ public class UsuarioService {
         Rol rolCliente = roleRepository.findById(2L)
             .orElseThrow(() -> new RuntimeException("Rol ROLE_CLIENTE no encontrado."));
         usuario.getRoles().add(rolCliente);
-        usuarioRepository.save(usuario);
+        Usuario guardado = usuarioRepository.save(usuario);
 
         pendingRepository.delete(pending);
+
+        try {
+            mensajeriaService.obtenerOCrearConversacion(guardado);
+        } catch (Exception ignored) {}
+
         return true;
     }
 }

@@ -22,6 +22,9 @@ public class OAuth2UserServiceCustom extends DefaultOAuth2UserService {
     @Autowired
     private RoleRepository rolRepository;
 
+    @Autowired
+    private MensajeriaService mensajeriaService;
+
     @Override
     @org.springframework.transaction.annotation.Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -50,6 +53,12 @@ public class OAuth2UserServiceCustom extends DefaultOAuth2UserService {
         } else {
             usuario = usuarioOpt.get(); // El usuario ya existía en la DB
         }
+
+        try {
+            boolean esCliente = usuario.getRoles() != null && usuario.getRoles().stream()
+                    .anyMatch(r -> "ROLE_CLIENTE".equals(r.getName()));
+            if (esCliente) mensajeriaService.obtenerOCrearConversacion(usuario);
+        } catch (Exception ignored) {}
 
         // Aquí está la solución clave: Fusionar los roles de Supabase (BD) con los de Google
         java.util.Set<org.springframework.security.core.GrantedAuthority> authorities = new java.util.HashSet<>(oAuth2User.getAuthorities());

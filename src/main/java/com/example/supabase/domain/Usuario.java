@@ -32,4 +32,11 @@ public class Usuario {
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Rol> roles = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "turno_plan_id")
+    private TurnoPlan turnoPlan;
+
+    @Column(length = 40)
+    private String departamento;   // RECEPCION | LIMPIEZA | COCINA | MANTENIMIENTO | DIRECCION | OTRO
 }

@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,19 +27,22 @@ public class ReservaService {
     private final ServicioRepository servicioRepository;
     private final ReservaServicioRepository reservaServicioRepository;
     private final PedidoRoomServiceRepository pedidoRoomServiceRepository;
+    private final PagoRepository pagoRepository;
 
     public ReservaService(ReservaRepository reservaRepository,
                           HabitacionRepository habitacionRepository,
                           UsuarioRepository usuarioRepository,
                           ServicioRepository servicioRepository,
                           ReservaServicioRepository reservaServicioRepository,
-                          PedidoRoomServiceRepository pedidoRoomServiceRepository) {
+                          PedidoRoomServiceRepository pedidoRoomServiceRepository,
+                          PagoRepository pagoRepository) {
         this.reservaRepository = reservaRepository;
         this.habitacionRepository = habitacionRepository;
         this.usuarioRepository = usuarioRepository;
         this.servicioRepository = servicioRepository;
         this.reservaServicioRepository = reservaServicioRepository;
         this.pedidoRoomServiceRepository = pedidoRoomServiceRepository;
+        this.pagoRepository = pagoRepository;
     }
 
     // ── Consultas ─────────────────────────────────────────────────────────────
@@ -53,6 +57,34 @@ public class ReservaService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no encontrado"));
         return reservaRepository.findByUsuario(usuario).stream()
+                .map(r -> toDTO(r, false))
+                .collect(Collectors.toList());
+    }
+
+    /** Solo reservas con pago COMPLETADO — para "Mis Reservas" */
+    public List<ReservaDTO> misReservasPagadas(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no encontrado"));
+        Set<Long> pagadas = pagoRepository.findByUsuarioIdOrderByCreatedAtDesc(usuario.getId()).stream()
+                .filter(p -> p.getEstado() == EstadoPago.COMPLETADO)
+                .map(p -> p.getReservaId())
+                .collect(Collectors.toSet());
+        return reservaRepository.findByUsuario(usuario).stream()
+                .filter(r -> pagadas.contains(r.getId()))
+                .map(r -> toDTO(r, false))
+                .collect(Collectors.toList());
+    }
+
+    /** Reservas SIN pago confirmado — para "Habitaciones Guardadas" */
+    public List<ReservaDTO> misReservasGuardadas(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no encontrado"));
+        Set<Long> pagadas = pagoRepository.findByUsuarioIdOrderByCreatedAtDesc(usuario.getId()).stream()
+                .filter(p -> p.getEstado() == EstadoPago.COMPLETADO)
+                .map(p -> p.getReservaId())
+                .collect(Collectors.toSet());
+        return reservaRepository.findByUsuario(usuario).stream()
+                .filter(r -> !pagadas.contains(r.getId()))
                 .map(r -> toDTO(r, false))
                 .collect(Collectors.toList());
     }
@@ -219,6 +251,20 @@ public class ReservaService {
         }
 
         return reservaRepository.save(reserva);
+    }
+
+    public void actualizarFechas(Long id, String fechaEntradaStr, String fechaSalidaStr, String email, boolean isAdmin) {
+        Reserva reserva = reservaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!isAdmin && !reserva.getUsuario().getEmail().equals(email))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        LocalDate entrada = LocalDate.parse(fechaEntradaStr);
+        LocalDate salida  = LocalDate.parse(fechaSalidaStr);
+        if (!entrada.isBefore(salida))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de entrada debe ser anterior a la de salida");
+        reserva.setFechaEntrada(entrada);
+        reserva.setFechaSalida(salida);
+        reservaRepository.save(reserva);
     }
 
     public void actualizarPeticion(Long id, String peticion, String email, boolean isAdmin) {

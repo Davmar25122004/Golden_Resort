@@ -18,6 +18,11 @@ init().then(() => {
         if (_sd) { try { state.searchDates = JSON.parse(_sd); } catch(_) {} }
     }
 
+    // Inyectar sidebar admin en todas las páginas
+    if (typeof asbInjectOnPage === 'function') {
+        asbInjectOnPage();
+    }
+
     // Page-specific init según la ruta actual
     var _path = window.location.pathname;
 
@@ -34,5 +39,9 @@ init().then(() => {
         showMisReservas();
     } else if (_path === '/admin') {
         showAdmin();
+    } else if (_path === '/perfil') {
+        showPerfil();
+    } else if (_path === '/peticiones') {
+        peticionesInit();
     }
 });

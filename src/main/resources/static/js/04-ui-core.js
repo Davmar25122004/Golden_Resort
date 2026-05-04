@@ -21,29 +21,68 @@ window.goHome = () => {
     window.location.href = '/';
 };
 
-function updateNav() {
-    var btnAuth        = document.getElementById('btn-auth');
-    var navUser        = document.getElementById('nav-user');
-    var navMisReservas = document.getElementById('nav-mis-reservas');
-    var navAdmin       = document.getElementById('nav-admin');
-    var btnReservarNav = document.getElementById('btn-reservar-nav');
+// Lee el estado del navbar renderizado por el servidor (NavbarAdvice).
+// El servidor es la fuente de verdad: no manipulamos display ni textos en JS.
+function readServerNavState() {
+    var nav = document.getElementById('navbar');
+    if (!nav) return { autenticado: false, usuario: null, roles: [], esStaff: false, esAdmin: false };
+    return {
+        autenticado: nav.dataset.auth === 'true',
+        usuario:     nav.dataset.user || null,
+        roles:       nav.dataset.roles ? nav.dataset.roles.split(',').filter(Boolean) : [],
+        esStaff:     nav.dataset.staff === 'true',
+        esAdmin:     nav.dataset.admin === 'true',
+    };
+}
 
-    if (state.token && state.user) {
-        btnAuth.textContent = t('nav_signout');
-        btnAuth.onclick     = logout;
-        navUser.style.display        = 'inline';
-        navUser.textContent          = state.user.email.split('@')[0];
-        navMisReservas.style.display = state.user.rol === 'ADMIN' ? 'none' : 'inline';
-        navAdmin.style.display       = state.user.rol === 'ADMIN' ? 'inline' : 'none';
-        if (btnReservarNav) btnReservarNav.style.display = state.user.rol === 'ADMIN' ? 'none' : 'inline';
+function updateNav() {
+    var s = readServerNavState();
+
+    // Sincronizar el state JS con la sesión real del servidor para que el resto
+    // del código (auth, reservas, peticiones, etc.) tenga la info correcta.
+    if (s.autenticado) {
+        state.token = 'session';
+        state.user  = {
+            email: s.usuario,
+            roles: s.roles,
+            rol:   s.esAdmin ? 'ADMIN' : (s.roles.indexOf('ROLE_RECEPCION') !== -1 ? 'RECEPCION' : 'CLIENTE'),
+        };
     } else {
-        btnAuth.textContent = t('nav_signin');
-        btnAuth.onclick     = openAuthModal;
-        navUser.style.display        = 'none';
-        navMisReservas.style.display = 'none';
-        navAdmin.style.display       = 'none';
-        if (btnReservarNav) btnReservarNav.style.display = 'none';
+        state.token = null;
+        state.user  = null;
     }
+
+    if (s.esStaff) startBellPolling();
+    else           stopBellPolling();
+}
+
+// ── Polling de la campanita (staff) ──────────────────────────────────────────
+
+var _bellTimer = null;
+
+async function refreshBellBadge() {
+    var bell  = document.getElementById('nav-bell');
+    var badge = document.getElementById('nav-bell-badge');
+    if (!bell || !badge) return;
+    if (document.hidden) return;
+    try {
+        var r = await fetch('/api/mensajeria/recepcion/no-leidos');
+        if (!r.ok) return;
+        var data = await r.json();
+        var n = parseInt(data.total || 0, 10);
+        if (n > 0) { badge.textContent = (n > 99 ? '99+' : n); badge.style.display = 'inline-flex'; }
+        else       { badge.style.display = 'none'; }
+    } catch (_) {}
+}
+
+function startBellPolling() {
+    if (_bellTimer) return;
+    refreshBellBadge();
+    _bellTimer = setInterval(refreshBellBadge, 5000);
+}
+
+function stopBellPolling() {
+    if (_bellTimer) { clearInterval(_bellTimer); _bellTimer = null; }
 }
 
 // ── VISTAS ────────────────────────────────────────────────────────────────────

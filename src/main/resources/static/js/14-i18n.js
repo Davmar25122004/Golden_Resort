@@ -35,7 +35,7 @@ window.TRANSLATIONS = {
     contact_map_cta:  'Ver en Google Maps →',
 
     // FOOTER
-    footer_rights:    '© 2026 Hotel DAW · Todos los derechos reservados',
+    footer_rights:    '© 2026 Golden Resort · Todos los derechos reservados',
 
     // AUTH
     auth_signin_tab:  'Iniciar Sesión',
@@ -67,7 +67,7 @@ window.TRANSLATIONS = {
     room_no_rooms:   'No hay habitaciones disponibles para esas fechas.',
 
     // ROOM DETAIL
-    detail_label:           'Hotel DAW · Nuestras Suites',
+    detail_label:           'Golden Resort · Nuestras Suites',
     detail_selected_dates:  'Fechas seleccionadas:',
     detail_arrival:         'LLEGADA',
     detail_departure:       'SALIDA',
@@ -263,7 +263,7 @@ window.TRANSLATIONS = {
 
     // SERVICIO DETAIL
     srv_back:        '← Volver a Servicios',
-    srv_label:       'Hotel DAW · Nuestros Servicios',
+    srv_label:       'Golden Resort · Nuestros Servicios',
     srv_a_la_carte:  'A la carta',
     srv_per_service: '/ servicio',
     srv_schedule:    'HORARIO',
@@ -274,7 +274,7 @@ window.TRANSLATIONS = {
     srv_no_services: 'No hay servicios disponibles actualmente.',
 
     // LIGHTBOX
-    lb_hotel_rooms:  'Hotel DAW · Habitaciones',
+    lb_hotel_rooms:  'Golden Resort · Habitaciones',
   },
 
   en: {
@@ -309,7 +309,7 @@ window.TRANSLATIONS = {
     contact_map_cta:  'View on Google Maps →',
 
     // FOOTER
-    footer_rights:    '© 2026 Hotel DAW · All rights reserved',
+    footer_rights:    '© 2026 Golden Resort · All rights reserved',
 
     // AUTH
     auth_signin_tab:  'Sign In',
@@ -341,7 +341,7 @@ window.TRANSLATIONS = {
     room_no_rooms:   'No rooms available for those dates.',
 
     // ROOM DETAIL
-    detail_label:           'Hotel DAW · Our Suites',
+    detail_label:           'Golden Resort · Our Suites',
     detail_selected_dates:  'Selected dates:',
     detail_arrival:         'ARRIVAL',
     detail_departure:       'DEPARTURE',
@@ -537,7 +537,7 @@ window.TRANSLATIONS = {
 
     // SERVICIO DETAIL
     srv_back:        '← Back to Services',
-    srv_label:       'Hotel DAW · Our Services',
+    srv_label:       'Golden Resort · Our Services',
     srv_a_la_carte:  'À la carte',
     srv_per_service: '/ service',
     srv_schedule:    'SCHEDULE',
@@ -548,7 +548,7 @@ window.TRANSLATIONS = {
     srv_no_services: 'No services available currently.',
 
     // LIGHTBOX
-    lb_hotel_rooms:  'Hotel DAW · Rooms',
+    lb_hotel_rooms:  'Golden Resort · Rooms',
   }
 };
 
@@ -618,3 +618,4 @@ window.applyTranslations = function() {
   document.documentElement.lang = LANG;
   if (typeof updateNav === 'function') updateNav();
 };
+

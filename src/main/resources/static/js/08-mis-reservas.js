@@ -38,6 +38,16 @@ window.showMisReservas = async () => {
     var reservas = await res.json();
     var container = document.getElementById('reservas-container');
 
+    // Obtener qué reservas ya están pagadas
+    var reservasPagadas = new Set();
+    try {
+        var rPagos = await fetch('/api/pagos/estados');
+        if (rPagos.ok) {
+            var dp = await rPagos.json();
+            (dp.pagadas || []).forEach(id => reservasPagadas.add(id));
+        }
+    } catch (_) {}
+
     if (!reservas || reservas.length === 0) {
         container.innerHTML = `
             <div class="reserva-empty">
@@ -193,11 +203,13 @@ window.showMisReservas = async () => {
                         <div class="date-block">
                             <span class="d-label">${t('hero_checkin')}</span>
                             <span class="d-value">${formatFecha(r.fechaEntrada)}</span>
+                            <span class="d-time">${(window.HOTEL_INFO && window.HOTEL_INFO.checkinTime) || '15:00'} h</span>
                         </div>
                         <div class="date-arrow">→</div>
                         <div class="date-block">
                             <span class="d-label">${t('hero_checkout')}</span>
                             <span class="d-value">${formatFecha(r.fechaSalida)}</span>
+                            <span class="d-time">${(window.HOTEL_INFO && window.HOTEL_INFO.checkoutTime) || '11:00'} h</span>
                         </div>
                     </div>
                     
@@ -242,11 +254,20 @@ window.showMisReservas = async () => {
                     </div>
 
                     <div class="card-actions">
+                        ${(estado === 'PROXIMA' || estado === 'EN_CURSO') && !reservasPagadas.has(r.id) ? `
+                            <button class="btn-manage-rs" style="background:var(--gold);color:var(--dark);border-color:var(--gold);" onclick="abrirPago(${r.id})">
+                                Pagar ${precioTotal} €
+                            </button>` : ''}
+                        ${reservasPagadas.has(r.id) ? `
+                            <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid rgba(40,167,69,0.5);color:#5cb85c;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;border-radius:2px;">
+                                ✓ Pagada
+                            </span>` : ''}
+
                         ${(estado === 'PROXIMA' || estado === 'EN_CURSO') ? `
                             <button class="btn-manage-rs" onclick="abrirGestionRS(${r.id})">
                                 <i class="fas fa-utensils"></i> ${t('mr_manage_rs')}
                             </button>` : ''}
-                        
+
                         ${estado === 'PROXIMA' ? `
                             <button class="btn-cancel-luxury" onclick="cancelarReserva(${r.id})">
                                 ${t('mr_cancel')}

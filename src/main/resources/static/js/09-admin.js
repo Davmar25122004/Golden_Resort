@@ -1,27 +1,23 @@
 // ── PANEL ADMIN ───────────────────────────────────────────────────────────────
 
 window.showAdmin = async () => {
-    var _mc = document.getElementById('main-content');
-    var _dv = document.getElementById('dynamic-view');
-    if (_mc) _mc.style.display = 'block';
-    if (_dv) _dv.innerHTML = `
-        <p class="section-label">${t('admin_label')}</p>
-        <h2 class="serif mb-2" style="color:var(--cream); font-size:2.5rem;">${t('admin_title')}</h2>
-        <div class="gold-line mb-4"></div>
+    if (typeof asbInjectOnPage === 'function') asbInjectOnPage();
+    else if (typeof asbInit === 'function') asbInit();
 
-        <div class="admin-tabs-bar mb-4">
-            <button class="admin-tab-btn active" id="atab-dashboard"    onclick="switchAdminTab('dashboard')">${t('admin_tab_dashboard')}</button>
-            <button class="admin-tab-btn"        id="atab-reservas"     onclick="switchAdminTab('reservas')">${t('admin_tab_bookings')}</button>
-            <button class="admin-tab-btn"        id="atab-habitaciones" onclick="switchAdminTab('habitaciones')">${t('admin_tab_rooms')}</button>
-            <button class="admin-tab-btn"        id="atab-servicios"    onclick="switchAdminTab('servicios')">${t('admin_tab_services')}</button>
-            <button class="admin-tab-btn"        id="atab-roomservice"  onclick="switchAdminTab('roomservice')">${t('admin_tab_rs')}</button>
-            <button class="admin-tab-btn"        id="atab-usuarios"     onclick="switchAdminTab('usuarios')">${t('admin_tab_users')}</button>
-        </div>
+    var initTab    = sessionStorage.getItem('asb_initTab')    || 'dashboard';
+    var initSubtab = sessionStorage.getItem('asb_initSubtab') || null;
+    sessionStorage.removeItem('asb_initTab');
+    sessionStorage.removeItem('asb_initSubtab');
 
-        <div id="admin-tab-body" style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px;">${t('admin_loading')}</div>
-    `;
+    if (initSubtab) window._asbPersonalSubtab = initSubtab;
 
-    switchAdminTab('dashboard');
+    switchAdminTab(initTab);
+
+    var activeId = (initTab === 'personal' && initSubtab)
+        ? 'asb-pers-' + initSubtab
+        : 'asb-adm-' + initTab;
+    var el = document.getElementById(activeId);
+    if (el) el.classList.add('asb-active');
 };
 
 window.switchAdminTab = (tab) => {
@@ -38,6 +34,7 @@ window.switchAdminTab = (tab) => {
     if (tab === 'servicios')    loadAdminServicios();
     if (tab === 'roomservice')  loadAdminRoomService();
     if (tab === 'usuarios')     loadAdminUsuarios();
+    if (tab === 'personal')     loadAdminPersonal();
 };
 
 // ── ADMIN: DASHBOARD ──────────────────────────────────────────────────────────
@@ -70,6 +67,7 @@ async function loadAdminDashboard() {
            </table>`
         : '<p style="color:var(--text-muted-custom); font-size:0.8rem; margin-top:12px; letter-spacing:1px;">' + t('adm_no_arrivals') + '</p>';
 
+    var anyoActual = new Date().getFullYear();
     body.innerHTML = `
         <div class="admin-stats-grid">
             <div class="admin-stat-card">
@@ -90,59 +88,613 @@ async function loadAdminDashboard() {
             </div>
         </div>
 
+        <!-- ── GRÁFICOS ──────────────────────────────────────────────────────── -->
+        <div class="admin-charts-toolbar">
+            <div class="admin-charts-tabs">
+                <button class="admin-chart-tab active" data-period="monthly" onclick="adminChartsSetPeriod('monthly')">Por mes</button>
+                <button class="admin-chart-tab" data-period="yearly" onclick="adminChartsSetPeriod('yearly')">Por año</button>
+            </div>
+            <div class="admin-charts-year" id="admin-charts-year-wrap">
+                <button class="admin-chart-nav" onclick="adminChartsChangeYear(-1)" aria-label="Año anterior">‹</button>
+                <span id="admin-charts-year-label">${anyoActual}</span>
+                <button class="admin-chart-nav" onclick="adminChartsChangeYear(1)" aria-label="Año siguiente">›</button>
+            </div>
+        </div>
+        <div class="admin-charts-grid">
+            <div class="admin-chart-card">
+                <p class="admin-chart-title">Reservas</p>
+                <div class="admin-chart-canvas-wrap">
+                    <canvas id="admin-chart-reservas"></canvas>
+                </div>
+            </div>
+            <div class="admin-chart-card">
+                <p class="admin-chart-title">Ingresos (€)</p>
+                <div class="admin-chart-canvas-wrap">
+                    <canvas id="admin-chart-ingresos"></canvas>
+                </div>
+            </div>
+        </div>
+
         <div class="mt-5">
             <p style="font-size:0.75rem; letter-spacing:2px; color:var(--text-muted-custom); margin-bottom:4px;">${t('adm_upcoming')}</p>
             <div class="gold-line" style="width:60px; margin-bottom:0;"></div>
             ${proximasHtml}
         </div>`;
+
+    // Inicializa state y carga gráficos
+    window._adminChartsState = window._adminChartsState || { period: 'monthly', year: anyoActual };
+    adminChartsLoad();
+}
+
+// ── GRÁFICOS DEL DASHBOARD ──────────────────────────────────────────────────
+
+window._adminCharts = { reservas: null, ingresos: null };
+
+window.adminChartsSetPeriod = (period) => {
+    window._adminChartsState.period = period;
+    document.querySelectorAll('.admin-chart-tab').forEach(b => {
+        b.classList.toggle('active', b.dataset.period === period);
+    });
+    var yWrap = document.getElementById('admin-charts-year-wrap');
+    if (yWrap) yWrap.style.visibility = (period === 'monthly') ? 'visible' : 'hidden';
+    adminChartsLoad();
+};
+
+window.adminChartsChangeYear = (delta) => {
+    window._adminChartsState.year += delta;
+    var lbl = document.getElementById('admin-charts-year-label');
+    if (lbl) lbl.textContent = window._adminChartsState.year;
+    adminChartsLoad();
+};
+
+async function adminChartsLoad() {
+    var st = window._adminChartsState;
+    if (!st || typeof Chart === 'undefined') return;
+    var url = '/api/admin/stats/series?type=' + encodeURIComponent(st.period);
+    if (st.period === 'monthly') url += '&year=' + st.year;
+    var data;
+    try {
+        var r = await fetch(url);
+        if (!r.ok) return;
+        data = await r.json();
+    } catch (_) { return; }
+
+    adminChartsRender('admin-chart-reservas', 'reservas', data.labels, data.reservas, '#C9A84C', false);
+    adminChartsRender('admin-chart-ingresos', 'ingresos', data.labels, data.ingresos, '#4dabf7', true);
+}
+
+function adminChartsRender(canvasId, key, labels, values, color, esEuros) {
+    var canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    if (window._adminCharts[key]) { window._adminCharts[key].destroy(); window._adminCharts[key] = null; }
+
+    var ctx = canvas.getContext('2d');
+    // Gradiente vertical sobre el color base (usa altura del wrapper)
+    var h = canvas.parentElement ? canvas.parentElement.clientHeight : 240;
+    var grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, color + 'cc');
+    grad.addColorStop(1, color + '22');
+
+    // Grosor máximo de barra: muchas barras → finas, pocas → gordas
+    var n = (labels || []).length;
+    var maxBar = n >= 12 ? 28 : n >= 6 ? 50 : n >= 2 ? 90 : 140;
+
+    window._adminCharts[key] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels || [],
+            datasets: [{
+                data: (values || []).map(v => parseFloat(v) || 0),
+                backgroundColor: grad,
+                borderColor: color,
+                borderWidth: 1,
+                borderRadius: 4,
+                maxBarThickness: maxBar,
+                minBarLength: 4   // garantiza que valores muy pequeños sigan siendo visibles
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1a1a1a',
+                    borderColor: 'rgba(201,168,76,0.4)',
+                    borderWidth: 1,
+                    titleColor: '#C9A84C',
+                    bodyColor: '#f5f0e8',
+                    padding: 10,
+                    callbacks: {
+                        label: (item) => esEuros
+                            ? ' ' + item.parsed.y.toFixed(2) + ' €'
+                            : ' ' + item.parsed.y + ' reserva' + (item.parsed.y === 1 ? '' : 's')
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#9a9a9a', font: { size: 11 } },
+                    grid:  { color: 'rgba(255,255,255,0.04)' }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#9a9a9a',
+                        font: { size: 11 },
+                        callback: (v) => esEuros ? v + ' €' : v
+                    },
+                    grid: { color: 'rgba(255,255,255,0.06)' }
+                }
+            }
+        }
+    });
 }
 
 // ── ADMIN: RESERVAS ───────────────────────────────────────────────────────────
 
 var _cachedReservasAdmin = [];
 
+// ── CALENDARIO ADMIN (replica recepción + acciones modificar/eliminar) ──────
+
+var _adminCalMeses = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
+                      'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+var _adminCalDIAS  = ['L','M','X','J','V','S','D'];
+
+var _adminCalState = {
+    vista: 'anual',                      // 'anual' | 'mensual' | 'semanal'
+    anyo:  new Date().getFullYear(),
+    mes:   new Date().getMonth(),         // 0-11
+    semana: 0,
+    cacheRango: null,
+    diaActual: null
+};
+
 async function loadAdminReservas() {
     var body = document.getElementById('admin-tab-body');
-    var res;
-    try { res = await fetch('/api/reservas'); } catch (_) {
-        body.innerHTML = '<p style="color:#c0392b;">' + t('adm_error_conn') + '</p>'; return;
-    }
-    if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">' + t('adm_res_error') + '</p>'; return; }
-    
-    var reservas = await res.json();
-    _cachedReservasAdmin = reservas;
-
-    if (!reservas || reservas.length === 0) {
-        body.innerHTML = '<p style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px; margin-top:12px;">' + t('adm_res_no_data') + '</p>';
-        return;
-    }
+    try {
+        var rRes = await fetch('/api/reservas');
+        if (rRes.ok) _cachedReservasAdmin = await rRes.json();
+    } catch (_) {}
+    // Importante: invalidar la caché de conteos del calendario al recargar
+    if (typeof adminCalInvalidarCache === 'function') adminCalInvalidarCache();
 
     body.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <div style="font-size:0.85rem; color:var(--cream);">
-                Filtrar por mes: 
-                <select id="admin-res-month-filter" class="admin-form-input" style="display:inline-block; width:auto; margin-left:10px; padding:6px 12px; cursor:pointer;" onchange="filtrarReservasMes()">
-                    <option value="ALL">Todas</option>
-                    <option value="01">Enero</option>
-                    <option value="02">Febrero</option>
-                    <option value="03">Marzo</option>
-                    <option value="04">Abril</option>
-                    <option value="05">Mayo</option>
-                    <option value="06">Junio</option>
-                    <option value="07">Julio</option>
-                    <option value="08">Agosto</option>
-                    <option value="09">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
-                </select>
+        <div id="cal-page">
+            <div class="cal-container" style="padding:0; max-width:none;">
+                <header class="cal-header" id="admin-cal-header">
+                    <h1 class="cal-title">PLAN HABITACIONES</h1>
+                    <div class="cal-view-tabs" role="tablist">
+                        <button type="button" class="cal-tab cal-tab--active" data-view="anual"   onclick="adminCalCambiarVista('anual')">CALENDARIO</button>
+                        <button type="button" class="cal-tab"                 data-view="mensual" onclick="adminCalCambiarVista('mensual')">MENSUAL</button>
+                        <button type="button" class="cal-tab"                 data-view="semanal" onclick="adminCalCambiarVista('semanal')">SEMANAL</button>
+                    </div>
+                    <div class="cal-context-selector">
+                        <button type="button" class="cal-nav-btn" onclick="adminCalNavegar(-1)" aria-label="Anterior">‹</button>
+                        <span id="admin-cal-context-label">${_adminCalState.anyo}</span>
+                        <button type="button" class="cal-nav-btn" onclick="adminCalNavegar(1)" aria-label="Siguiente">›</button>
+                    </div>
+                </header>
+                <main id="admin-cal-content" class="cal-content">
+                    <div class="cal-loading">Cargando…</div>
+                </main>
+            </div>
+
+            <div class="modal fade cal-modal" id="adminCalDiaModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="adminCalDiaTitulo">Reservas</h5>
+                            <button type="button" class="btn-volver-cal" data-bs-dismiss="modal" aria-label="Volver al calendario">
+                                ← Volver al calendario
+                            </button>
+                        </div>
+                        <div class="modal-body" id="adminCalDiaBody">
+                            <div class="text-center py-4 text-muted">Cargando…</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div id="admin-res-table-container"></div>
     `;
 
-    renderReservasTable(_cachedReservasAdmin);
+    adminCalRender();
 }
+
+window.adminCalCambiarVista = (v) => {
+    _adminCalState.vista = v;
+    document.querySelectorAll('#admin-cal-header .cal-tab').forEach(b => {
+        b.classList.toggle('cal-tab--active', b.dataset.view === v);
+    });
+    if (v === 'semanal') _adminCalState.semana = adminCalSemanaActualDelMes(_adminCalState.anyo, _adminCalState.mes);
+    adminCalRender();
+};
+
+window.adminCalNavegar = (delta) => {
+    var s = _adminCalState;
+    if (s.vista === 'anual') {
+        s.anyo += delta;
+    } else if (s.vista === 'mensual') {
+        s.mes += delta;
+        if (s.mes < 0)  { s.mes = 11; s.anyo--; }
+        if (s.mes > 11) { s.mes = 0;  s.anyo++; }
+    } else if (s.vista === 'semanal') {
+        var totalSemanas = adminCalSemanasDelMes(s.anyo, s.mes);
+        s.semana += delta;
+        if (s.semana < 0) {
+            s.mes--;
+            if (s.mes < 0) { s.mes = 11; s.anyo--; }
+            s.semana = adminCalSemanasDelMes(s.anyo, s.mes) - 1;
+        } else if (s.semana >= totalSemanas) {
+            s.mes++;
+            if (s.mes > 11) { s.mes = 0; s.anyo++; }
+            s.semana = 0;
+        }
+    }
+    adminCalRender();
+};
+
+function adminCalRender() {
+    adminCalActualizarLabel();
+    var content = document.getElementById('admin-cal-content');
+    if (!content) return;
+    content.innerHTML = '<div class="cal-loading">Cargando…</div>';
+
+    if (_adminCalState.vista === 'anual')   return adminCalRenderAnual(content);
+    if (_adminCalState.vista === 'mensual') return adminCalRenderMensual(content);
+    if (_adminCalState.vista === 'semanal') return adminCalRenderSemanal(content);
+}
+
+function adminCalActualizarLabel() {
+    var label = document.getElementById('admin-cal-context-label');
+    if (!label) return;
+    var s = _adminCalState;
+    if (s.vista === 'anual') label.textContent = s.anyo;
+    else if (s.vista === 'mensual') label.textContent = adminCalCap(_adminCalMeses[s.mes].toLowerCase()) + ' ' + s.anyo;
+    else {
+        var rango = adminCalRangoSemanaDelMes(s.anyo, s.mes, s.semana);
+        label.textContent = 'Sem. ' + (s.semana + 1) + ' · ' + adminCalFechaCorta(rango.desde) + ' → ' + adminCalFechaCorta(rango.hasta);
+    }
+}
+
+function adminCalRenderAnual(content) {
+    var anyo = _adminCalState.anyo;
+    var desde = adminCalYmd(anyo, 0, 1);
+    var hasta = adminCalYmd(anyo, 11, 31);
+    adminCalCargarRango(desde, hasta).then(conteos => {
+        var html = '<div class="cal-anual-grid">';
+        for (var m = 0; m < 12; m++) {
+            html += '<div class="cal-mes-card">';
+            html += '<div class="cal-mes-header">' + _adminCalMeses[m] + '</div>';
+            html += adminCalRenderGridMes(anyo, m, conteos, false);
+            html += '</div>';
+        }
+        html += '</div>';
+        content.innerHTML = html;
+        adminCalAttachDayHandlers(content);
+    });
+}
+
+function adminCalRenderMensual(content) {
+    var s = _adminCalState;
+    var dias = adminCalDiasEnMes(s.anyo, s.mes);
+    var desde = adminCalYmd(s.anyo, s.mes, 1);
+    var hasta = adminCalYmd(s.anyo, s.mes, dias);
+    adminCalCargarRango(desde, hasta).then(conteos => {
+        var html = '<div class="cal-mensual-card">';
+        html += '<div class="cal-mensual-header">' + adminCalCap(_adminCalMeses[s.mes].toLowerCase()) + ' ' + s.anyo + '</div>';
+        html += adminCalRenderGridMes(s.anyo, s.mes, conteos, true);
+        html += '</div>';
+        content.innerHTML = html;
+        adminCalAttachDayHandlers(content);
+    });
+}
+
+function adminCalRenderSemanal(content) {
+    var s = _adminCalState;
+    var rango = adminCalRangoSemanaDelMes(s.anyo, s.mes, s.semana);
+    adminCalCargarRango(rango.desde, rango.hasta).then(conteos => {
+        var fechas = [];
+        var d = adminCalParseYmd(rango.desde);
+        var f = adminCalParseYmd(rango.hasta);
+        while (d <= f) {
+            fechas.push(adminCalToYmd(d));
+            d = new Date(d.getTime() + 86400000);
+        }
+        Promise.all(fechas.map(fecha =>
+            fetch('/api/recepcion/calendario/dia?fecha=' + fecha)
+                .then(r => r.ok ? r.json() : [])
+                .then(j => ({ fecha: fecha, reservas: j }))
+        )).then(resultados => {
+            var html = '<div class="cal-semanal-card">';
+            html += '<div class="cal-mensual-header">Semana ' + (s.semana + 1) + ' · ' + adminCalCap(_adminCalMeses[s.mes].toLowerCase()) + ' ' + s.anyo + '</div>';
+            html += '<div class="cal-semanal-list">';
+            var nombres = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+            resultados.forEach(item => {
+                var fechaObj = adminCalParseYmd(item.fecha);
+                var dow = (fechaObj.getDay() + 6) % 7;
+                var num = conteos[item.fecha] || 0;
+                var reservasHtml = item.reservas.length === 0
+                    ? '<div class="cal-sem-empty">Sin reservas</div>'
+                    : item.reservas.map(r => {
+                        var pill = r.estadoDia === 'ENTRA' ? '<span class="cal-pill cal-pill--in">Entra</span>'
+                                 : r.estadoDia === 'SALE'  ? '<span class="cal-pill cal-pill--out">Sale</span>'
+                                 : '<span class="cal-pill cal-pill--stay">En curso</span>';
+                        return '<div class="cal-sem-reserva">'
+                             + '<span class="cal-sem-hab">Hab. ' + adminCalEsc(r.habitacionNumero || '—') + '</span>'
+                             + '<span class="cal-sem-tipo">' + adminCalEsc(r.habitacionTipo || '') + '</span>'
+                             + '<span class="cal-sem-cliente">' + adminCalEsc(r.clienteNombre || r.clienteEmail || '—') + '</span>'
+                             + pill + '</div>';
+                    }).join('');
+                html += '<div class="cal-sem-dia" data-day="' + item.fecha + '">'
+                      + '<div class="cal-sem-cabecera">'
+                      + '<span class="cal-sem-num">' + fechaObj.getDate() + '</span>'
+                      + '<span class="cal-sem-nombre">' + nombres[dow] + '</span>'
+                      + '<span class="cal-sem-count">' + num + ' reserva' + (num === 1 ? '' : 's') + '</span>'
+                      + '</div>'
+                      + '<div class="cal-sem-reservas">' + reservasHtml + '</div>'
+                      + '</div>';
+            });
+            html += '</div></div>';
+            content.innerHTML = html;
+            adminCalAttachDayHandlers(content);
+        });
+    });
+}
+
+function adminCalRenderGridMes(anyo, mes, conteos, ampliado) {
+    var primerDia = (new Date(anyo, mes, 1).getDay() + 6) % 7;
+    var dias = adminCalDiasEnMes(anyo, mes);
+    var hoy = new Date();
+    var html = '<div class="cal-grid' + (ampliado ? ' cal-grid--lg' : '') + '">';
+    _adminCalDIAS.forEach(d => { html += '<div class="cal-cabecera">' + d + '</div>'; });
+    for (var i = 0; i < primerDia; i++) html += '<div class="cal-celda cal-celda--vacia"></div>';
+    for (var d = 1; d <= dias; d++) {
+        var fecha = adminCalYmd(anyo, mes, d);
+        var n = conteos[fecha] || 0;
+        var clase = 'cal-celda';
+        if (n > 0) clase += ' cal-celda--con-reservas';
+        if (anyo === hoy.getFullYear() && mes === hoy.getMonth() && d === hoy.getDate()) clase += ' cal-celda--hoy';
+        html += '<button type="button" class="' + clase + '" data-day="' + fecha + '">'
+              + '<span class="cal-celda-num">' + d + '</span>'
+              + (n > 0 ? '<span class="cal-celda-badge">' + n + '</span>' : '')
+              + '</button>';
+    }
+    html += '</div>';
+    return html;
+}
+
+function adminCalAttachDayHandlers(root) {
+    root.querySelectorAll('[data-day]').forEach(el => {
+        el.addEventListener('click', ev => {
+            ev.stopPropagation();
+            adminCalAbrirDia(el.dataset.day);
+        });
+    });
+}
+
+window.adminCalAbrirDia = async (fecha) => {
+    _adminCalState.diaActual = fecha;
+    var titulo = document.getElementById('adminCalDiaTitulo');
+    var body = document.getElementById('adminCalDiaBody');
+    if (!titulo || !body) return;
+    titulo.textContent = 'Reservas del ' + adminCalFechaLarga(adminCalParseYmd(fecha));
+    body.innerHTML = '<div class="text-center py-4 text-muted">Cargando…</div>';
+
+    var modalEl = document.getElementById('adminCalDiaModal');
+    var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+
+    try {
+        var r = await fetch('/api/recepcion/calendario/dia?fecha=' + fecha);
+        if (!r.ok) throw new Error();
+        var reservas = await r.json();
+        if (reservas.length === 0) {
+            body.innerHTML = '<div class="text-center py-5 cal-empty-day">Sin reservas para este día.</div>';
+            return;
+        }
+        body.innerHTML = '<div class="cal-dia-list">' + reservas.map(adminCalRenderReservaCard).join('') + '</div>';
+    } catch (_) {
+        body.innerHTML = '<div class="alert alert-danger">No se pudieron cargar las reservas.</div>';
+    }
+};
+
+function adminCalRenderReservaCard(r) {
+    var imgs = (typeof TIPO_IMAGES !== 'undefined' && TIPO_IMAGES[r.habitacionTipo]) || [];
+    var img = imgs[0] || '/images/normal-1.jpg';
+    var pill = adminCalPillReserva(r);
+
+    var emailHtml = (r.clienteEmail && r.clienteEmail !== r.clienteNombre)
+        ? '<div class="cal-dia-extra-line cal-dia-extra-line--email">' + adminCalEsc(r.clienteEmail) + '</div>'
+        : '';
+
+    var serviciosHtml = '';
+    if (r.servicios && r.servicios.length > 0) {
+        serviciosHtml = '<div class="cal-dia-extra-line"><span class="cal-dia-extra-key">Servicios:</span> '
+            + r.servicios.map(s => adminCalEsc(s.nombre) + (s.cantidad > 1 ? ' ×' + s.cantidad : '')).join(', ')
+            + '</div>';
+    }
+
+    var rsHtml = '';
+    if (r.pedidosRoomService && r.pedidosRoomService.length > 0) {
+        rsHtml = '<div class="cal-dia-extra-line"><span class="cal-dia-extra-key">Room service:</span> '
+            + r.pedidosRoomService.map(p => adminCalEsc(p.nombre) + ' ×' + (p.cantidad || 1)).join(', ')
+            + '</div>';
+    }
+
+    var peticionHtml = r.peticionEspecial
+        ? '<div class="cal-dia-peticion">'
+            + '<svg class="cal-dia-peticion-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>'
+            + '<span class="cal-dia-peticion-key">Petición:</span> '
+            + adminCalEsc(r.peticionEspecial)
+          + '</div>'
+        : '';
+
+    return '<div class="cal-dia-card">'
+         + '<div class="cal-dia-img" style="background-image:url(\'' + img + '\')"></div>'
+         + '<div class="cal-dia-info">'
+         +   '<div class="cal-dia-row">'
+         +     '<span class="cal-dia-hab">Hab. ' + adminCalEsc(r.habitacionNumero || '—') + '</span>'
+         +     '<span class="cal-dia-tipo">' + adminCalEsc(r.habitacionTipo || '') + '</span>'
+         +     pill
+         +   '</div>'
+         +   '<div class="cal-dia-cliente">' + adminCalEsc(r.clienteNombre || r.clienteEmail || '—') + '</div>'
+         +   emailHtml
+         +   '<div class="cal-dia-fechas">'
+         +     adminCalFechaCortaStr(r.fechaEntrada) + ' <span class="cal-dia-hora">' + ((window.HOTEL_INFO && window.HOTEL_INFO.checkinTime) || '15:00') + 'h</span>'
+         +     ' → '
+         +     adminCalFechaCortaStr(r.fechaSalida)  + ' <span class="cal-dia-hora">' + ((window.HOTEL_INFO && window.HOTEL_INFO.checkoutTime) || '11:00') + 'h</span>'
+         +   '</div>'
+         +   serviciosHtml
+         +   rsHtml
+         +   peticionHtml
+         +   '<div class="cal-dia-actions">'
+         +     '<button class="admin-btn" style="background:rgba(255,255,255,0.05); color:var(--gold); border:1px solid rgba(185,149,77,0.4);" onclick="adminCalEditarReserva(' + r.id + ')">' + t('adm_res_modify') + '</button>'
+         +     '<button class="admin-btn admin-btn--danger" onclick="adminCalEliminarReserva(' + r.id + ')">' + t('adm_res_cancel') + '</button>'
+         +   '</div>'
+         + '</div>'
+         + '</div>';
+}
+
+// ── Cache + helpers ──────────────────────────────────────────────────────────
+
+function adminCalCargarRango(desde, hasta) {
+    if (_adminCalState.cacheRango && _adminCalState.cacheRango.key === desde + '|' + hasta) {
+        return Promise.resolve(_adminCalState.cacheRango.data);
+    }
+    return fetch('/api/recepcion/calendario?desde=' + desde + '&hasta=' + hasta)
+        .then(r => r.ok ? r.json() : {})
+        .then(data => {
+            _adminCalState.cacheRango = { key: desde + '|' + hasta, data: data };
+            return data;
+        });
+}
+
+function adminCalInvalidarCache() { _adminCalState.cacheRango = null; }
+
+function adminCalDiaEsPasado(ymdStr) {
+    if (!ymdStr) return false;
+    var d = adminCalParseYmd(ymdStr);
+    var hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+    return d.getTime() < hoy.getTime();
+}
+
+// Calcula la pill según la reserva real respecto a HOY (no respecto al día clicado)
+function adminCalPillReserva(r) {
+    if (!r || !r.fechaEntrada || !r.fechaSalida)
+        return '<span class="cal-pill cal-pill--stay">—</span>';
+    var hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+    var entrada = adminCalParseYmd(r.fechaEntrada);
+    var salida  = adminCalParseYmd(r.fechaSalida);
+    var hT = hoy.getTime(), eT = entrada.getTime(), sT = salida.getTime();
+
+    if (sT < hT) return '<span class="cal-pill cal-pill--past">Pasada</span>';
+    if (eT > hT) return '<span class="cal-pill cal-pill--future">Próxima</span>';
+    return '<span class="cal-pill cal-pill--stay">En estancia</span>';
+}
+
+function adminCalDiasEnMes(a, m) { return new Date(a, m + 1, 0).getDate(); }
+function adminCalPad(n) { return n < 10 ? '0' + n : '' + n; }
+function adminCalYmd(a, m, d) { return a + '-' + adminCalPad(m + 1) + '-' + adminCalPad(d); }
+function adminCalToYmd(d) { return d.getFullYear() + '-' + adminCalPad(d.getMonth() + 1) + '-' + adminCalPad(d.getDate()); }
+function adminCalParseYmd(s) { var p = s.split('-'); return new Date(parseInt(p[0]), parseInt(p[1]) - 1, parseInt(p[2])); }
+function adminCalSemanasDelMes(a, m) {
+    var primer = (new Date(a, m, 1).getDay() + 6) % 7;
+    return Math.ceil((primer + adminCalDiasEnMes(a, m)) / 7);
+}
+function adminCalSemanaActualDelMes(a, m) {
+    var hoy = new Date();
+    if (hoy.getFullYear() !== a || hoy.getMonth() !== m) return 0;
+    var primer = (new Date(a, m, 1).getDay() + 6) % 7;
+    return Math.floor((primer + hoy.getDate() - 1) / 7);
+}
+function adminCalRangoSemanaDelMes(a, m, semana) {
+    var primer = (new Date(a, m, 1).getDay() + 6) % 7;
+    var inicio = new Date(a, m, 1 + (semana * 7) - primer);
+    var fin = new Date(inicio.getTime() + 6 * 86400000);
+    return { desde: adminCalToYmd(inicio), hasta: adminCalToYmd(fin) };
+}
+function adminCalFechaCorta(ymdStr) {
+    var d = adminCalParseYmd(ymdStr);
+    return d.getDate() + ' ' + ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][d.getMonth()];
+}
+function adminCalFechaCortaStr(ymd) { return ymd ? adminCalFechaCorta(ymd) : '—'; }
+function adminCalFechaLarga(d) {
+    var dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+    var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    return dias[d.getDay()] + ' ' + d.getDate() + ' de ' + meses[d.getMonth()] + ' ' + d.getFullYear();
+}
+function adminCalCap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function adminCalEsc(s) {
+    return (s == null ? '' : String(s))
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ── Acciones desde el modal del día ──────────────────────────────────────────
+
+window.adminCalEditarReserva = async (id) => {
+    try {
+        var r = (_cachedReservasAdmin || []).find(x => x.id === id);
+        if (!r) {
+            var rr = await fetch('/api/reservas');
+            if (rr.ok) {
+                _cachedReservasAdmin = await rr.json();
+                r = _cachedReservasAdmin.find(x => x.id === id);
+            }
+        }
+        if (!r) { alert('No se pudo cargar la reserva ' + id + '.'); return; }
+
+        // Cierra el modal del día con Bootstrap y limpia restos de backdrop
+        var modalEl = document.getElementById('adminCalDiaModal');
+        if (modalEl) {
+            var inst = bootstrap.Modal.getInstance(modalEl);
+            if (inst) {
+                // Espera al cierre antes de abrir el siguiente modal para evitar conflictos de backdrop
+                modalEl.addEventListener('hidden.bs.modal', function once() {
+                    modalEl.removeEventListener('hidden.bs.modal', once);
+                    document.body.classList.remove('modal-open');
+                    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                    try { adminModificarReserva(r); }
+                    catch (e) { console.error('adminModificarReserva fallo:', e); alert('Error al abrir el modal: ' + e.message); }
+                });
+                inst.hide();
+                // Fallback: si por algún motivo no dispara hidden en 400ms, abrimos igual
+                setTimeout(() => {
+                    if (!document.getElementById('modal-mod-reserva')) {
+                        document.body.classList.remove('modal-open');
+                        document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                        try { adminModificarReserva(r); }
+                        catch (e) { console.error(e); alert('Error: ' + e.message); }
+                    }
+                }, 400);
+                return;
+            }
+        }
+        adminModificarReserva(r);
+    } catch (e) {
+        console.error('adminCalEditarReserva fallo:', e);
+        alert('No se pudo abrir el modal de modificar: ' + e.message);
+    }
+};
+
+window.adminCalEliminarReserva = async (id) => {
+    if (!confirm(t('adm_res_confirm_cancel'))) return;
+    try {
+        var res = await fetch('/api/reservas/' + id, { method: 'DELETE' });
+        if (res.ok || res.status === 204) {
+            try {
+                var rr = await fetch('/api/reservas');
+                if (rr.ok) _cachedReservasAdmin = await rr.json();
+            } catch (_) {}
+            adminCalInvalidarCache();
+            adminCalRender();
+            if (_adminCalState.diaActual) adminCalAbrirDia(_adminCalState.diaActual);
+        } else {
+            alert(t('adm_res_cancel_error'));
+        }
+    } catch (_) { alert(t('adm_error_conn')); }
+};
 
 window.filtrarReservasMes = () => {
     var month = document.getElementById('admin-res-month-filter').value;
@@ -399,9 +951,16 @@ window.guardarModificacionReserva = async (id) => {
 
         if (res.ok) {
             cerrarModalModRe();
-            loadAdminReservas();
-            // Actualizar header de statistics si es necesario
-            if (typeof loadAdminStats === 'function') loadAdminStats();
+            // Refresca la caché completa del calendario y los datos
+            if (typeof adminCalInvalidarCache === 'function') adminCalInvalidarCache();
+            // Determina la pestaña activa para refrescar la vista correcta
+            var activa = document.querySelector('.admin-tab-btn.active');
+            var tab = activa && activa.id ? activa.id.replace(/^atab-/, '') : 'reservas';
+            if (tab === 'dashboard')      loadAdminDashboard();
+            else if (tab === 'reservas')  loadAdminReservas();
+            else                          loadAdminReservas();   // por defecto, refresca calendario
+            // Recarga gráficos del dashboard si están abiertos
+            if (typeof adminChartsLoad === 'function') adminChartsLoad();
         } else {
             var msg = await res.text();
             alert(t('adm_mod_error') + msg);
@@ -955,38 +1514,51 @@ window.adminEliminarRSItem = async (id) => {
 
 var _cachedUsuariosAdmin = [];
 
+var _cachedRolesAdmin = [];
+
 async function loadAdminUsuarios() {
     var body = document.getElementById('admin-tab-body');
-    var res;
-    try { res = await fetch('/api/admin/usuarios'); } catch (_) {
-        body.innerHTML = '<p style="color:#c0392b;">' + t('adm_error_conn') + '</p>'; return;
+    try {
+        var [resUsr, resRoles] = await Promise.all([
+            fetch('/api/admin/usuarios'),
+            fetch('/api/admin/roles')
+        ]);
+        if (!resUsr.ok) {
+            body.innerHTML = '<p style="color:#c0392b;">' + t('adm_usr_error') + '</p>';
+            return;
+        }
+        _cachedUsuariosAdmin = await resUsr.json();
+        _cachedRolesAdmin    = resRoles.ok ? await resRoles.json() : [];
+    } catch (_) {
+        body.innerHTML = '<p style="color:#c0392b;">' + t('adm_error_conn') + '</p>';
+        return;
     }
-    if (!res.ok) { body.innerHTML = '<p style="color:#c0392b;">' + t('adm_usr_error') + '</p>'; return; }
-    var usuarios = await res.json();
-    _cachedUsuariosAdmin = usuarios;
+
+    var optionsRoles = _cachedRolesAdmin
+        .map(r => `<option value="${r.name}">${prettyRole(r.name)}</option>`)
+        .join('');
 
     body.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <div style="display:flex; align-items:center; gap:20px;">
-                <!-- Buscador por nombre/email -->
+            <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
                 <div style="font-size:0.85rem; color:var(--cream);">
-                    Buscar: 
-                    <input type="text" id="admin-usr-search" class="admin-form-input" 
-                           placeholder="Nombre o email..." 
-                           style="display:inline-block; width:200px; margin-left:10px; padding:6px 12px;" 
+                    Buscar:
+                    <input type="text" id="admin-usr-search" class="admin-form-input"
+                           placeholder="Nombre o email..."
+                           style="display:inline-block; width:200px; margin-left:10px; padding:6px 12px;"
                            oninput="filtrarUsuarios()">
                 </div>
-                <!-- Filtro por rol -->
                 <div style="font-size:0.85rem; color:var(--cream);">
-                    Filtrar por rol: 
-                    <select id="admin-usr-role-filter" class="admin-form-input" 
-                            style="display:inline-block; width:auto; margin-left:10px; padding:6px 12px; cursor:pointer;" 
+                    Filtrar por rol:
+                    <select id="admin-usr-role-filter" class="admin-form-input"
+                            style="display:inline-block; width:auto; margin-left:10px; padding:6px 12px; cursor:pointer;"
                             onchange="filtrarUsuarios()">
                         <option value="ALL">Todos</option>
-                        <option value="ROLE_ADMIN">Admin</option>
-                        <option value="ROLE_USER">Cliente</option>
+                        ${optionsRoles}
+                        <option value="__SIN__">Sin rol</option>
                     </select>
                 </div>
+                <button class="admin-btn" onclick="loadAdminUsuarios()" style="font-size:0.7rem; padding:6px 14px;">↻ Refrescar</button>
             </div>
         </div>
         <div id="admin-usr-table-container"></div>
@@ -998,18 +1570,17 @@ async function loadAdminUsuarios() {
 window.filtrarUsuarios = () => {
     var query = (document.getElementById('admin-usr-search').value || "").toLowerCase();
     var role  = (document.getElementById('admin-usr-role-filter').value || "ALL");
-    
+
     var filtered = _cachedUsuariosAdmin.filter(u => {
-        // 1. Filtro por búsqueda de texto
         var nombre = (u.nombre || "").toLowerCase();
         var email  = (u.email  || "").toLowerCase();
         var matchesText = nombre.includes(query) || email.includes(query);
-        
-        // 2. Filtro por rol
+
         var matchesRole = true;
-        if (role === 'ROLE_ADMIN') matchesRole = (u.rol === 'ROLE_ADMIN');
-        if (role === 'ROLE_USER')  matchesRole = (u.rol !== 'ROLE_ADMIN');
-        
+        var roles = u.roles || (u.rol ? [u.rol] : []);
+        if (role === '__SIN__') matchesRole = roles.length === 0;
+        else if (role !== 'ALL') matchesRole = roles.indexOf(role) !== -1;
+
         return matchesText && matchesRole;
     });
 
@@ -1020,7 +1591,7 @@ window.filtrarUsuarios = () => {
 window.renderUsuariosTable = (usuarios) => {
     var container = document.getElementById('admin-usr-table-container');
     if (!usuarios || usuarios.length === 0) {
-        container.innerHTML = '<p style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px; margin-top:12px;">No hay usuarios que coincidan con este rol.</p>';
+        container.innerHTML = '<p style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px; margin-top:12px;">No hay usuarios que coincidan con este filtro.</p>';
         return;
     }
 
@@ -1028,16 +1599,36 @@ window.renderUsuariosTable = (usuarios) => {
         <table class="admin-table">
             <thead><tr><th>#</th><th>${t('adm_usr_col_name')}</th><th>${t('adm_usr_col_email')}</th><th>${t('adm_usr_col_role')}</th><th></th></tr></thead>
             <tbody>
-                ${usuarios.map(u => `
-                    <tr>
-                        <td>${u.id}</td>
-                        <td style="color:var(--cream);">${u.nombre || '—'}</td>
-                        <td style="color:var(--text-muted-custom);">${u.email}</td>
-                        <td><span class="admin-badge ${u.rol === 'ROLE_ADMIN' ? 'admin-badge--admin' : ''}">${u.rol === 'ROLE_ADMIN' ? 'ADMIN' : 'CLIENTE'}</span></td>
-                        <td><button class="admin-btn admin-btn--danger" onclick="adminEliminarUsuario(${u.id})">${t('adm_usr_delete')}</button></td>
-                    </tr>`).join('')}
+                ${usuarios.map(u => {
+                    var roles = (u.roles && u.roles.length > 0)
+                        ? u.roles
+                        : (u.rol && u.rol !== 'SIN ROL' ? [u.rol] : []);
+                    var badgesHtml = roles.length === 0
+                        ? '<span class="admin-badge admin-badge--muted">SIN ROL</span>'
+                        : roles.map(r => {
+                            var cls = 'admin-badge';
+                            if (r === 'ROLE_ADMIN')     cls += ' admin-badge--admin';
+                            if (r === 'ROLE_RECEPCION') cls += ' admin-badge--recepcion';
+                            if (r === 'ROLE_LIMPIEZA')  cls += ' admin-badge--limpieza';
+                            return `<span class="${cls}">${prettyRole(r)}</span>`;
+                          }).join(' ');
+                    return `
+                        <tr>
+                            <td>${u.id}</td>
+                            <td style="color:var(--cream);">${u.nombre || '—'}</td>
+                            <td style="color:var(--text-muted-custom);">${u.email}</td>
+                            <td>${badgesHtml}</td>
+                            <td><button class="admin-btn admin-btn--danger" onclick="adminEliminarUsuario(${u.id})">${t('adm_usr_delete')}</button></td>
+                        </tr>`;
+                }).join('')}
             </tbody>
         </table>`;
+}
+
+function prettyRole(name) {
+    if (!name) return '—';
+    var clean = name.replace(/^ROLE_/, '');
+    return clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase();
 }
 
 window.adminEliminarUsuario = async (id) => {

@@ -98,6 +98,8 @@ window.selectRoom = async (tipo, precio, descripcion) => {
 
             ${fechasHtml}
 
+            <div id="disponibilidad-badge" style="margin-bottom:16px;"></div>
+
             <div style="margin-bottom:20px;">
                 <p style="font-size:0.75rem; letter-spacing:2px; color:var(--text-muted-custom); margin-bottom:12px;">${t('detail_add_services')}</p>
                 ${serviciosHtml}
@@ -177,9 +179,47 @@ window.selectRoom = async (tipo, precio, descripcion) => {
 
     document.querySelectorAll('.servicio-check').forEach(cb => cb.addEventListener('change', recalcularTotal));
 
-    flatpickr('#detail-in-date',  { ...FP_CONFIG, minDate: 'today', onChange: recalcularTotal });
-    flatpickr('#detail-out-date', { ...FP_CONFIG, minDate: 'today', onChange: recalcularTotal });
+    // ── Disponibilidad en tiempo real ──────────────────────────────────────────
+    async function actualizarDisponibilidad() {
+        var inDate  = document.getElementById('detail-in-date')?.value  || '';
+        var outDate = document.getElementById('detail-out-date')?.value || '';
+        var badge   = document.getElementById('disponibilidad-badge');
+        var btnConf = document.getElementById('btn-confirmar-reserva');
+        if (!badge) return;
+        if (!inDate || !outDate) { badge.innerHTML = ''; return; }
+        try {
+            var dRes = await fetch('/api/habitaciones/disponibles?fechaEntrada=' + inDate + '&fechaSalida=' + outDate);
+            if (!dRes.ok) return;
+            var disp = await dRes.json();
+            var libres = disp[tipo] !== undefined ? disp[tipo] : 0;
+            if (libres > 0) {
+                badge.innerHTML = `<span style="
+                    display:inline-block; font-size:0.72rem; letter-spacing:1px;
+                    padding:6px 16px; border-radius:20px;
+                    background:rgba(185,149,77,0.15); color:var(--gold);
+                    border:1px solid rgba(185,149,77,0.3);
+                ">
+                    🏨 ${libres} ${libres === 1 ? 'habitación disponible' : 'habitaciones disponibles'} para estas fechas
+                </span>`;
+                if (btnConf) { btnConf.disabled = false; btnConf.style.opacity = '1'; btnConf.style.cursor = 'pointer'; }
+            } else {
+                badge.innerHTML = `<span style="
+                    display:inline-block; font-size:0.72rem; letter-spacing:1px;
+                    padding:6px 16px; border-radius:20px;
+                    background:rgba(139,26,26,0.2); color:#e74c3c;
+                    border:1px solid rgba(192,57,43,0.4);
+                ">
+                    ❌ Sin disponibilidad para estas fechas
+                </span>`;
+                if (btnConf) { btnConf.disabled = true; btnConf.style.opacity = '0.45'; btnConf.style.cursor = 'not-allowed'; }
+            }
+        } catch (_) {}
+    }
+
+    flatpickr('#detail-in-date',  { ...FP_CONFIG, minDate: 'today', onChange: () => { recalcularTotal(); actualizarDisponibilidad(); } });
+    flatpickr('#detail-out-date', { ...FP_CONFIG, minDate: 'today', onChange: () => { recalcularTotal(); actualizarDisponibilidad(); } });
     recalcularTotal();
+    actualizarDisponibilidad();
 };
 
 window.confirmarReserva = async (tipo) => {
@@ -269,6 +309,10 @@ window.confirmarReserva = async (tipo) => {
             btn.textContent   = t('detail_booked');
             // Refrescar disponibilidad en la sección principal
             loadRooms();
+            // Abrir modal de pago con la reserva recién creada
+            if (reservaCreada && reservaCreada.id && typeof abrirPago === 'function') {
+                setTimeout(() => abrirPago(reservaCreada.id), 400);
+            }
         } else if (res.status === 409) {
             msg.style.display  = 'block';
             msg.style.color    = '#c0392b';

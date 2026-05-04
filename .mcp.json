@@ -4,11 +4,9 @@
       "command": "npx",
       "args": [
         "-y",
-        "@supabase/mcp-server-supabase@latest",
-        "--supabase-url",
-        "https://udojqeioeixaxbsxwpfe.supabase.co",
-        "--supabase-key",
-        "sb_secret_NQpUTsdGOdaN3nUFsaD7iQ_XxJGvQbE"
+        "@supabase/mcp-server-supabase@0.5.4",
+        "--project-ref=udojqeioeixaxbsxwpfe",
+        "--access-token=sbp_741ac97fcb7ebf687a8bb2008cc3562fa467861a"
       ]
     }
   }

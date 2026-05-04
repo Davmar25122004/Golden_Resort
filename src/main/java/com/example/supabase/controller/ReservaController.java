@@ -41,7 +41,12 @@ public class ReservaController {
 
     @GetMapping("/mis-reservas")
     public ResponseEntity<?> misReservas(Authentication auth) {
-        return ResponseEntity.ok(reservaService.misReservas(getEmail(auth)));
+        return ResponseEntity.ok(reservaService.misReservasPagadas(getEmail(auth)));
+    }
+
+    @GetMapping("/guardadas")
+    public ResponseEntity<?> guardadas(Authentication auth) {
+        return ResponseEntity.ok(reservaService.misReservasGuardadas(getEmail(auth)));
     }
 
     @GetMapping("/usuario/{usuarioId}")
@@ -86,6 +91,14 @@ public class ReservaController {
                                                 Authentication auth) {
         reservaService.actualizarPeticion(id, request.peticionEspecial, getEmail(auth), isAdmin(auth));
         return ResponseEntity.ok(Map.of("mensaje", "Petición actualizada"));
+    }
+
+    @PatchMapping("/{id}/fechas")
+    public ResponseEntity<?> actualizarFechas(@PathVariable Long id,
+                                              @RequestBody java.util.Map<String, String> body,
+                                              Authentication auth) {
+        reservaService.actualizarFechas(id, body.get("fechaEntrada"), body.get("fechaSalida"), getEmail(auth), isAdmin(auth));
+        return ResponseEntity.ok(java.util.Map.of("mensaje", "Fechas actualizadas"));
     }
 
     @DeleteMapping("/{id}")

@@ -1,6 +1,6 @@
 // ── INIT ──────────────────────────────────────────────────────────────────────
 
-async function init() {
+function init() {
     AOS.init({ duration: 800, once: false });
 
     if (document.getElementById('in-date'))  flatpickr('#in-date',  { ...FP_CONFIG, onChange: (dates) => { if (!dates.length) { state.searchDates = null; sessionStorage.removeItem('searchDates'); } } });
@@ -9,21 +9,11 @@ async function init() {
     setupNavbarScroll();
     setupSearch();
 
-    // Comprobar sesión activa en el servidor
-    try {
-        const res = await fetch('/api/usuario-info');
-        if (res.ok) {
-            const data = await res.json();
-            if (data.nombre && data.nombre !== 'Invitado') {
-                state.user  = { email: data.nombre, roles: data.roles };
-                state.token = 'session';
-                const rol = data.roles.includes('ROLE_ADMIN') ? 'ADMIN' : 'CLIENTE';
-                state.user.rol = rol;
-            }
-        }
-    } catch (_) {}
-
+    // El navbar y la sesión vienen ya renderizados por el servidor (NavbarAdvice).
+    // updateNav() solo sincroniza el state JS y arranca el polling de la campanita.
     updateNav();
     checkCookies();
+
+    return Promise.resolve();
 }
 

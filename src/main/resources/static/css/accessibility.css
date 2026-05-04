@@ -19,8 +19,8 @@
     width: 44px;
     height: 44px;
     border-radius: 0 8px 8px 0;
-    background: #1a1610;
-    border: 1px solid #c9a96e;
+    background: var(--acc-bg-panel);
+    border: 1px solid var(--acc-primary);
     border-left: none;
     cursor: pointer;
     display: flex;
@@ -28,7 +28,7 @@
     justify-content: center;
     box-shadow: 2px 0 12px rgba(0,0,0,0.5);
     transition: background 0.25s, transform 0.2s;
-    color: #c9a96e;
+    color: var(--acc-primary);
     outline: none;
     overflow: hidden;
     padding: 0;
@@ -36,7 +36,7 @@
 
 #acc-toggle-btn:hover,
 #acc-toggle-btn:focus-visible {
-    background: #2a2010;
+    background: var(--acc-bg-panel);
     transform: scale(1.05);
 }
 
@@ -120,10 +120,10 @@
 .acc-section-label {
     font-size: 0.85rem;
     font-weight: 700;
-    color: #c9a96e;
+    color: var(--acc-primary);
     text-transform: uppercase;
     letter-spacing: 2px;
-    border-bottom: 1px solid #2a2a2a;
+    border-bottom: 1px solid var(--acc-border);
     padding-bottom: 5px;
     margin: 0;
 }
@@ -141,10 +141,10 @@
 .acc-btn {
     width: 100%;
     padding: 12px 10px;
-    background: #1e1e1e;
-    border: 1px solid #2a2a2a;
+    background: var(--acc-bg-panel);
+    border: 1px solid var(--acc-border);
     border-radius: 6px;
-    color: #b0a090;
+    color: var(--acc-text-main);
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
@@ -175,15 +175,15 @@
 }
 
 .acc-btn:hover:not(:disabled) {
-    background: #2a2010;
-    border-color: #c9a96e;
-    color: #c9a96e;
+    background: var(--acc-bg-panel);
+    border-color: var(--acc-primary);
+    color: var(--acc-primary);
 }
 
 .acc-btn.acc-active {
-    background: #2a2010;
-    border-color: #c9a96e;
-    color: #c9a96e;
+    background: var(--acc-bg-panel);
+    border-color: var(--acc-primary);
+    color: var(--acc-primary);
 }
 
 .acc-btn--small {
@@ -203,10 +203,10 @@
 .acc-reset-btn {
     padding: 14px;
     width: 100%;
-    background: #1e1e1e;
-    border: 1px solid #3a3a3a;
+    background: var(--acc-bg-panel);
+    border: 1px solid var(--acc-border);
     border-radius: 6px;
-    color: #6b6050;
+    color: var(--acc-text-main);
     font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
@@ -214,8 +214,8 @@
 }
 
 .acc-reset-btn:hover {
-    border-color: #c9a96e;
-    color: #c9a96e;
+    border-color: var(--acc-primary);
+    color: var(--acc-primary);
 }
 
 /* Overlay */

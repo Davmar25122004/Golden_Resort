@@ -1,0 +1,566 @@
+/* ── PÁGINA CALENDARIO RECEPCIÓN ─────────────────────────────────────────── */
+/* Reutiliza la paleta dorada/oscura global definida en base.css. */
+
+#cal-page {
+    --c-bg:        var(--bg);
+    --c-card:      var(--surface);
+    --c-border:    var(--border);
+    --c-text:      var(--text);
+    --c-text-soft: var(--text-soft);
+    --c-muted:     var(--text-muted);
+    --c-accent:    var(--gold);
+    --c-accent-2:  var(--gold-light);
+    --c-accent-bg: rgba(201, 168, 76, 0.12);
+    --c-warn:      #E0B14A;
+    --c-warn-bg:   rgba(224, 177, 74, 0.15);
+    --c-info:      #6FA8D6;
+    --c-info-bg:   rgba(111, 168, 214, 0.15);
+    --c-danger:    #C04A4A;
+
+    background: var(--c-bg);
+    color: var(--c-text);
+    min-height: 100vh;
+    padding-top: 100px;
+    padding-bottom: 60px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.cal-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 32px;
+}
+
+/* ── HEADER ──────────────────────────────────────────────────────────────── */
+
+.cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+}
+
+.cal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    color: var(--c-text);
+    margin: 0;
+}
+
+.cal-view-tabs {
+    display: inline-flex;
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 2px;
+}
+
+.cal-tab {
+    background: transparent;
+    border: none;
+    padding: 9px 22px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    font-weight: 600;
+    color: var(--c-text-soft);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+
+.cal-tab:hover { color: var(--c-text); }
+
+.cal-tab--active {
+    background: var(--c-accent);
+    color: var(--bg);
+}
+
+.cal-context-selector {
+    display: inline-flex;
+    align-items: center;
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: 999px;
+    padding: 4px 10px;
+    gap: 8px;
+    min-width: 200px;
+    justify-content: center;
+}
+
+.cal-context-selector span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--c-text);
+    padding: 0 6px;
+    user-select: none;
+}
+
+.cal-nav-btn {
+    background: transparent;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--c-text-soft);
+    font-size: 1.2rem;
+    line-height: 1;
+    transition: background 0.2s, color 0.2s;
+}
+
+.cal-nav-btn:hover {
+    background: var(--c-accent-bg);
+    color: var(--c-accent);
+}
+
+/* ── CONTENIDO ───────────────────────────────────────────────────────────── */
+
+.cal-content { min-height: 400px; }
+
+.cal-loading {
+    text-align: center;
+    color: var(--c-muted);
+    padding: 60px 0;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+/* ── VISTA ANUAL ─────────────────────────────────────────────────────────── */
+
+.cal-anual-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+@media (max-width: 992px) {
+    .cal-anual-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+    .cal-anual-grid { grid-template-columns: 1fr; }
+}
+
+.cal-mes-card {
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.cal-mes-header {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--c-text);
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--c-border);
+    margin-bottom: 14px;
+}
+
+/* ── VISTA MENSUAL ───────────────────────────────────────────────────────── */
+
+.cal-mensual-card {
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.cal-mensual-header {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--c-text);
+    text-align: center;
+    margin-bottom: 24px;
+    letter-spacing: 1px;
+}
+
+/* ── GRID DE DÍAS (compartido) ───────────────────────────────────────────── */
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+
+.cal-grid--lg .cal-celda { aspect-ratio: 1.1; padding: 10px; }
+.cal-grid--lg .cal-celda-num { font-size: 1.1rem; }
+
+.cal-cabecera {
+    text-align: center;
+    font-size: 0.65rem;
+    letter-spacing: 1.5px;
+    color: var(--c-muted);
+    padding: 6px 0;
+    font-weight: 600;
+}
+
+.cal-celda {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 6px 4px;
+    aspect-ratio: 1;
+    cursor: pointer;
+    position: relative;
+    color: var(--c-text-soft);
+    font-family: inherit;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.cal-celda--vacia { cursor: default; pointer-events: none; }
+
+.cal-celda:hover:not(.cal-celda--vacia) {
+    background: var(--c-accent-bg);
+    border-color: var(--c-accent);
+    color: var(--c-accent-2);
+}
+
+.cal-celda--con-reservas { color: var(--c-text); font-weight: 600; }
+
+.cal-celda--hoy {
+    border-color: var(--c-accent);
+    color: var(--c-accent-2);
+    font-weight: 700;
+}
+
+.cal-celda-num { font-size: 0.85rem; line-height: 1; }
+
+.cal-celda-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: var(--c-accent);
+    color: var(--bg);
+    font-size: 0.6rem;
+    font-weight: 700;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+/* ── VISTA SEMANAL ───────────────────────────────────────────────────────── */
+
+.cal-semanal-card {
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.cal-semanal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cal-sem-dia {
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.cal-sem-dia:hover {
+    border-color: var(--c-accent);
+    background: var(--c-accent-bg);
+}
+
+.cal-sem-cabecera {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 10px;
+}
+
+.cal-sem-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--c-accent);
+    min-width: 36px;
+}
+
+.cal-sem-nombre {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--c-text);
+    text-transform: capitalize;
+    flex: 1;
+}
+
+.cal-sem-count {
+    font-size: 0.7rem;
+    color: var(--c-text-soft);
+    background: var(--c-bg);
+    padding: 4px 10px;
+    border-radius: 999px;
+    letter-spacing: 1px;
+}
+
+.cal-sem-reservas {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-left: 52px;
+}
+
+.cal-sem-reserva {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--c-bg);
+    border-radius: 8px;
+    font-size: 0.78rem;
+}
+
+.cal-sem-hab {
+    font-weight: 700;
+    color: var(--c-text);
+    min-width: 70px;
+}
+
+.cal-sem-tipo {
+    color: var(--c-text-soft);
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    min-width: 70px;
+}
+
+.cal-sem-cliente { flex: 1; color: var(--c-text); }
+
+.cal-sem-empty {
+    color: var(--c-muted);
+    font-size: 0.78rem;
+    margin-left: 52px;
+    font-style: italic;
+}
+
+/* ── PILLS DE ESTADO ─────────────────────────────────────────────────────── */
+
+.cal-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.cal-pill--in     { background: var(--c-accent-bg); color: var(--c-accent-2); }
+.cal-pill--out    { background: var(--c-warn-bg);   color: var(--c-warn); }
+.cal-pill--stay   { background: var(--c-info-bg);   color: var(--c-info); }
+.cal-pill--past   { background: rgba(154,154,154,0.15); color: rgba(255,255,255,0.55); }
+.cal-pill--future { background: rgba(155, 89, 182, 0.18); color: #c89bf2; }
+
+/* ── MODAL DETALLE DEL DÍA ───────────────────────────────────────────────── */
+
+.cal-modal .modal-content {
+    background: var(--c-card);
+    color: var(--c-text);
+    border: 1px solid var(--c-border);
+    border-radius: 16px;
+}
+
+.cal-modal .modal-header {
+    border-bottom: 1px solid var(--c-border);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cal-modal .modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--c-text);
+    text-transform: capitalize;
+}
+
+.btn-volver-cal {
+    background: var(--c-accent);
+    color: var(--bg);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-volver-cal:hover { background: var(--c-accent-2); }
+
+.cal-modal .modal-body { padding: 20px 24px; }
+
+.cal-empty-day {
+    color: var(--c-muted);
+    font-size: 0.9rem;
+}
+
+.cal-dia-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.cal-dia-card {
+    display: flex;
+    gap: 16px;
+    padding: 14px;
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+    background: var(--surface-2);
+}
+
+.cal-dia-img {
+    width: 110px;
+    height: 110px;
+    border-radius: 10px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--surface-3);
+    flex-shrink: 0;
+}
+
+.cal-dia-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.cal-dia-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.cal-dia-hab {
+    font-weight: 700;
+    color: var(--c-text);
+    font-size: 0.95rem;
+}
+
+.cal-dia-tipo {
+    color: var(--c-text-soft);
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.cal-dia-cliente {
+    color: var(--c-text);
+    font-size: 0.85rem;
+}
+
+.cal-dia-fechas {
+    color: var(--c-text-soft);
+    font-size: 0.78rem;
+    letter-spacing: 0.5px;
+}
+
+.cal-dia-peticion {
+    color: var(--c-warn);
+    font-size: 0.78rem;
+    background: var(--c-warn-bg);
+    padding: 6px 10px;
+    border-radius: 8px;
+    margin-top: 4px;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    line-height: 1.4;
+}
+.cal-dia-peticion-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.cal-dia-peticion-key {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.7rem;
+    margin-right: 2px;
+}
+
+.cal-dia-extra-line {
+    color: var(--c-text-soft);
+    font-size: 0.78rem;
+    margin-top: 2px;
+    line-height: 1.35;
+}
+.cal-dia-extra-line--email {
+    color: var(--c-muted);
+    font-size: 0.75rem;
+    margin-top: -2px;
+    margin-bottom: 4px;
+    word-break: break-all;
+}
+.cal-dia-extra-key {
+    color: var(--c-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.7rem;
+    margin-right: 4px;
+    font-weight: 600;
+}
+
+/* Hora de check-in / check-out junto a cada fecha en la card del día */
+.cal-dia-hora {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: rgba(201, 168, 76, 0.12);
+    color: var(--c-accent);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* Botones de acción dentro de cada card (admin: Modificar / Eliminar) */
+.cal-dia-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(201, 168, 76, 0.18);
+}
+.cal-dia-actions .admin-btn {
+    font-size: 0.7rem;
+    padding: 6px 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}

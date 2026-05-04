@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Resort | Peticiones Especiales</title>
+
+    <link rel="stylesheet" th:href="@{/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/lib/aos-master/dist/aos.css}">
+    <link rel="stylesheet" th:href="@{/lib/flatpickr/flatpickr.min.css}">
+
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/accessibility.css}">
+    <link rel="stylesheet" th:href="@{/css/recepcion.css}">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <!-- Contenido -->
+    <div id="main-content" style="display:block;">
+        <div class="container">
+            <div id="peticiones-root"></div>
+        </div>
+    </div>
+
+    <!-- MODAL detalle reserva (reutilizado de recepción) -->
+    <div class="modal fade modal-dark" id="reservaDetalleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-body" id="reservaDetalleBody">
+                    <div class="text-center py-4 text-muted">Cargando…</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Libraries -->
+    <script th:src="@{/lib/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/lib/aos-master/dist/aos.js}"></script>
+    <script th:src="@{/lib/flatpickr/flatpickr.min.js}"></script>
+    <script th:src="@{/lib/flatpickr/l10n/es.js}"></script>
+
+    <!-- JS -->
+    <script th:src="@{/js/14-i18n.js}"></script>
+    <script th:src="@{/js/15-accessibility.js}"></script>
+    <script th:src="@{/js/01-globals.js}"></script>
+    <script th:src="@{/js/02-flatpickr-config.js}"></script>
+    <script th:src="@{/js/04-ui-core.js}"></script>
+    <script th:src="@{/js/03-navegacion.js}"></script>
+    <script th:src="@{/js/10-auth.js}"></script>
+    <script th:src="@{/js/13-init.js}"></script>
+    <script th:src="@{/js/18-recepcion.js}"></script>
+    <script th:src="@{/js/19-peticiones.js}"></script>
+
+</body>
+</html>

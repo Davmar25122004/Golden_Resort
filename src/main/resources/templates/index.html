@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hotel DAW | Lujo y Distinción</title>
+    <title>Golden Resort | Lujo y Distinción</title>
 
     <!-- Bootstrap 5.3 -->
     <link rel="stylesheet" th:href="@{/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css}">
@@ -33,50 +33,19 @@
     <link rel="stylesheet" th:href="@{/css/mis-reservas.css}">
     <link rel="stylesheet" th:href="@{/css/servicio-detail.css}">
     <link rel="stylesheet" th:href="@{/css/accessibility.css}">
+    <link rel="stylesheet" th:href="@{/css/perfil.css}">
+    <link rel="stylesheet" th:href="@{/css/pago.css}">
 </head>
 <body>
 
     <!-- NAVBAR -->
-    <nav id="navbar" class="navbar navbar-expand-md navbar-dark">
-        <div class="container">
-            <a href="#" class="navbar-brand-custom" onclick="event.preventDefault(); goHome()">HOTEL DAW</a>
-
-            <button class="navbar-toggler shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navCollapse"
-                    style="border-color: rgba(201,168,76,0.6); padding: 4px 8px;">
-                <span class="navbar-toggler-icon" style="filter: brightness(0) saturate(100%) invert(77%) sepia(21%) saturate(1450%) hue-rotate(6deg) brightness(88%) contrast(85%); width: 1.2em; height: 1.2em;"></span>
-            </button>
-
-            <div class="collapse navbar-collapse p-3 p-md-0 mt-2 mt-md-0" id="navCollapse">
-                <div class="d-flex flex-column flex-md-row align-items-center gap-2 gap-md-1 my-3 my-md-0 mx-md-auto" id="nav-links">
-                    <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('habitaciones')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show"><span data-i18n="nav_rooms">Habitaciones</span></a>
-                    <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('servicios')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show"><span data-i18n="nav_services">Servicios</span></a>
-                    <a href="/" class="nav-link-custom" onclick="event.preventDefault(); scrollToSection('contacto')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show"><span data-i18n="nav_contact">Contacto</span></a>
-                    <span id="nav-mis-reservas">
-                        <a href="/mis-reservas" class="nav-link-custom"><span data-i18n="nav_my_bookings">Mis Reservas</span></a>
-                    </span>
-                    <span id="nav-admin">
-                        <a href="/admin" class="nav-link-custom"><span data-i18n="nav_admin">Admin</span></a>
-                    </span>
-                </div>
-                <div class="d-flex flex-column flex-md-row align-items-center gap-3">
-                    <span id="nav-user"></span>
-                    <button id="btn-reservar-nav" class="btn-reservar" onclick="scrollToSection('habitaciones')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show" data-i18n="nav_book">Reservar</button>
-                    <button id="btn-auth" class="btn-reservar" onclick="openAuthModal()" data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show">Iniciar Sesión</button>
-                    <div class="lang-switcher">
-                        <button class="lang-btn lang-btn--active" data-lang="es" onclick="setLang('es')">ES</button>
-                        <span class="lang-sep">|</span>
-                        <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
 
     <!-- Fondo principal -->
     <section id="hero">
         <div class="container">
             <p class="hero-subtitle" data-i18n="hero_welcome">Bienvenido a</p>
-            <h1 class="hero-title">Hotel DAW</h1>
+            <h1 class="hero-title">Golden Resort</h1>
             <p class="hero-subtitle hero-tagline" data-i18n="hero_tagline">Lujo · Distinción · Confort</p>
             <div class="search-glass mt-4">
                 <form id="form-search" class="row g-3 align-items-end">
@@ -154,7 +123,7 @@
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4106.155563218017!2d-0.24134068636495795!3d39.16841688846856!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd61c8a2e5853133%3A0xc909e48140a17d8b!2sPlaya%20de%20San%20Antonio!5e0!3m2!1ses!2ses!4v1775721471261!5m2!1ses!2ses"
                         allowfullscreen
                         loading="lazy"
-                        title="Ubicación Hotel DAW — Playa de Cullera, Valencia">
+                        title="Ubicación Golden Resort — Playa de Cullera, Valencia">
                     </iframe>                
                 </a>
 
@@ -200,8 +169,8 @@
     <!-- FOOTER -->
     <footer>
         <div class="container text-center">
-            <p class="footer-brand serif mb-2">Hotel DAW</p>
-            <p class="footer-text" data-i18n="footer_rights">© 2026 Hotel DAW · Todos los derechos reservados</p>
+            <p class="footer-brand serif mb-2">Golden Resort</p>
+            <p class="footer-text" data-i18n="footer_rights">© 2026 Golden Resort · Todos los derechos reservados</p>
         </div>
     </footer>
 
@@ -276,7 +245,7 @@
             </div>
             <div class="room-lightbox-caption">
                 <div>
-                    <p class="room-type-badge room-type-badge--lb">Hotel DAW · Habitaciones</p>
+                    <p class="room-type-badge room-type-badge--lb">Golden Resort · Habitaciones</p>
                     <h3 class="serif room-lightbox-name room-lightbox-name-text"></h3>
                 </div>
                 <div class="room-lightbox-caption-right">
@@ -326,6 +295,9 @@
     <script th:src="@{/js/06-servicios-detalles.js}"></script>
     <script th:src="@{/js/10-auth.js}"></script>
     <script th:src="@{/js/11-lightbox.js}"></script>
+    <script th:src="@{/js/17-pago.js}"></script>
+    <script th:if="${navEsAdmin}" th:src="@{/js/admin-sidebar.js(v=2)}"></script>
     <script th:src="@{/js/13-init.js}"></script>
+
 </body>
 </html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Factura · Golden Resort</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+            background: #0D0D0D;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #0D0D0D;
+            font-family: Helvetica, Arial, sans-serif;
+            color: #F5F0E8;
+            font-size: 12pt;
+            line-height: 1.45;
+        }
+        .wrap {
+            width: 100%;
+            background: #0D0D0D;
+            padding: 24pt 0;
+        }
+        .card {
+            background: #1A1A1A;
+            border: 1px solid #2a2a2a;
+            margin: 0 24pt;
+        }
+        .header {
+            text-align: center;
+            padding: 28pt 32pt 22pt;
+            border-bottom: 1px solid rgba(201,168,76,0.25);
+        }
+        .brand {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 22pt;
+            letter-spacing: 5pt;
+            color: #C9A84C;
+            margin: 0;
+        }
+        .brand-tag {
+            margin-top: 6pt;
+            font-size: 8pt;
+            letter-spacing: 2pt;
+            text-transform: uppercase;
+            color: #9A9A9A;
+        }
+        .pad {
+            padding: 18pt 32pt 0;
+        }
+        .greeting {
+            font-family: Georgia, serif;
+            font-size: 16pt;
+            color: #F5F0E8;
+            margin: 0 0 8pt 0;
+        }
+        .greeting small {
+            display: block;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #9A9A9A;
+            margin-top: 6pt;
+        }
+        .meta-table, .row-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+        }
+        .meta-table td.label {
+            color: #9A9A9A;
+            text-transform: uppercase;
+            letter-spacing: 1.5pt;
+            padding: 2pt 0;
+            font-size: 9pt;
+        }
+        .meta-ref {
+            color: #C9A84C;
+            font-size: 11pt;
+            font-weight: bold;
+        }
+        .meta-fecha {
+            color: #F5F0E8;
+            font-size: 11pt;
+            text-align: right;
+        }
+        .section-title {
+            color: #C9A84C;
+            font-family: Georgia, serif;
+            font-size: 13pt;
+            padding-bottom: 8pt;
+            border-bottom: 1px solid rgba(201,168,76,0.2);
+            margin: 0;
+            font-weight: normal;
+        }
+        .row-table td {
+            padding: 4pt 0;
+            font-size: 10pt;
+        }
+        .row-table td.k { color: #9A9A9A; }
+        .row-table td.v { color: #F5F0E8; text-align: right; }
+        .divider {
+            border-top: 1px dashed rgba(201,168,76,0.18);
+            height: 1px;
+            font-size: 0;
+            line-height: 0;
+            padding-top: 6pt;
+        }
+        .total-divider {
+            border-top: 1px solid rgba(201,168,76,0.30);
+            height: 1px;
+            font-size: 0;
+            line-height: 0;
+            padding-top: 8pt;
+        }
+        .total-label {
+            color: #F5F0E8;
+            font-family: Georgia, serif;
+            font-size: 13pt;
+        }
+        .total-value {
+            color: #C9A84C;
+            font-family: Georgia, serif;
+            font-size: 18pt;
+            text-align: right;
+            font-weight: bold;
+        }
+        .desc-tag { color: #C9A84C; font-weight: bold; }
+        .desc-value { color: #C9A84C; text-align: right; }
+        .qr-box { text-align: center; padding-top: 8pt; }
+        .qr-title {
+            color: #C9A84C;
+            font-family: Georgia, serif;
+            font-size: 12pt;
+            margin-bottom: 6pt;
+        }
+        .qr-sub {
+            color: #9A9A9A;
+            font-size: 8pt;
+            letter-spacing: 1.5pt;
+            text-transform: uppercase;
+            margin-bottom: 10pt;
+        }
+        .qr-img {
+            width: 130pt;
+            height: 130pt;
+            border: 5pt solid #ffffff;
+            background: #ffffff;
+        }
+        .qr-ref {
+            color: #9A9A9A;
+            font-size: 8pt;
+            letter-spacing: 1pt;
+            margin-top: 8pt;
+        }
+        .qr-ref .gold { color: #C9A84C; }
+        .room-img-box { text-align: center; padding-top: 14pt; }
+        .room-img-title {
+            color: #C9A84C;
+            font-family: Georgia, serif;
+            font-size: 12pt;
+            margin-bottom: 10pt;
+        }
+        .room-img {
+            width: 100%;
+            max-width: 470pt;
+            border: 1px solid #2a2a2a;
+        }
+        .room-img-cap {
+            color: #9A9A9A;
+            font-size: 8pt;
+            letter-spacing: 1.5pt;
+            text-transform: uppercase;
+            margin-top: 8pt;
+        }
+        .footer {
+            text-align: center;
+            border-top: 1px solid rgba(201,168,76,0.2);
+            padding: 22pt 32pt 26pt;
+            margin-top: 22pt;
+        }
+        .footer p {
+            font-size: 8pt;
+            color: #9A9A9A;
+            line-height: 1.5;
+            margin: 0 0 8pt 0;
+        }
+        .footer .gold-line {
+            font-size: 9pt;
+            letter-spacing: 3pt;
+            text-transform: uppercase;
+            color: #C9A84C;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrap">
+    <div class="card">
+
+        <!-- Header -->
+        <div class="header">
+            <div class="brand">GOLDEN RESORT</div>
+            <div class="brand-tag">Lujo &#183; Distinci&#243;n &#183; Confort</div>
+        </div>
+
+        <!-- Greeting -->
+        <div class="pad">
+            <div class="greeting">
+                Gracias por tu reserva, <span th:text="${nombreCliente}">cliente</span>.
+                <small>Tu pago se ha procesado correctamente. A continuaci&#243;n tienes el detalle de tu factura.</small>
+            </div>
+        </div>
+
+        <!-- Invoice meta -->
+        <div class="pad">
+            <table class="meta-table">
+                <tr>
+                    <td class="label">Referencia</td>
+                    <td class="label" style="text-align:right;">Fecha</td>
+                </tr>
+                <tr>
+                    <td class="meta-ref" th:text="${referencia}">GR-XXXXXX</td>
+                    <td class="meta-fecha" th:text="${fecha}">&#8212;</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Detalle estancia -->
+        <div class="pad">
+            <h3 class="section-title">Detalle de la estancia</h3>
+        </div>
+        <div class="pad">
+            <table class="row-table">
+                <tr>
+                    <td class="k">Habitaci&#243;n</td>
+                    <td class="v">
+                        <span th:text="${habitacionTipo}">SUITE</span><th:block th:if="${habitacionNumero}"> &#183; N&#186; <span th:text="${habitacionNumero}">301</span></th:block>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="k">Entrada</td>
+                    <td class="v"><span th:text="${fechaEntrada}">&#8212;</span><th:block th:if="${horaCheckin}"> &#183; <span th:text="${horaCheckin}">15:00</span> h</th:block></td>
+                </tr>
+                <tr>
+                    <td class="k">Salida</td>
+                    <td class="v"><span th:text="${fechaSalida}">&#8212;</span><th:block th:if="${horaCheckout}"> &#183; <span th:text="${horaCheckout}">11:00</span> h</th:block></td>
+                </tr>
+                <tr>
+                    <td class="k">Noches</td>
+                    <td class="v" th:text="${noches}">&#8212;</td>
+                </tr>
+                <tr>
+                    <td class="k">Precio por noche</td>
+                    <td class="v"><span th:text="${precioNoche}">0</span> &#8364;</td>
+                </tr>
+                <tr><td colspan="2" class="divider"></td></tr>
+                <tr>
+                    <td class="v" style="text-align:left;">Alojamiento</td>
+                    <td class="v"><span th:text="${habitacionTotal}">0</span> &#8364;</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Servicios -->
+        <th:block th:if="${servicios != null and not #lists.isEmpty(servicios)}">
+            <div class="pad">
+                <h3 class="section-title">Servicios adicionales</h3>
+            </div>
+            <div class="pad">
+                <table class="row-table">
+                    <tr th:each="rs : ${servicios}">
+                        <td class="k">
+                            <span th:text="${rs.servicio.nombre}">Servicio</span>
+                            <span style="font-size:9pt;">(x<span th:text="${rs.cantidad}">1</span>)</span>
+                        </td>
+                        <td class="v"><span th:text="${rs.servicio.precio * rs.cantidad}">0</span> &#8364;</td>
+                    </tr>
+                </table>
+            </div>
+        </th:block>
+
+        <!-- Room Service -->
+        <th:block th:if="${pedidosRS != null and not #lists.isEmpty(pedidosRS)}">
+            <div class="pad">
+                <h3 class="section-title">Room Service</h3>
+            </div>
+            <div class="pad">
+                <table class="row-table">
+                    <tr th:each="p : ${pedidosRS}">
+                        <td class="k">
+                            <span th:text="${p.item.nombre}">Plato</span>
+                            <span style="font-size:9pt;">(x<span th:text="${p.cantidad}">1</span>)</span>
+                        </td>
+                        <td class="v"><span th:text="${p.item.precio * p.cantidad}">0</span> &#8364;</td>
+                    </tr>
+                </table>
+            </div>
+        </th:block>
+
+        <!-- Importe -->
+        <div class="pad">
+            <h3 class="section-title">Importe</h3>
+        </div>
+        <div class="pad">
+            <table class="row-table">
+                <tr>
+                    <td class="k">Subtotal</td>
+                    <td class="v"><span th:text="${subtotal}">0</span> &#8364;</td>
+                </tr>
+                <tr th:if="${descuento != null and descuento.signum() > 0}">
+                    <td class="k">
+                        Descuento
+                        <span th:if="${codigoDescuento}" class="desc-tag">(<span th:text="${codigoDescuento}">CODE</span>)</span>
+                    </td>
+                    <td class="desc-value">&#8211; <span th:text="${descuento}">0</span> &#8364;</td>
+                </tr>
+                <tr><td colspan="2" class="total-divider"></td></tr>
+                <tr>
+                    <td class="total-label">Total pagado</td>
+                    <td class="total-value"><span th:text="${total}">0</span> &#8364;</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Método de pago -->
+        <div class="pad">
+            <h3 class="section-title">M&#233;todo de pago</h3>
+        </div>
+        <div class="pad" style="font-size:11pt;">
+            <span th:if="${metodoTipo == 'TARJETA'}">
+                <span th:text="${metodoMarca ?: 'Tarjeta'}">Tarjeta</span>
+                &#8226;&#8226;&#8226;&#8226; <span th:text="${metodoUltimos}">----</span>
+            </span>
+            <span th:if="${metodoTipo == 'BIZUM'}">Bizum</span>
+            <span th:if="${metodoTipo == 'CUENTA_BANCARIA'}">Cuenta bancaria</span>
+        </div>
+
+        <!-- QR -->
+        <th:block th:if="${qrDataUri != null}">
+            <div class="pad qr-box">
+                <div class="qr-title">Tu c&#243;digo de acceso</div>
+                <div class="qr-sub">
+                    <span th:text="${habitacionTipo}">SUITE</span><th:block th:if="${habitacionNumero}"> &#183; N&#186; <span th:text="${habitacionNumero}">301</span></th:block>
+                </div>
+                <img th:src="${qrDataUri}" alt="QR" class="qr-img"/>
+                <div class="qr-ref">
+                    Ref &#183; <span class="gold" th:text="${referencia}">GR-XXXX</span>
+                </div>
+            </div>
+        </th:block>
+
+        <!-- Foto habitación -->
+        <th:block th:if="${habitacionImgDataUri != null}">
+            <div class="pad room-img-box">
+                <div class="room-img-title">Tu habitaci&#243;n te espera</div>
+                <img th:src="${habitacionImgDataUri}" alt="Habitaci&#243;n" class="room-img"/>
+                <div class="room-img-cap">
+                    <span th:text="${habitacionTipo}">SUITE</span><th:block th:if="${habitacionNumero}"> &#183; N&#186; <span th:text="${habitacionNumero}">301</span></th:block>
+                </div>
+            </div>
+        </th:block>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                Este documento confirma tu pago. Cons&#233;rvalo para tus registros.<br/>
+                Si tienes alguna duda, cont&#225;ctanos respondiendo al correo de confirmaci&#243;n.
+            </p>
+            <p class="gold-line">Golden Resort</p>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

@@ -83,7 +83,7 @@
     display: flex;
     align-items: center;
     text-align: center;
-    color: rgba(255,255,255,0.3);
+    color: var(--text-muted);
     font-size: 0.75rem;
     margin: 16px 0 12px;
 }
@@ -91,6 +91,6 @@
 .auth-divider::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid rgba(255,255,255,0.15);
+    border-bottom: 1px solid var(--border-soft);
 }
 .auth-divider span { margin: 0 10px; }

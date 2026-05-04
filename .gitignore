@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Secrets / local overrides ###
+.env
+.env.*
+!.env.example
+.mcp.json.local
+.claude/settings.local.json

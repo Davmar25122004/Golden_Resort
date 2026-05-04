@@ -41,7 +41,7 @@ window.handleLogin = async (e) => {
     if (res.url && res.url.includes('error')) {
         showAuthError('Email o contraseña incorrectos.');
     } else if (res.ok || res.redirected) {
-        window.location.reload();
+        window.location.href = res.url || '/';
     } else {
         showAuthError(t('auth_error_login'));
     }

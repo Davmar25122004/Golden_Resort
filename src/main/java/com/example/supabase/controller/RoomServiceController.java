@@ -1,6 +1,5 @@
 package com.example.supabase.controller;
 
-import com.example.supabase.domain.PedidoRoomService;
 import com.example.supabase.domain.RoomServiceItem;
 import com.example.supabase.dto.PedidoRequest;
 import com.example.supabase.service.RoomServiceService;

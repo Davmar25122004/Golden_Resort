@@ -10,7 +10,7 @@
 .reserva-card-luxury {
     position: relative;
     display: flex;
-    background: linear-gradient(135deg, #1c1c1c 0%, #151515 100%);
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-3) 100%);
     border: 1px solid rgba(185, 149, 77, 0.25);
     border-radius: 12px;
     overflow: hidden;
@@ -110,6 +110,15 @@
     font-size: 1rem;
     color: var(--cream);
     font-weight: 500;
+}
+
+.date-block .d-time {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--gold);
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+    font-weight: 600;
 }
 
 .date-arrow {
@@ -241,7 +250,7 @@
     max-width: 520px;
     margin: 60px auto;
     text-align: center;
-    background: linear-gradient(135deg, #1c1c1c 0%, #141414 100%);
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-3) 100%);
     border: 1px solid rgba(185, 149, 77, 0.2);
     border-radius: 12px;
     padding: 60px 48px;
