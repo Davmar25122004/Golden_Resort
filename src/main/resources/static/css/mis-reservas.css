@@ -1,0 +1,337 @@
+/* ── LUXURY GUEST PASS ── */
+.reservas-list {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.reserva-card-luxury {
+    position: relative;
+    display: flex;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-3) 100%);
+    border: 1px solid rgba(185, 149, 77, 0.25);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transition: transform 0.4s ease, border-color 0.4s ease;
+}
+
+.reserva-card-luxury:hover {
+    transform: translateY(-5px);
+    border-color: rgba(185, 149, 77, 0.5);
+}
+
+.card-image-side {
+    position: relative;
+    width: 250px;
+    min-width: 250px;
+}
+
+.card-img-luxury {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.8) contrast(1.1);
+}
+
+.card-img-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 40%, rgba(0,0,0,0.6) 100%);
+}
+
+.card-status-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    padding: 4px 12px;
+    font-size: 0.6rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.2);
+    font-weight: 600;
+}
+
+.card-content-side {
+    flex: 1;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.card-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.room-type-tag {
+    font-size: 0.65rem;
+    color: var(--gold);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.room-id-tag {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    color: var(--cream);
+    font-style: italic;
+}
+
+.ticket-dates {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    background: rgba(185, 149, 77, 0.05);
+    padding: 12px 20px;
+    border-radius: 6px;
+    border-left: 2px solid var(--gold);
+}
+
+.date-block .d-label {
+    display: block;
+    font-size: 0.55rem;
+    color: var(--text-muted-custom);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.date-block .d-value {
+    font-size: 1rem;
+    color: var(--cream);
+    font-weight: 500;
+}
+
+.date-block .d-time {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--gold);
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+    font-weight: 600;
+}
+
+.date-arrow {
+    color: var(--gold);
+    font-size: 1.2rem;
+    opacity: 0.6;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.info-section-title {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    color: var(--text-muted-custom);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    border-bottom: 1px solid rgba(185, 149, 77, 0.15);
+    padding-bottom: 5px;
+}
+
+.service-item-mini {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--cream);
+    margin-bottom: 6px;
+}
+
+.service-item-mini span:last-child {
+    color: var(--gold);
+    font-weight: 500;
+}
+
+.ticket-separator {
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(185, 149, 77, 0.3) 50%, transparent 50%);
+    background-size: 10px 1px;
+    background-repeat: repeat-x;
+    margin: 10px 0 25px;
+}
+
+.total-row-luxury {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.total-label {
+    color: var(--cream);
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.8;
+}
+
+.total-value {
+    font-size: 1.8rem;
+    color: var(--gold);
+    font-weight: 600;
+    font-family: 'Cormorant Garamond', serif;
+}
+
+.card-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-manage-rs {
+    flex: 1;
+    background: linear-gradient(to right, #b9954d, #d4af37);
+    color: #1a1a1a;
+    border: none;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-manage-rs:hover {
+    transform: scale(1.02);
+    box-shadow: 0 10px 30px rgba(185, 149, 77, 0.3);
+}
+
+.btn-cancel-luxury {
+    padding: 12px 20px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-muted-custom);
+    border-radius: 4px;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-cancel-luxury:hover {
+    border-color: #c0392b;
+    color: #c0392b;
+    background: rgba(192, 57, 43, 0.05);
+}
+
+@media (max-width: 850px) {
+    .reserva-card-luxury { flex-direction: column; }
+    .card-image-side { width: 100%; height: 200px; }
+}
+
+@media (max-width: 600px) {
+    .card-image-side { min-width: unset; height: 180px; }
+    .card-content-side { border-left: none; border-top: 1px solid rgba(201,168,77,0.12); }
+}
+
+/* ── EMPTY STATE ── */
+.reserva-empty {
+    max-width: 520px;
+    margin: 60px auto;
+    text-align: center;
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-3) 100%);
+    border: 1px solid rgba(185, 149, 77, 0.2);
+    border-radius: 12px;
+    padding: 60px 48px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+}
+
+.reserva-empty-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 28px;
+    color: var(--gold);
+    opacity: 0.7;
+}
+
+.reserva-empty-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.reserva-empty-deco {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.reserva-empty-deco span:not(.reserva-empty-diamond) {
+    display: block;
+    width: 60px;
+    height: 1px;
+    background: rgba(185, 149, 77, 0.35);
+}
+
+.reserva-empty-diamond {
+    color: var(--gold);
+    font-size: 10px;
+    opacity: 0.6;
+}
+
+.reserva-empty-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.9rem;
+    color: var(--cream);
+    font-style: italic;
+    font-weight: 400;
+    margin: 0 0 14px;
+    line-height: 1.2;
+}
+
+.reserva-empty-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted-custom);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin: 0 0 36px;
+    line-height: 1.8;
+}
+
+.btn-reserva-empty {
+    display: inline-block;
+    background: linear-gradient(to right, #b9954d, #d4af37);
+    color: #1a1a1a;
+    border: none;
+    padding: 14px 36px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-reserva-empty:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(185, 149, 77, 0.3);
+}
+
+@media (max-width: 600px) {
+    .reserva-empty { padding: 44px 28px; margin: 40px auto; }
+    .reserva-empty-title { font-size: 1.5rem; }
+}
+

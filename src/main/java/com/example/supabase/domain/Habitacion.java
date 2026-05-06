@@ -30,6 +30,15 @@ public class Habitacion {
     @Column(nullable = true)
     private String descripcion;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado_limpieza", nullable = false, length = 20)
+    private EstadoLimpieza estadoLimpieza;
+
+    @PrePersist
+    void prePersist() {
+        if (estadoLimpieza == null) estadoLimpieza = EstadoLimpieza.LIMPIA;
+    }
+
     public enum TipoHabitacion {
         NORMAL, DOBLE, SUITE, LUJO
     }

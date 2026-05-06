@@ -3,6 +3,7 @@ package com.example.supabase.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -37,4 +38,14 @@ public class Reserva {
     // Relación con ReservaServicio:
     @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL)
     private List<ReservaServicio> servicios;
+
+    // Petición especial del cliente
+    @Column(name = "peticion_especial", columnDefinition = "TEXT")
+    private String peticionEspecial;
+
+    // Momento exacto del checkout (recepción lo marca al entregar la llave).
+    // Si está informado, la reserva se considera cerrada aunque la fechaSalida
+    // sea posterior. Se usa para liberar la habitación y disparar limpieza.
+    @Column(name = "checkout_en")
+    private LocalDateTime checkoutEn;
 }

@@ -1,0 +1,246 @@
+/* Forzar fondo opaco del navbar (por defecto es transparente hasta scroll>80px) */
+#navbar {
+    background: rgba(13, 13, 13, 0.94) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(201, 168, 76, 0.18);
+}
+
+/* Espacio para que el navbar fixed no tape el título */
+#main-content {
+    padding-top: 110px;
+    min-height: 80vh;
+    background: var(--dark);
+}
+@media (max-width: 991px) {
+    #main-content { padding-top: 140px; }   /* navbar colapsado más alto */
+}
+#cal-page {
+    padding-top: 110px;
+    background: var(--dark);
+}
+
+/* Texto muted de Bootstrap es ilegible sobre fondo negro: lo aclaramos
+   solo dentro del contexto de las páginas de limpieza */
+#main-content .text-muted,
+#cal-page    .text-muted {
+    color: #b8b3a4 !important;
+}
+.limp-card .text-muted     { color: #c2bdae !important; }
+.limp-card .small.text-muted { color: #b8b3a4 !important; }
+.limp-card small            { color: #c2bdae; }
+.limp-card hr               { border-color: rgba(201,168,76,0.2); opacity: 1; }
+
+/* ── Filtro de fecha (cascada año/mes/semana/día) ─────────────────────── */
+.limp-fecha-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(201,168,76,0.18);
+    border-radius: 999px;
+    padding: 8px 14px;
+    margin-bottom: 1rem;
+}
+.limp-fecha-label {
+    color: var(--text-muted-custom, #aaa);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-right: 4px;
+}
+.limp-pill {
+    background: #fff;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    cursor: pointer;
+}
+.limp-pill:hover { background: var(--gold, #c9a84c); }
+.limp-select {
+    background: rgba(0,0,0,0.4);
+    color: #f5f0e8;
+    border: 1px solid rgba(201,168,76,0.28);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none' stroke='%23c9a84c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='1 1 5 5 9 1'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 30px;
+}
+.limp-select:disabled { opacity: 0.35; cursor: not-allowed; }
+.limp-select option { background: #1a1a1a; color: #f5f0e8; }
+.limp-clear {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #aaa;
+    border-radius: 50%;
+    width: 24px; height: 24px;
+    line-height: 1;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-left: 4px;
+}
+.limp-clear:hover { color: #fff; border-color: #e74c3c; background: #e74c3c; }
+
+.limp-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    color: #e8e8e8;
+    transition: transform 0.15s, border-color 0.15s;
+}
+.limp-card:hover { transform: translateY(-2px); border-color: rgba(201,168,76,0.6); }
+.limp-card h5 { color: #c9a84c; font-family: 'Cormorant Garamond', serif; margin: 0; }
+.limp-card.estado-limpia        { border-left: 4px solid #198754; }
+.limp-card.estado-sucia         { border-left: 4px solid #ffc107; }
+.limp-card.estado-progreso      { border-left: 4px solid #0dcaf0; }
+.limp-card.estado-mantenimiento { border-left: 4px solid #dc3545; }
+
+.limp-tabs { border-bottom: 1px solid rgba(201,168,76,0.25); }
+.limp-tabs .nav-link {
+    color: #aaa; background: transparent; border: none;
+    padding: 0.5rem 1rem; letter-spacing: 1px; text-transform: uppercase; font-size: 0.8rem;
+}
+.limp-tabs .nav-link.active { color: #c9a84c; border-bottom: 2px solid #c9a84c; background: transparent; }
+
+#limp-filtros .btn-filter {
+    background: transparent; color: #ccc;
+    border: 1px solid rgba(201,168,76,0.35);
+    padding: 0.25rem 0.85rem; font-size: 0.78rem;
+    letter-spacing: 1px; text-transform: uppercase;
+}
+#limp-filtros .btn-filter:hover { border-color: #c9a84c; color: #fff; }
+#limp-filtros .btn-filter.active { background: #c9a84c; color: #1a1a1a; border-color: #c9a84c; }
+
+/* ── Modales oscuros del módulo de limpieza ───────────────────────────── */
+.modal-dark .modal-content {
+    background: #161616;
+    border: 1px solid rgba(201,168,76,0.35);
+    color: #f5f0e8;
+    box-shadow: 0 18px 48px rgba(0,0,0,0.7);
+}
+.modal-dark .modal-body { padding: 1.6rem 1.8rem; }
+.modal-dark h3 {
+    color: #c9a84c !important;
+    font-family: 'Cormorant Garamond', serif !important;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 1.1rem;
+}
+.modal-dark .form-label,
+.modal-dark .form-label.small.text-muted,
+.modal-dark .form-check-label {
+    color: #d8d2c5 !important;
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    opacity: 1;
+}
+.modal-dark .form-control,
+.modal-dark .form-select {
+    background: rgba(0,0,0,0.45);
+    color: #f5f0e8;
+    border: 1px solid rgba(201,168,76,0.32);
+    border-radius: 6px;
+    padding: 0.55rem 0.8rem;
+}
+.modal-dark .form-control:focus,
+.modal-dark .form-select:focus {
+    background: rgba(0,0,0,0.65);
+    border-color: #c9a84c;
+    color: #fff;
+    outline: none;
+    box-shadow: 0 0 0 0.15rem rgba(201,168,76,0.18);
+}
+.modal-dark .form-control::placeholder { color: rgba(255,255,255,0.35); }
+.modal-dark .form-select option { background: #1a1a1a; color: #f5f0e8; }
+.modal-dark input[type="file"]::file-selector-button {
+    background: #c9a84c;
+    color: #1a1a1a;
+    border: none;
+    padding: 0.4rem 0.85rem;
+    border-radius: 4px;
+    margin-right: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+}
+.modal-dark input[type="file"]::file-selector-button:hover { background: #d4b766; }
+.modal-dark .btn-gold {
+    background: #c9a84c;
+    color: #1a1a1a;
+    border: none;
+    padding: 0.65rem 1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+.modal-dark .btn-gold:hover { background: #d4b766; }
+.modal-dark .alert { border-radius: 6px; }
+
+/* Objetos perdidos */
+.obj-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(201,168,76,0.22);
+    border-radius: 8px;
+    overflow: hidden;
+    color: #e8e8e8;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.obj-card.estado-entregado  { border-left: 4px solid #198754; opacity: 0.85; }
+.obj-card.estado-descartado { border-left: 4px solid #6c757d; opacity: 0.55; }
+.obj-card.estado-disponible { border-left: 4px solid #ffc107; }
+.obj-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    background: #1a1a1a;
+    display: block;
+}
+.obj-img--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.35);
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.obj-body { padding: 0.85rem 1rem; flex: 1; display: flex; flex-direction: column; }
+.obj-body strong { color: #c9a84c; }
+.obj-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1.35;
+}
+.obj-meta svg { flex-shrink: 0; opacity: 0.85; }
+
+/* Tablas e incidencias */
+.limp-inc-table { width: 100%; color: #e8e8e8; border-collapse: collapse; font-size: 0.85rem; }
+.limp-inc-table th, .limp-inc-table td { padding: 0.55rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.06); vertical-align: top; }
+.limp-inc-table th { color: #aaa; font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600; }
+.limp-inc-table tr.cerrada td { opacity: 0.55; }
+@media (max-width: 768px) {
+    .limp-inc-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+    .limp-inc-table th, .limp-inc-table td { padding: 0.35rem 0.55rem; font-size: 0.75rem; }
+}

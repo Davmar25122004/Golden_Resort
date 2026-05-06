@@ -1,11 +1,13 @@
 {
   "mcpServers": {
     "supabase": {
-      "type": "http",
-      "url": "https://mcp.supabase.com/mcp?project_ref=udojqeioeixaxbsxwpfe",
-      "headers": {
-        "Authorization": "Bearer sbp_c51ec23eba39f7f4a009734d0f8a3cd662fa26c2"
-      }
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@0.5.4",
+        "--project-ref=udojqeioeixaxbsxwpfe",
+        "--access-token=sbp_741ac97fcb7ebf687a8bb2008cc3562fa467861a"
+      ]
     }
   }
 }

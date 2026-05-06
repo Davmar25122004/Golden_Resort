@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230D0D0D'/><text x='50' y='72' font-size='68' text-anchor='middle' font-family='Georgia,serif' fill='%23C9A84C'>G</text></svg>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Resort | Verificar Email</title>
+    <link rel="stylesheet" th:href="@{/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <style>
+        body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .card-verificar { background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; padding: 2.5rem; max-width: 480px; width: 100%; text-align: center; color: #e0d8cc; }
+        .icon-wrap { font-size: 3rem; margin-bottom: 1rem; }
+        .spinner-border { width: 3rem; height: 3rem; color: #c9a96e; }
+        .btn-gold { background: #c9a96e; color: #0a0a0a; font-weight: 600; border: none; padding: .65rem 2rem; border-radius: 6px; }
+        .btn-gold:hover { background: #b8956a; color: #0a0a0a; }
+    </style>
+</head>
+<body>
+<div class="card-verificar">
+
+    <!-- Estado: procesando -->
+    <div id="estado-cargando">
+        <div class="spinner-border mb-3" role="status"></div>
+        <h5 class="mb-2">Verificando tu cuenta…</h5>
+        <p class="text-secondary small">Por favor espera un momento.</p>
+    </div>
+
+    <!-- Estado: éxito -->
+    <div id="estado-ok" class="d-none">
+        <div class="icon-wrap">✅</div>
+        <h4 class="mb-2">¡Email verificado!</h4>
+        <p class="text-secondary">Tu cuenta está activa. Ya puedes iniciar sesión.</p>
+        <a href="/" class="btn btn-gold mt-3">Ir al inicio</a>
+    </div>
+
+    <!-- Estado: error -->
+    <div id="estado-error" class="d-none">
+        <div class="icon-wrap">❌</div>
+        <h4 class="mb-2">No se pudo verificar</h4>
+        <p id="error-msg" class="text-secondary small">El enlace puede haber expirado o ya fue usado.</p>
+        <a href="/" class="btn btn-gold mt-3">Volver al inicio</a>
+    </div>
+
+</div>
+
+<script>
+(async () => {
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get('access_token');
+    const type = params.get('type');
+
+    if (!accessToken || type !== 'signup') {
+        mostrarError('Enlace inválido o incompleto.');
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/auth/confirmar-verificacion', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ accessToken })
+        });
+
+        if (res.ok) {
+            mostrarOk();
+        } else {
+            const msg = await res.text();
+            mostrarError(msg);
+        }
+    } catch (_) {
+        mostrarError('Error de conexión. Inténtalo de nuevo.');
+    }
+
+    function mostrarOk() {
+        document.getElementById('estado-cargando').classList.add('d-none');
+        document.getElementById('estado-ok').classList.remove('d-none');
+    }
+
+    function mostrarError(msg) {
+        document.getElementById('estado-cargando').classList.add('d-none');
+        document.getElementById('error-msg').textContent = msg;
+        document.getElementById('estado-error').classList.remove('d-none');
+    }
+})();
+</script>
+</body>
+</html>

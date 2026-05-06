@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230D0D0D'/><text x='50' y='72' font-size='68' text-anchor='middle' font-family='Georgia,serif' fill='%23C9A84C'>G</text></svg>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Privacidad | Golden Resort</title>
+
+    <link rel="stylesheet" th:href="@{/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/lib/aos-master/dist/aos.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+</head>
+<body>
+
+    <nav id="navbar" class="navbar navbar-expand-md navbar-dark scrolled">
+        <div class="container">
+            <a href="/" class="navbar-brand-custom">GOLDEN RESORT</a>
+        </div>
+    </nav>
+
+    <main class="container py-5 mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8" data-aos="fade-up">
+                <h1 class="serif mb-4" style="color:var(--gold);">Política de Privacidad</h1>
+                <div class="gold-line mb-5"></div>
+
+                <div style="color:var(--text-muted-custom); line-height:1.7;">
+                    <p class="mb-4">En <strong style="color:var(--cream);">Golden Resort</strong>, valoramos su privacidad y nos comprometemos a proteger sus datos personales. Esta política explica cómo recopilamos, usamos y protegemos su información.</p>
+
+                    <h2 class="h5 mt-5 mb-3" style="color:var(--cream);">1. Información que Recopilamos</h2>
+                    <p>Recopilamos información que usted nos proporciona directamente al realizar una reserva, registrarse en nuestra plataforma o contactarnos. Esto incluye:</p>
+                    <ul>
+                        <li>Nombre y apellidos</li>
+                        <li>Dirección de correo electrónico</li>
+                        <li>Número de teléfono</li>
+                        <li>Información de pago y facturación</li>
+                        <li>Preferencias de estancia</li>
+                    </ul>
+
+                    <h2 class="h5 mt-5 mb-3" style="color:var(--cream);">2. Uso de la Información</h2>
+                    <p>Utilizamos sus datos para los siguientes fines:</p>
+                    <ul>
+                        <li>Procesar y gestionar sus reservas.</li>
+                        <li>Enviar confirmaciones y actualizaciones sobre su estancia.</li>
+                        <li>Mejorar nuestros servicios y personalizar su experiencia.</li>
+                        <li>Cumplir con obligaciones legales y de seguridad.</li>
+                    </ul>
+
+                    <h2 class="h5 mt-5 mb-3" style="color:var(--cream);">3. Protección de Datos</h2>
+                    <p>Implementamos medidas de seguridad técnicas y organizativas para proteger sus datos personales contra el acceso no autorizado, la pérdida o la alteración.</p>
+
+                    <h2 class="h5 mt-5 mb-3" style="color:var(--cream);">4. Sus Derechos</h2>
+                    <p>Usted tiene derecho a acceder, rectificar o eliminar su información personal en cualquier momento. Puede ejercer estos derechos contactándonos a través de <a href="mailto:hgoldenresort@gmail.com" style="color:var(--gold);">hgoldenresort@gmail.com</a>.</p>
+
+                    <p class="mt-5 small text-end" style="font-style:italic;">Última actualización: 23 de abril de 2026</p>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="/" class="btn-reservar">Volver al inicio</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container text-center">
+            <p class="footer-brand serif mb-2">Golden Resort</p>
+            <p class="footer-text mb-2">© 2026 Golden Resort · Todos los derechos reservados</p>
+            <div class="footer-links d-flex justify-content-center gap-3">
+                <a href="/privacidad" class="footer-link">Política de Privacidad</a>
+                <span class="footer-sep">|</span>
+                <a href="/cookies" class="footer-link">Política de Cookies</a>
+            </div>
+        </div>
+    </footer>
+
+    <script th:src="@{/lib/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/lib/aos-master/dist/aos.js}"></script>
+    <script>AOS.init({ duration: 1000, once: true });</script>
+</body>
+</html>

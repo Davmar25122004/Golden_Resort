@@ -1,0 +1,80 @@
+﻿/* ── FUENTES LOCALES ── */
+@font-face {
+    font-family: 'Cormorant Garamond';
+    src: url('../lib/fonts/cormorant/cormorant-garamond-v21-latin-regular.woff2') format('woff2');
+    font-weight: 400; font-style: normal;
+}
+@font-face {
+    font-family: 'Cormorant Garamond';
+    src: url('../lib/fonts/cormorant/cormorant-garamond-v21-latin-italic.woff2') format('woff2');
+    font-weight: 400; font-style: italic;
+}
+@font-face {
+    font-family: 'Cormorant Garamond';
+    src: url('../lib/fonts/cormorant/cormorant-garamond-v21-latin-600.woff2') format('woff2');
+    font-weight: 600; font-style: normal;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../lib/fonts/motserrat/montserrat-v31-latin-300.woff2') format('woff2');
+    font-weight: 300; font-style: normal;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../lib/fonts/motserrat/montserrat-v31-latin-regular.woff2') format('woff2');
+    font-weight: 400; font-style: normal;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../lib/fonts/motserrat/montserrat-v31-latin-500.woff2') format('woff2');
+    font-weight: 500; font-style: normal;
+}
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../lib/fonts/motserrat/montserrat-v31-latin-600.woff2') format('woff2');
+    font-weight: 600; font-style: normal;
+}
+
+/* ── PALETA ─────────────────────────────────────────────────────────────── */
+:root {
+    /* Colores de marca */
+    --gold:        #C9A84C;
+    --gold-light:  #E8D5A3;
+    --accent:      #8B1A1A;
+
+    /* Variables legacy (mantener para no romper hojas hijas) */
+    --dark:        #0D0D0D;
+    --dark-2:      #1A1A1A;
+    --dark-3:      #252525;
+    --cream:       #F5F0E8;
+    --text-muted-custom: #9A9A9A;
+
+    /* Variables semánticas */
+    --bg:          #0D0D0D;
+    --surface:     #1A1A1A;
+    --surface-2:   #252525;
+    --surface-3:   #141414;
+    --border:      rgba(201, 168, 76, 0.18);
+    --border-soft: rgba(255, 255, 255, 0.08);
+    --text:        #F5F0E8;
+    --text-muted:  #9A9A9A;
+    --text-soft:   rgba(245, 240, 232, 0.7);
+    --overlay:     rgba(0, 0, 0, 0.65);
+    --shadow:      0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .serif {
+    font-family: 'Cormorant Garamond', serif;
+}
+
+
+

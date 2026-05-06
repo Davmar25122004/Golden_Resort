@@ -1,0 +1,26 @@
+﻿/* ── RESERVA FORM ── */
+.reserva-form-container {
+    background: var(--dark-2);
+    border: 1px solid rgba(201,168,76,0.2);
+    padding: 48px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+.servicio-select-item {
+    background: var(--dark-3);
+    border: 1px solid rgba(201,168,76,0.1);
+    padding: 16px 20px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.qty-input {
+    background: var(--dark);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--cream);
+    width: 70px;
+    padding: 6px 10px;
+    text-align: center;
+}
+

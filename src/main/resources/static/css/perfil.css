@@ -1,0 +1,714 @@
+/* ── LOADER ──────────────────────────────────────────────────────────────── */
+
+.perfil-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+}
+
+.perfil-spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(201, 168, 76, 0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: perfil-spin 0.8s linear infinite;
+}
+
+@keyframes perfil-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── PERFIL PAGE ─────────────────────────────────────────────────────────── */
+
+.perfil-page {
+    margin-top: -100px;
+    padding: 14rem 0 4rem;
+    min-height: calc(100vh + 100px);
+    background-image: url('../images/perfil-bg.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+    position: relative;
+    z-index: 1;
+}
+
+.perfil-page::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to bottom, rgba(13, 10, 5, 0.3) 0%, rgba(13, 10, 5, 0.9) 100%);
+    z-index: -1;
+}
+
+.perfil-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: var(--dark);
+    flex-shrink: 0;
+    margin: 0 auto 1.5rem;
+}
+
+.perfil-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.perfil-role-badge {
+    display: inline-block;
+    padding: 0.25rem 1rem;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Montserrat', sans-serif;
+    margin-top: 0.5rem;
+}
+
+.perfil-card {
+    background: rgba(17, 17, 17, 0.6); /* Fondo semi-transparente (glassmorphism) */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(201, 168, 76, 0.3);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.perfil-card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+}
+
+.perfil-field-label {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted-custom);
+    margin-bottom: 0.3rem;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.perfil-field-value {
+    font-size: 1rem;
+    color: var(--cream);
+    margin-bottom: 0;
+}
+
+.perfil-form-input {
+    background: var(--dark-3);
+    border: 1px solid rgba(201, 168, 76, 0.3);
+    border-radius: 2px;
+    color: var(--cream);
+    padding: 0.6rem 0.9rem;
+    width: 100%;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
+    outline: none;
+}
+
+.perfil-form-input:focus {
+    border-color: var(--gold);
+    background: var(--dark-3);
+    color: var(--cream);
+}
+
+.perfil-form-input::placeholder {
+    color: rgba(154, 154, 154, 0.5);
+}
+
+.perfil-btn {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 0.5rem 1.8rem;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'Montserrat', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.perfil-btn:hover {
+    background: var(--gold);
+    color: var(--dark);
+}
+
+.perfil-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.perfil-alert {
+    padding: 0.6rem 1rem;
+    border-radius: 2px;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    margin-top: 0.75rem;
+    display: none;
+}
+
+.perfil-alert--ok {
+    background: rgba(40, 167, 69, 0.15);
+    border: 1px solid rgba(40, 167, 69, 0.4);
+    color: #5cb85c;
+}
+
+.perfil-alert--err {
+    background: rgba(220, 53, 69, 0.15);
+    border: 1px solid rgba(220, 53, 69, 0.4);
+    color: #e74c3c;
+}
+
+.perfil-info-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.perfil-info-row:last-child {
+    margin-bottom: 0;
+}
+
+/* ── NAVBAR PROFILE ICON ──────────────────────────────────────────────────── */
+
+.btn-perfil-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1.5px solid var(--gold);
+    color: var(--gold);
+    text-decoration: none;
+    transition: all 0.25s ease;
+    background: transparent;
+    flex-shrink: 0;
+}
+
+.btn-perfil-nav:hover {
+    background: var(--gold);
+    color: var(--dark);
+}
+
+.btn-perfil-nav svg {
+    display: block;
+}
+
+/* ── MÉTODOS DE PAGO ─────────────────────────────────────────────────────── */
+
+.mp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.mp-btn-add {
+    padding: 0.45rem 1.2rem !important;
+    font-size: 0.7rem !important;
+}
+
+.mp-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.mp-empty {
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--text-muted-custom);
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.mp-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--dark-3);
+    border: 1px solid rgba(201, 168, 76, 0.15);
+    border-radius: 3px;
+    transition: border-color 0.2s;
+    flex-wrap: wrap;
+}
+
+.mp-card:hover {
+    border-color: rgba(201, 168, 76, 0.4);
+}
+
+.mp-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--dark);
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.mp-card-body {
+    flex: 1;
+    min-width: 180px;
+}
+
+.mp-card-title {
+    font-size: 0.95rem;
+    color: var(--cream);
+    margin-bottom: 0.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.mp-card-sub {
+    font-size: 0.8rem;
+    color: var(--text-muted-custom);
+}
+
+.mp-badge-default {
+    display: inline-block;
+    font-size: 0.6rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 0.15rem 0.6rem;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    border-radius: 2px;
+}
+
+.mp-card-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.mp-link {
+    background: transparent;
+    border: none;
+    color: var(--gold);
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 0.3rem 0.5rem;
+    transition: color 0.2s;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.mp-link:hover {
+    color: var(--gold-light);
+}
+
+.mp-link-danger {
+    color: #e74c3c;
+}
+
+.mp-link-danger:hover {
+    color: #ff6b5a;
+}
+
+/* ── MODALES DE MÉTODOS DE PAGO ──────────────────────────────────────────── */
+
+.mp-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.mp-modal-overlay.is-open {
+    display: flex;
+    animation: mp-fade 0.2s ease-out;
+}
+
+@keyframes mp-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.mp-modal {
+    background: var(--dark-2);
+    border: 1px solid rgba(201, 168, 76, 0.3);
+    border-radius: 4px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.mp-modal-close,
+.mp-modal-back {
+    position: absolute;
+    top: 0.8rem;
+    background: transparent;
+    border: none;
+    color: var(--cream);
+    font-size: 1.5rem;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 2px;
+    transition: background 0.2s;
+    line-height: 1;
+    padding: 0;
+}
+
+.mp-modal-close { right: 0.8rem; }
+.mp-modal-back  { left:  0.8rem; }
+
+.mp-modal-close:hover,
+.mp-modal-back:hover {
+    background: rgba(201, 168, 76, 0.15);
+}
+
+.mp-modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    color: var(--gold);
+    margin: 0.5rem 0 1.5rem;
+    text-align: center;
+}
+
+.mp-tipo-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 1rem;
+    background: transparent;
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 2px;
+    color: var(--cream);
+    cursor: pointer;
+    text-align: left;
+    margin-bottom: 0.6rem;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.mp-tipo-btn:hover {
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.05);
+}
+
+.mp-tipo-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    background: var(--dark-3);
+    flex-shrink: 0;
+    font-weight: 700;
+}
+
+.mp-tipo-arrow {
+    margin-left: auto;
+    color: var(--gold);
+    font-size: 1.3rem;
+}
+
+.mp-btn-primary {
+    width: 100%;
+    background: var(--gold) !important;
+    color: var(--dark) !important;
+    margin-top: 1rem;
+    padding: 0.7rem !important;
+    font-size: 0.8rem !important;
+}
+
+.mp-btn-primary:hover {
+    background: var(--gold-light) !important;
+}
+
+/* ── Mi Horario (calendario personal) ───────────────────────────────────── */
+
+.ph-plan-hdr {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 24px;
+    border-bottom: 1px solid rgba(201,168,76,0.18);
+    flex-wrap: wrap;
+}
+.ph-plan-icon {
+    width: 42px; height: 42px;
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold);
+    flex-shrink: 0;
+}
+.ph-plan-label {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+.ph-plan-name {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--cream);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.ph-vista-tabs {
+    display: inline-flex;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 999px;
+    padding: 3px;
+    gap: 2px;
+}
+.ph-vista-tab {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.ph-vista-tab:hover { color: var(--gold); }
+.ph-vista-tab.active { background: var(--gold); color: #111; }
+
+.ph-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 14px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.ph-nav-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 50%;
+    width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.ph-nav-btn:hover { background: rgba(201,168,76,0.15); }
+.ph-nav-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--cream);
+    min-width: 180px;
+    text-align: center;
+}
+
+/* Calendario mensual / anual */
+.ph-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+.ph-cal-grid--mini { gap: 2px; }
+.ph-cal-hdr {
+    text-align: center;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #555;
+    padding: 4px 0 8px;
+}
+.ph-cal-celda {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 8px;
+    min-height: 72px;
+    padding: 8px 6px 6px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    transition: background 0.12s, border-color 0.12s, transform 0.1s;
+}
+.ph-cal-celda:hover:not(.ph-cal-vacia) {
+    background: rgba(201,168,76,0.08);
+    border-color: rgba(201,168,76,0.3);
+    transform: scale(1.02);
+}
+.ph-cal-vacia { background: transparent; border-color: transparent; cursor: default; pointer-events: none; }
+.ph-cal-hoy {
+    outline: 2px solid var(--gold);
+    outline-offset: -2px;
+}
+.ph-cal-con-perfil { cursor: pointer; }
+.ph-cal-num {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1;
+}
+.ph-cal-perf {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.ph-cal-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 2px;
+}
+
+/* Celda mini (vista anual) */
+.ph-cal-celda--mini {
+    min-height: 26px;
+    padding: 3px 4px;
+    border-radius: 4px;
+    align-items: center;
+    justify-content: center;
+}
+.ph-cal-celda--mini .ph-cal-num { font-size: 0.62rem; }
+
+/* Vista anual: grid de 12 meses */
+.ph-anyo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+.ph-mini-mes {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(201,168,76,0.12);
+    border-radius: 8px;
+    padding: 10px;
+}
+.ph-mini-mes-hdr {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--cream);
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Vista semanal */
+.ph-semana {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+.ph-semana-col {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 8px;
+    padding: 10px 8px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 120px;
+}
+.ph-semana-hoy { outline: 2px solid var(--gold); outline-offset: -2px; }
+.ph-semana-dia {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #666;
+}
+.ph-semana-fecha {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--cream);
+}
+.ph-semana-perf {
+    font-size: 0.68rem;
+    color: var(--gold);
+    font-weight: 600;
+    margin-top: 4px;
+    line-height: 1.3;
+}
+.ph-semana-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+}
+
+/* Slots (tramos horarios) */
+.ph-slot {
+    background: rgba(201,168,76,0.1);
+    color: var(--gold);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.6rem;
+    font-family: 'Courier New', monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+    .ph-semana { grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .ph-semana-col { padding: 6px 4px; min-height: 90px; }
+    .ph-semana-perf, .ph-slot { font-size: 0.55rem; }
+    .ph-cal-celda { min-height: 52px; padding: 5px 4px; }
+    .ph-plan-hdr { flex-direction: column; align-items: flex-start; }
+    .ph-vista-tabs { margin-left: 0 !important; }
+}

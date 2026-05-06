@@ -1,0 +1,176 @@
+﻿<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230D0D0D'/><text x='50' y='72' font-size='68' text-anchor='middle' font-family='Georgia,serif' fill='%23C9A84C'>G</text></svg>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Resort | Limpieza</title>
+
+    <link rel="stylesheet" th:href="@{/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/accessibility.css}">
+    <link rel="stylesheet" th:href="@{/css/limpieza.css}">
+</head>
+<body>
+
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div id="main-content" style="display:block;">
+        <div class="container">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mt-4 mb-3 gap-2">
+                <div>
+                    <h2 class="serif text-gold mb-1">Panel de limpieza</h2>
+                    <p class="text-muted mb-0" style="font-size:0.85rem; letter-spacing:1px;">
+                        Habitaciones, tareas pendientes e incidencias
+                    </p>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="btn btn-outline-light btn-sm" onclick="limpGenerarSalidas()">Generar salidas de hoy</button>
+                    <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#incidenciaModal">Reportar incidencia</button>
+                    <button class="btn btn-outline-light btn-sm" th:if="${navEsAdmin or navEsRecepcion}" data-bs-toggle="modal" data-bs-target="#tareaManualModal">Crear tarea</button>
+                </div>
+            </div>
+
+            <ul class="nav nav-tabs limp-tabs mb-3">
+                <li class="nav-item"><a class="nav-link active" href="#" data-tab="panel" onclick="limpSetTab('panel'); return false;">Habitaciones</a></li>
+                <li class="nav-item"><a class="nav-link"        href="#" data-tab="mias"  onclick="limpSetTab('mias'); return false;">Mis tareas</a></li>
+                <li class="nav-item"><a class="nav-link"        href="#" data-tab="todas" onclick="limpSetTab('todas'); return false;">Todas las tareas</a></li>
+            </ul>
+
+            <div class="d-flex flex-wrap gap-2 mb-3" id="limp-filtros">
+                <button class="btn btn-sm btn-filter active" data-estado="">Todas</button>
+                <button class="btn btn-sm btn-filter" data-estado="SUCIA">Sucias</button>
+                <button class="btn btn-sm btn-filter" data-estado="EN_LIMPIEZA">En limpieza</button>
+                <button class="btn btn-sm btn-filter" data-estado="LIMPIA">Limpias</button>
+                <button class="btn btn-sm btn-filter" data-estado="MANTENIMIENTO">Mantenimiento</button>
+            </div>
+
+            <!-- Filtro de fecha (cascada año / mes / semana / día) -->
+            <div class="limp-fecha-bar" id="limp-fecha">
+                <span class="limp-fecha-label">FECHA:</span>
+                <button class="limp-pill" id="limp-pill-hoy" onclick="limpFechaHoy()">HOY</button>
+                <select class="limp-select" id="limp-anyo" onchange="limpFechaCambio()"></select>
+                <select class="limp-select" id="limp-mes"  onchange="limpFechaCambio()"></select>
+                <select class="limp-select" id="limp-sem"  onchange="limpFechaCambio()" disabled></select>
+                <select class="limp-select" id="limp-dia"  onchange="limpFechaCambio()" disabled></select>
+                <button class="limp-clear" onclick="limpFechaReset()" title="Limpiar filtro">×</button>
+            </div>
+
+            <div id="limp-root" class="row g-3">
+                <div class="col-12 text-center text-muted py-5">Cargando…</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: completar tarea con notas -->
+    <div class="modal fade modal-dark" id="completarModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h3 class="serif text-gold mb-3" style="font-size:1.4rem;">Completar tarea</h3>
+                    <input type="hidden" id="completar-tarea-id">
+                    <div id="completar-error" class="alert alert-danger d-none py-2" style="font-size:0.8rem;"></div>
+                    <label class="form-label small text-muted">Notas finales (opcional)</label>
+                    <textarea class="form-control" id="completar-notas" rows="3" placeholder="Observaciones, incidencias detectadas..."></textarea>
+                    <button class="btn-gold mt-3 w-100" onclick="limpConfirmarCompletar()">Marcar como completada</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: crear tarea manual -->
+    <div class="modal fade modal-dark" id="tareaManualModal" tabindex="-1" aria-hidden="true" th:if="${navEsAdmin or navEsRecepcion}">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h3 class="serif text-gold mb-3" style="font-size:1.4rem;">Nueva tarea</h3>
+                    <div id="manual-error" class="alert alert-danger d-none py-2" style="font-size:0.8rem;"></div>
+                    <form onsubmit="limpCrearManual(event)">
+                        <label class="form-label small text-muted">Habitación</label>
+                        <select class="form-select mb-2" id="manual-habitacion" required></select>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small text-muted">Tipo</label>
+                                <select class="form-select" id="manual-tipo">
+                                    <option value="SALIDA">Salida</option>
+                                    <option value="DIARIA">Diaria</option>
+                                    <option value="MANTENIMIENTO">Mantenimiento</option>
+                                    <option value="OTRA">Otra</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted">Prioridad</label>
+                                <select class="form-select" id="manual-prioridad">
+                                    <option value="BAJA">Baja</option>
+                                    <option value="NORMAL" selected>Normal</option>
+                                    <option value="ALTA">Alta</option>
+                                    <option value="URGENTE">Urgente</option>
+                                </select>
+                            </div>
+                        </div>
+                        <label class="form-label small text-muted mt-2">Notas</label>
+                        <textarea class="form-control" id="manual-notas" rows="2"></textarea>
+                        <button type="submit" class="btn-gold mt-3 w-100">Crear tarea</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: reportar incidencia -->
+    <div class="modal fade modal-dark" id="incidenciaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h3 class="serif text-gold mb-3" style="font-size:1.4rem;">Reportar incidencia</h3>
+                    <div id="inc-error" class="alert alert-danger d-none py-2" style="font-size:0.8rem;"></div>
+                    <div id="inc-success" class="alert alert-success d-none py-2" style="font-size:0.85rem;"></div>
+                    <form onsubmit="limpCrearIncidencia(event)">
+                        <label class="form-label small text-muted">Habitación (opcional si es general)</label>
+                        <select class="form-select mb-2" id="inc-habitacion">
+                            <option value="">— Sin habitación —</option>
+                        </select>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small text-muted">Tipo</label>
+                                <select class="form-select" id="inc-tipo">
+                                    <option value="MANTENIMIENTO">Mantenimiento</option>
+                                    <option value="INVENTARIO">Inventario</option>
+                                    <option value="OTRO">Otro</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted">Prioridad</label>
+                                <select class="form-select" id="inc-prioridad">
+                                    <option value="BAJA">Baja</option>
+                                    <option value="NORMAL" selected>Normal</option>
+                                    <option value="ALTA">Alta</option>
+                                    <option value="URGENTE">Urgente</option>
+                                </select>
+                            </div>
+                        </div>
+                        <label class="form-label small text-muted mt-2">Descripción</label>
+                        <textarea class="form-control" id="inc-descripcion" rows="3" required placeholder="Ej: Bombilla del baño fundida, falta toallas, grifo gotea..."></textarea>
+                        <button type="submit" class="btn-gold mt-3 w-100">Reportar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/lib/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/14-i18n.js}"></script>
+    <script th:src="@{/js/15-accessibility.js}"></script>
+    <script th:src="@{/js/01-globals.js}"></script>
+    <script th:src="@{/js/00-api-urls.js}"></script>
+    <script th:src="@{/js/00-enums.js}"></script>
+    <script th:src="@{/js/04-ui-core.js}"></script>
+    <script th:src="@{/js/03-navegacion.js}"></script>
+    <script th:src="@{/js/10-auth.js}"></script>
+    <script th:src="@{/js/13-init.js}"></script>
+    <script th:src="@{/js/21-limpieza.js}"></script>
+
+</body>
+</html>

@@ -2,6 +2,8 @@ package com.example.supabase.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -22,11 +24,34 @@ public class Usuario {
     
     private String nombre;
 
+    private String supabaseUid;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "usuarios_roles",
         joinColumns = @JoinColumn(name = "usuario_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Rol> roles;
+    private Set<Rol> roles = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "turno_plan_id")
+    private TurnoPlan turnoPlan;
+
+    @Column(length = 40)
+    private String departamento;   // RECEPCION | LIMPIEZA | COCINA | MANTENIMIENTO | DIRECCION | OTRO
+
+    @Column(length = 20)
+    private String tipoDocumento;
+
+    @Column(length = 20)
+    private String numDocumento;
+
+    private LocalDate fechaNacimiento;
+
+    @Column(length = 10)
+    private String telefonoPrefijo;
+
+    @Column(length = 20)
+    private String telefono;
 }

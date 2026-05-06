@@ -1,0 +1,43 @@
+﻿/* ── SERVICIOS ── */
+#servicios { background: var(--dark); }
+.servicio-card {
+    background: var(--dark-2);
+    border: 1px solid rgba(201,168,76,0.1);
+    padding: 36px 28px;
+    text-align: center;
+    transition: border-color 0.3s, transform 0.3s;
+}
+.servicio-card:hover { border-color: var(--gold); transform: translateY(-4px); }
+.servicio-card--clickable { cursor: pointer; }
+.servicio-card--img {
+    position: relative;
+    height: 280px;
+    padding: 0;
+    background-size: cover;
+    background-position: center;
+    border: none;
+    overflow: hidden;
+}
+.servicio-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.82) 40%, rgba(0,0,0,0.25) 100%);
+    transition: background 0.4s;
+}
+.servicio-card--img:hover .servicio-card-overlay {
+    background: linear-gradient(to top, rgba(0,0,0,0.88) 40%, rgba(0,0,0,0.45) 100%);
+}
+.servicio-card-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 24px 22px;
+    text-align: left;
+}
+.servicio-card--img:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(201,168,76,0.18); border: none; }
+.servicio-card-hint { font-size: 0.68rem; letter-spacing: 2px; color: rgba(255,255,255,0.45); margin-top: 6px; margin-bottom: 0; text-transform: uppercase; transition: color 0.3s; }
+.servicio-card--img:hover .servicio-card-hint { color: var(--gold); }
+.servicio-name { font-size: 1.25rem; color: var(--cream); margin-bottom: 4px; }
+.servicio-price { font-size: 0.85rem; color: var(--gold); font-weight: 600; margin: 0; }
+

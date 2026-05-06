@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Factura · Golden Resort</title>
+</head>
+<body style="margin:0; padding:0; background:#0D0D0D; font-family: 'Helvetica Neue', Arial, sans-serif; color:#F5F0E8;">
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#0D0D0D; padding:32px 16px;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0"
+                   style="max-width:600px; width:100%; background:#1A1A1A; border:1px solid #2a2a2a;">
+
+                <!-- Header -->
+                <tr>
+                    <td style="padding:40px 40px 28px; text-align:center; border-bottom:1px solid rgba(201,168,76,0.25);">
+                        <img th:if="${logoPng != null}" src="cid:logoImg" alt="Golden Resort" style="height:60px;width:auto;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto;">
+                        <div style="font-family: Georgia, 'Times New Roman', serif; font-size:28px; letter-spacing:6px; color:#C9A84C;">
+                            GOLDEN RESORT
+                        </div>
+                        <div style="margin-top:6px; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#9A9A9A;">
+                            Lujo · Distinción · Confort
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Greeting -->
+                <tr>
+                    <td style="padding:36px 40px 8px;">
+                        <div style="font-family: Georgia, serif; font-size:22px; color:#F5F0E8; margin-bottom:10px;">
+                            Gracias por tu reserva, <span th:text="${nombreCliente}">cliente</span>.
+                        </div>
+                        <p style="font-size:14px; line-height:1.6; color:#9A9A9A; margin:0;">
+                            Tu pago se ha procesado correctamente. A continuación tienes el detalle de tu factura.
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Invoice meta -->
+                <tr>
+                    <td style="padding:24px 40px 4px;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size:12px;">
+                            <tr>
+                                <td style="color:#9A9A9A; text-transform:uppercase; letter-spacing:2px; padding-bottom:4px;">Referencia</td>
+                                <td align="right" style="color:#9A9A9A; text-transform:uppercase; letter-spacing:2px; padding-bottom:4px;">Fecha</td>
+                            </tr>
+                            <tr>
+                                <td style="color:#C9A84C; font-size:14px;" th:text="${referencia}">GR-XXXXXX</td>
+                                <td align="right" style="color:#F5F0E8; font-size:14px;" th:text="${fecha}">—</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Detalle estancia -->
+                <tr>
+                    <td style="padding:24px 40px 0;">
+                        <div style="color:#C9A84C; font-family: Georgia, serif; font-size:18px; padding-bottom:10px; border-bottom:1px solid rgba(201,168,76,0.2);">
+                            Detalle de la estancia
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:16px 40px 0;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="6" border="0" style="font-size:13px;">
+                            <tr>
+                                <td style="color:#9A9A9A;">Habitación</td>
+                                <td align="right" style="color:#F5F0E8;">
+                                    <span th:text="${habitacionTipo}">SUITE</span>
+                                    <span th:if="${habitacionNumero}"> · Nº <span th:text="${habitacionNumero}">301</span></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="color:#9A9A9A;">Entrada</td>
+                                <td align="right" style="color:#F5F0E8;">
+                                    <span th:text="${fechaEntrada}">—</span><th:block th:if="${horaCheckin}"> · <span th:text="${horaCheckin}">15:00</span> h</th:block>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="color:#9A9A9A;">Salida</td>
+                                <td align="right" style="color:#F5F0E8;">
+                                    <span th:text="${fechaSalida}">—</span><th:block th:if="${horaCheckout}"> · <span th:text="${horaCheckout}">11:00</span> h</th:block>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="color:#9A9A9A;">Noches</td>
+                                <td align="right" style="color:#F5F0E8;" th:text="${noches}">—</td>
+                            </tr>
+                            <tr>
+                                <td style="color:#9A9A9A;">Precio por noche</td>
+                                <td align="right" style="color:#F5F0E8;"><span th:text="${precioNoche}">0</span> €</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="border-top:1px dashed rgba(201,168,76,0.15); padding-top:10px;"></td>
+                            </tr>
+                            <tr>
+                                <td style="color:#F5F0E8;">Alojamiento</td>
+                                <td align="right" style="color:#F5F0E8;"><span th:text="${habitacionTotal}">0</span> €</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Servicios Extra -->
+                <tr th:if="${servicios != null and not #lists.isEmpty(servicios)}">
+                    <td style="padding:24px 40px 0;">
+                        <div style="color:#C9A84C; font-family: Georgia, serif; font-size:18px; padding-bottom:10px; border-bottom:1px solid rgba(201,168,76,0.2);">
+                            Servicios adicionales
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${servicios != null and not #lists.isEmpty(servicios)}">
+                    <td style="padding:16px 40px 0;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="6" border="0" style="font-size:13px;">
+                            <tr th:each="rs : ${servicios}">
+                                <td style="color:#9A9A9A;">
+                                    <span th:text="${rs.servicio.nombre}">Servicio</span>
+                                    <span style="font-size:11px;">(x<span th:text="${rs.cantidad}">1</span>)</span>
+                                    <th:block th:if="${rs.ubicacion != null}">
+                                        <br/><span style="font-size:11px;"
+                                            th:text="${rs.ubicacion == 'AEROPUERTO_VALENCIA' ? 'Aeropuerto de Valencia' :
+                                                      (rs.ubicacion == 'RENFE_JOAQUIN_SOROLLA' ? 'Renfe Joaquín Sorolla' :
+                                                      (rs.ubicacion == 'RENFE_CULLERA' ? 'Renfe Cullera' : rs.ubicacion))}">Ubicación</span>
+                                    </th:block>
+                                </td>
+                                <td align="right" style="color:#F5F0E8;">
+                                    <span th:text="${(rs.precioServicio != null ? rs.precioServicio : rs.servicio.precio) * rs.cantidad}">0</span> €
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Room Service -->
+                <tr th:if="${pedidosRS != null and not #lists.isEmpty(pedidosRS)}">
+                    <td style="padding:24px 40px 0;">
+                        <div style="color:#C9A84C; font-family: Georgia, serif; font-size:18px; padding-bottom:10px; border-bottom:1px solid rgba(201,168,76,0.2);">
+                            Room Service
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${pedidosRS != null and not #lists.isEmpty(pedidosRS)}">
+                    <td style="padding:16px 40px 0;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="6" border="0" style="font-size:13px;">
+                            <tr th:each="p : ${pedidosRS}">
+                                <td style="color:#9A9A9A;">
+                                    <span th:text="${p.item.nombre}">Plato</span> 
+                                    <span style="font-size:11px;">(x<span th:text="${p.cantidad}">1</span>)</span>
+                                </td>
+                                <td align="right" style="color:#F5F0E8;">
+                                    <span th:text="${p.item.precio * p.cantidad}">0</span> €
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Totales -->
+                <tr>
+                    <td style="padding:28px 40px 0;">
+                        <div style="color:#C9A84C; font-family: Georgia, serif; font-size:18px; padding-bottom:10px; border-bottom:1px solid rgba(201,168,76,0.2);">
+                            Importe
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:16px 40px 0;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="6" border="0" style="font-size:13px;">
+                            <tr>
+                                <td style="color:#9A9A9A;">Subtotal</td>
+                                <td align="right" style="color:#F5F0E8;"><span th:text="${subtotal}">0</span> €</td>
+                            </tr>
+                            <tr th:if="${descuento != null and descuento.signum() > 0}">
+                                <td style="color:#9A9A9A;">
+                                    Descuento
+                                    <span th:if="${codigoDescuento}" style="color:#C9A84C;">(<span th:text="${codigoDescuento}">CODE</span>)</span>
+                                </td>
+                                <td align="right" style="color:#C9A84C;">– <span th:text="${descuento}">0</span> €</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" style="border-top:1px solid rgba(201,168,76,0.25); padding-top:12px;"></td>
+                            </tr>
+                            <tr>
+                                <td style="color:#F5F0E8; font-family: Georgia, serif; font-size:18px;">Total pagado</td>
+                                <td align="right" style="color:#C9A84C; font-family: Georgia, serif; font-size:22px;">
+                                    <span th:text="${total}">0</span> €
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Método de pago -->
+                <tr>
+                    <td style="padding:28px 40px 0;">
+                        <div style="color:#C9A84C; font-family: Georgia, serif; font-size:18px; padding-bottom:10px; border-bottom:1px solid rgba(201,168,76,0.2);">
+                            Método de pago
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:16px 40px 0; font-size:13px; color:#F5F0E8;">
+                        <span th:if="${metodoTipo == 'TARJETA'}">
+                            <span th:text="${metodoMarca ?: 'Tarjeta'}">Tarjeta</span> •••• <span th:text="${metodoUltimos}">----</span>
+                        </span>
+                        <span th:if="${metodoTipo == 'BIZUM'}">Bizum</span>
+                        <span th:if="${metodoTipo == 'CUENTA_BANCARIA'}">Cuenta bancaria</span>
+                    </td>
+                </tr>
+
+                <!-- QR Code -->
+                <tr th:if="${qrCid != null}">
+                    <td style="padding:32px 40px 0; text-align:center;">
+                        <div style="color:#C9A84C; font-family: Georgia, serif; font-size:16px; margin-bottom:8px;">
+                            Tu código de acceso
+                        </div>
+                        <div style="color:#9A9A9A; font-size:11px; letter-spacing:2px; text-transform:uppercase; margin-bottom:14px;">
+                            <span th:text="${habitacionTipo}">SUITE</span>
+                            <span th:if="${habitacionNumero}"> · Nº <span th:text="${habitacionNumero}">301</span></span>
+                        </div>
+                        <img th:src="'cid:' + ${qrCid}" alt="Código QR de la reserva" style="width:180px; height:180px; border:6px solid #ffffff; border-radius:8px; display:block; margin: 0 auto; background:#ffffff;">
+                        <div style="color:#9A9A9A; font-size:11px; letter-spacing:1px; margin-top:10px;">
+                            Ref · <span style="color:#C9A84C;" th:text="${referencia}">GR-XXXX</span>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Foto de la habitación (embebida inline cid: para que se vea sin descargas externas) -->
+                <tr th:if="${habitacionCid != null}">
+                    <td style="padding:32px 40px 0; text-align:center;">
+                        <div style="color:#C9A84C; font-family: Georgia, serif; font-size:16px; margin-bottom:14px;">
+                            Tu habitación te espera
+                        </div>
+                        <img th:src="'cid:' + ${habitacionCid}" alt="Foto de la habitación"
+                             style="width:100%; max-width:520px; border-radius:8px; border:1px solid #2a2a2a; display:block; margin: 0 auto;">
+                        <div style="color:#9A9A9A; font-size:11px; letter-spacing:2px; text-transform:uppercase; margin-top:10px;">
+                            <span th:text="${habitacionTipo}">SUITE</span>
+                            <span th:if="${habitacionNumero}"> · Nº <span th:text="${habitacionNumero}">301</span></span>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="padding:40px; text-align:center; border-top:1px solid rgba(201,168,76,0.2); margin-top:32px;">
+                        <p style="font-size:11px; color:#9A9A9A; line-height:1.6; margin:0 0 12px;">
+                            Este correo confirma tu pago. Conserva esta factura para tus registros.<br>
+                            Si tienes alguna duda, contáctanos respondiendo a este mensaje.
+                        </p>
+                        <p style="font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#C9A84C; margin:0;">
+                            Golden Resort
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230D0D0D'/><text x='50' y='72' font-size='68' text-anchor='middle' font-family='Georgia,serif' fill='%23C9A84C'>G</text></svg>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Cookies | Golden Resort</title>
+
+    <link rel="stylesheet" th:href="@{/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/lib/aos-master/dist/aos.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+</head>
+<body>
+
+    <nav id="navbar" class="navbar navbar-expand-md navbar-dark scrolled">
+        <div class="container">
+            <a href="/" class="navbar-brand-custom">GOLDEN RESORT</a>
+        </div>
+    </nav>
+
+    <main class="container py-5 mt-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8" data-aos="fade-up">
+                <h1 class="serif mb-4" style="color:var(--gold);">Política de Cookies</h1>
+                <div class="gold-line mb-5"></div>
+
+                <div style="color:var(--text-muted-custom); line-height:1.7;">
+                    <p class="mb-4">Este sitio web utiliza cookies para mejorar su experiencia de usuario. A continuación encontrará información sobre qué son las cookies, qué tipos utiliza este sitio y cómo puede desactivarlas.</p>
+
+                    <h2 class="h5 mt-5 mb-3" style="color:var(--cream);">1. ¿Qué son las Cookies?</h2>
+                    <p>Las cookies son pequeños archivos de texto que los sitios web almacenan en su navegador para recordar información sobre su visita, como su idioma preferido y otras opciones, lo que puede facilitar su próxima visita y hacer que el sitio le resulte más útil.</p>
+
+                    <h2 class="h5 mt-5 mb-3" style="color:var(--cream);">2. Tipos de Cookies que Utiliza este Sitio</h2>
+                    <ul>
+                        <li><strong style="color:var(--cream);">Cookies Técnicas:</strong> Son esenciales para el funcionamiento del sitio, permitiendo el acceso a áreas seguras y la gestión de reservas.</li>
+                        <li><strong style="color:var(--cream);">Cookies de Personalización:</strong> Permiten recordar sus preferencias, como el idioma seleccionado.</li>
+                        <li><strong style="color:var(--cream);">Cookies de Análisis:</strong> Nos ayudan a entender cómo los visitantes interactúan con el sitio web, recopilando información de forma anónima.</li>
+                    </ul>
+
+                    <h2 class="h5 mt-5 mb-3" style="color:var(--cream);">3. Gestión de Cookies</h2>
+                    <p>Usted puede permitir, bloquear o eliminar las cookies instaladas en su equipo mediante la configuración de las opciones de su navegador.</p>
+                    <ul>
+                        <li>Microsoft Edge: <a href="https://support.microsoft.com/es-es/microsoft-edge" style="color:var(--gold);" target="_blank">support.microsoft.com</a></li>
+                        <li>Firefox: <a href="https://support.mozilla.org/es/kb/habilitar-y-deshabilitar-cookies-sitios-web-rastrear-preferencias" style="color:var(--gold);" target="_blank">support.mozilla.org</a></li>
+                        <li>Google Chrome: <a href="https://support.google.com/chrome/answer/95647?hl=es" style="color:var(--gold);" target="_blank">support.google.com</a></li>
+                        <li>Safari: <a href="https://support.apple.com/es-es/guide/safari/sfri11471/mac" style="color:var(--gold);" target="_blank">support.apple.com</a></li>
+                    </ul>
+
+                    <h2 class="h5 mt-5 mb-3" style="color:var(--cream);">4. Consentimiento</h2>
+                    <p>Al navegar por nuestro sitio web, usted acepta el uso de las cookies en las condiciones contenidas en esta Política de Cookies.</p>
+
+                    <p class="mt-5 small text-end" style="font-style:italic;">Última actualización: 23 de abril de 2026</p>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="/" class="btn-reservar">Volver al inicio</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container text-center">
+            <p class="footer-brand serif mb-2">Golden Resort</p>
+            <p class="footer-text mb-2">© 2026 Golden Resort · Todos los derechos reservados</p>
+            <div class="footer-links d-flex justify-content-center gap-3">
+                <a href="/privacidad" class="footer-link">Política de Privacidad</a>
+                <span class="footer-sep">|</span>
+                <a href="/cookies" class="footer-link">Política de Cookies</a>
+            </div>
+        </div>
+    </footer>
+
+    <script th:src="@{/lib/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/lib/aos-master/dist/aos.js}"></script>
+    <script>AOS.init({ duration: 1000, once: true });</script>
+</body>
+</html>

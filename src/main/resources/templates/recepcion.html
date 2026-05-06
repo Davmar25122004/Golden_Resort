@@ -1,0 +1,158 @@
+﻿<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230D0D0D'/><text x='50' y='72' font-size='68' text-anchor='middle' font-family='Georgia,serif' fill='%23C9A84C'>G</text></svg>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Resort | Recepción</title>
+
+    <link rel="stylesheet" th:href="@{/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/lib/aos-master/dist/aos.css}">
+    <link rel="stylesheet" th:href="@{/lib/flatpickr/flatpickr.min.css}">
+
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/flatpickr.css}">
+    <link rel="stylesheet" th:href="@{/css/accessibility.css}">
+    <link rel="stylesheet" th:href="@{/css/recepcion.css}">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <!-- Contenido del panel de recepción -->
+    <div id="main-content" style="display:block;">
+        <div class="container">
+            <div id="recepcion-root"></div>
+        </div>
+    </div>
+
+    <!-- MODAL detalle reserva -->
+    <div class="modal fade modal-dark" id="reservaDetalleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-body" id="reservaDetalleBody">
+                    <div class="text-center py-4 text-muted">Cargando…</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL asignar limpieza -->
+    <div class="modal fade modal-dark" id="asignarLimpiezaModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h3 class="serif text-gold mb-1" style="font-size:1.4rem;">Asignar limpieza extra</h3>
+                    <p class="text-muted mb-3" style="font-size:0.78rem; letter-spacing:0.05em;">Cuando un cliente alojado pide limpieza, asigna a un miembro del equipo que esté de turno.</p>
+                    <div id="al-error" class="alert alert-danger d-none py-2" style="font-size:0.8rem;"></div>
+                    <div id="al-success" class="alert alert-success d-none py-2" style="font-size:0.85rem;"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <h6 class="text-gold" style="font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px;">Habitación ocupada</h6>
+                            <div id="al-habitaciones" style="max-height:340px;overflow-y:auto;border:1px solid rgba(201,168,76,0.15);border-radius:8px;padding:6px;">
+                                <div class="text-center text-muted py-3" style="font-size:0.85rem;">Cargando…</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-gold" style="font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:8px;">Limpiador de turno</h6>
+                            <div id="al-limpiadores" style="max-height:200px;overflow-y:auto;border:1px solid rgba(201,168,76,0.15);border-radius:8px;padding:6px;margin-bottom:14px;">
+                                <div class="text-center text-muted py-3" style="font-size:0.85rem;">Cargando…</div>
+                            </div>
+
+                            <label class="form-label small text-muted mt-2">Tipo</label>
+                            <select class="form-select form-select-sm" id="al-tipo">
+                                <option value="DIARIA">Limpieza diaria (a petición)</option>
+                                <option value="MANTENIMIENTO">Mantenimiento</option>
+                                <option value="OTRA" selected>Otra</option>
+                            </select>
+
+                            <label class="form-label small text-muted mt-2">Prioridad</label>
+                            <select class="form-select form-select-sm" id="al-prioridad">
+                                <option value="BAJA">Baja</option>
+                                <option value="NORMAL" selected>Normal</option>
+                                <option value="ALTA">Alta</option>
+                                <option value="URGENTE">Urgente</option>
+                            </select>
+
+                            <label class="form-label small text-muted mt-2">Notas</label>
+                            <textarea class="form-control form-control-sm" id="al-notas" rows="2" placeholder="Ej: Cliente solicita reposición de toallas"></textarea>
+
+                            <button class="btn-gold mt-3 w-100" onclick="recepcionGuardarAsignacion()">Asignar tarea</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL walk-in -->
+    <div class="modal fade modal-dark" id="walkinModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h3 class="serif text-gold mb-3" style="font-size:1.5rem;">Reserva walk-in</h3>
+                    <p class="text-muted" style="font-size:0.8rem; letter-spacing:1px;">Cliente que llega sin haber reservado online</p>
+                    <div id="walkin-error" class="alert alert-danger d-none py-2" style="font-size:0.8rem;"></div>
+                    <div id="walkin-success" class="alert alert-success d-none py-2" style="font-size:0.85rem;"></div>
+                    <form id="form-walkin" onsubmit="recepcionCrearWalkIn(event)">
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <label class="form-label small text-muted">Email del cliente</label>
+                                <input type="email" class="form-control" id="wi-email" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small text-muted">Nombre (opcional)</label>
+                                <input type="text" class="form-control" id="wi-nombre">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted">Entrada</label>
+                                <input type="text" class="form-control" id="wi-entrada" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted">Salida</label>
+                                <input type="text" class="form-control" id="wi-salida" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small text-muted">Tipo de habitación</label>
+                                <select class="form-select" id="wi-tipo" required>
+                                    <option value="NORMAL">Normal</option>
+                                    <option value="DOBLE">Doble</option>
+                                    <option value="SUITE">Suite</option>
+                                    <option value="LUJO">Lujo</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small text-muted">Notas / petición especial</label>
+                                <textarea class="form-control" id="wi-peticion" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-gold mt-3 w-100">Crear reserva</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Libraries -->
+    <script th:src="@{/lib/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/lib/aos-master/dist/aos.js}"></script>
+    <script th:src="@{/lib/flatpickr/flatpickr.min.js}"></script>
+    <script th:src="@{/lib/flatpickr/l10n/es.js}"></script>
+
+    <!-- JS -->
+    <script th:src="@{/js/14-i18n.js}"></script>
+    <script th:src="@{/js/15-accessibility.js}"></script>
+    <script th:src="@{/js/01-globals.js}"></script>
+    <script th:src="@{/js/02-flatpickr-config.js}"></script>
+    <script th:src="@{/js/04-ui-core.js}"></script>
+    <script th:src="@{/js/03-navegacion.js}"></script>
+    <script th:src="@{/js/10-auth.js}"></script>
+    <script th:src="@{/js/13-init.js}"></script>
+    <script th:src="@{/js/18-recepcion.js}"></script>
+
+</body>
+</html>
