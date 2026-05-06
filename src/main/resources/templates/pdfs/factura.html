@@ -276,8 +276,14 @@
                         <td class="k">
                             <span th:text="${rs.servicio.nombre}">Servicio</span>
                             <span style="font-size:9pt;">(x<span th:text="${rs.cantidad}">1</span>)</span>
+                            <th:block th:if="${rs.ubicacion != null}">
+                                <br/><span style="font-size:8.5pt; color:#999;"
+                                    th:text="${rs.ubicacion == 'AEROPUERTO_VALENCIA' ? 'Aeropuerto de Valencia' :
+                                              (rs.ubicacion == 'RENFE_JOAQUIN_SOROLLA' ? 'Renfe Joaquín Sorolla' :
+                                              (rs.ubicacion == 'RENFE_CULLERA' ? 'Renfe Cullera' : rs.ubicacion))}">Ubicación</span>
+                            </th:block>
                         </td>
-                        <td class="v"><span th:text="${rs.servicio.precio * rs.cantidad}">0</span> &#8364;</td>
+                        <td class="v"><span th:text="${(rs.precioServicio != null ? rs.precioServicio : rs.servicio.precio) * rs.cantidad}">0</span> &#8364;</td>
                     </tr>
                 </table>
             </div>

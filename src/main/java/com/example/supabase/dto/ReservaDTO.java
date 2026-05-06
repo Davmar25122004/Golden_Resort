@@ -2,6 +2,7 @@ package com.example.supabase.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class ReservaDTO {
@@ -18,6 +19,7 @@ public class ReservaDTO {
     public String clienteNombre;
     public String clienteEmail;
     public String peticionEspecial;
+    public LocalDateTime checkoutEn;
 
     // Constructor para mis-reservas (sin datos de cliente)
     public ReservaDTO(Long id, LocalDate fechaEntrada, LocalDate fechaSalida,

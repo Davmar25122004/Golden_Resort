@@ -18,7 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     limpInicializarSelectsFecha();
-    limpCargar();
+
+    // Si la URL trae #mias / #todas / #panel, abrir esa tab al cargar
+    var hash = (window.location.hash || '').replace('#','').trim();
+    if (['panel','mias','todas'].indexOf(hash) !== -1) {
+        limpSetTab(hash);
+    } else {
+        limpCargar();
+    }
     setInterval(limpCargar, 30000);
 
     document.addEventListener('shown.bs.modal', (ev) => {
@@ -31,6 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function limpSetTab(tab) {
     _limpTab = tab;
     document.querySelectorAll('.limp-tabs .nav-link').forEach(a => a.classList.toggle('active', a.dataset.tab === tab));
+    // En "Mis tareas" ocultamos los filtros de estado y la barra de fecha:
+    // ahí solo aplica la lista de tareas asignadas a mí.
+    var filtros = document.getElementById('limp-filtros');
+    var fechaBar = document.getElementById('limp-fecha');
+    if (filtros)  filtros.style.display  = tab === 'mias' ? 'none' : '';
+    if (fechaBar) fechaBar.style.display = tab === 'mias' ? 'none' : '';
     limpCargar();
 }
 
@@ -392,30 +405,10 @@ function limpPoblarSelectsHabitacion() {
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-function cssEstado(e) {
-    return e === 'LIMPIA' ? 'estado-limpia'
-         : e === 'SUCIA'  ? 'estado-sucia'
-         : e === 'EN_LIMPIEZA' ? 'estado-progreso'
-         : e === 'MANTENIMIENTO' ? 'estado-mantenimiento' : '';
-}
-function badgeEstado(e) {
-    return e === 'LIMPIA' ? 'bg-success'
-         : e === 'SUCIA'  ? 'bg-warning text-dark'
-         : e === 'EN_LIMPIEZA' ? 'bg-info text-dark'
-         : e === 'MANTENIMIENTO' ? 'bg-danger' : 'bg-secondary';
-}
-function labelEstado(e) {
-    return e === 'LIMPIA' ? 'Limpia'
-         : e === 'SUCIA'  ? 'Sucia'
-         : e === 'EN_LIMPIEZA' ? 'En limpieza'
-         : e === 'MANTENIMIENTO' ? 'Mantenimiento' : (e || '—');
-}
-function badgePrioridad(p) {
-    return p === 'URGENTE' ? 'bg-danger'
-         : p === 'ALTA'    ? 'bg-warning text-dark'
-         : p === 'NORMAL'  ? 'bg-secondary'
-         : p === 'BAJA'    ? 'bg-dark' : 'bg-secondary';
-}
+function cssEstado(e)       { return ENUMS.estadoLimpiezaCss(e); }
+function badgeEstado(e)     { return ENUMS.estadoLimpiezaBadge(e); }
+function labelEstado(e)     { return ENUMS.estadoLimpiezaLabel(e); }
+function badgePrioridad(p)  { return ENUMS.prioridadBadge(p); }
 function formatFecha(iso) {
     if (!iso) return '';
     try { return new Date(iso).toLocaleDateString('es-ES'); } catch { return iso; }

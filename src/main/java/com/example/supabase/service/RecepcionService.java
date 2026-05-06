@@ -51,7 +51,8 @@ public class RecepcionService {
     public List<Map<String, Object>> enEstancia() {
         LocalDate hoy = LocalDate.now();
         return reservaRepository.findAll().stream()
-                .filter(r -> !r.getFechaEntrada().isAfter(hoy) && r.getFechaSalida().isAfter(hoy))
+                .filter(r -> !r.getFechaEntrada().isAfter(hoy) && r.getFechaSalida().isAfter(hoy)
+                          && r.getCheckoutEn() == null)
                 .sorted(Comparator.comparing(r -> r.getHabitacion().getNumero()))
                 .map(this::toRow)
                 .collect(Collectors.toList());
@@ -60,7 +61,7 @@ public class RecepcionService {
     public List<Map<String, Object>> salidasHoy() {
         LocalDate hoy = LocalDate.now();
         return reservaRepository.findAll().stream()
-                .filter(r -> r.getFechaSalida().equals(hoy))
+                .filter(r -> r.getFechaSalida().equals(hoy) && r.getCheckoutEn() == null)
                 .sorted(Comparator.comparing(r -> r.getHabitacion().getNumero()))
                 .map(this::toRow)
                 .collect(Collectors.toList());
@@ -168,7 +169,7 @@ public class RecepcionService {
             LocalDate fin = r.getFechaSalida().isAfter(hasta.plusDays(1)) ? hasta.plusDays(1) : r.getFechaSalida();
             LocalDate d = ini;
             while (d.isBefore(fin)) {
-                conteo.merge(d.toString(), 1, Integer::sum);
+                conteo.merge(d.toString(), 1, (x, y) -> x + y);
                 d = d.plusDays(1);
             }
         }
@@ -250,6 +251,8 @@ public class RecepcionService {
                                Usuario autor) {
         if (fechaEntrada == null || fechaSalida == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fechas requeridas.");
+        if (fechaEntrada.isBefore(LocalDate.now()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No se puede crear walk-in para fechas pasadas.");
         if (!fechaSalida.isAfter(fechaEntrada))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de salida debe ser posterior a la de entrada.");
         if (emailCliente == null || emailCliente.isBlank())
@@ -332,6 +335,7 @@ public class RecepcionService {
             m.put("clienteNombre", r.getUsuario().getNombre());
         }
         m.put("peticionEspecial", r.getPeticionEspecial());
+        m.put("checkoutEn", r.getCheckoutEn());
 
         var ultimoPago = pagoRepository.findTopByReservaIdAndEstadoOrderByCreatedAtDesc(r.getId(), EstadoPago.COMPLETADO);
         m.put("pagada", ultimoPago.isPresent());

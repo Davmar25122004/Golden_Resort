@@ -53,18 +53,28 @@ public class NavbarAdvice {
         boolean esAdmin     = roles.contains("ROLE_ADMIN");
         boolean esRecepcion = roles.contains("ROLE_RECEPCION");
         boolean esLimpieza  = roles.contains("ROLE_LIMPIEZA");
-        boolean esStaff     = esAdmin || esRecepcion || esLimpieza;
+        boolean esGimnasio    = roles.contains("ROLE_GIMNASIO");
+        boolean esSpa         = roles.contains("ROLE_SPA");
+        boolean esCoche       = roles.contains("ROLE_COCHE");
+        boolean esHosteleria  = roles.contains("ROLE_HOSTELERIA");
+        boolean esRoomService = roles.contains("ROLE_ROOMSERVICE");
+        boolean esStaff     = esAdmin || esRecepcion || esLimpieza || esGimnasio || esSpa || esCoche || esHosteleria || esRoomService;
         boolean esCliente   = autenticado && !esStaff;
 
-        model.addAttribute("navAutenticado", autenticado);
-        model.addAttribute("navUsuario",     displayName);
-        model.addAttribute("navEmail",       emailLogin);
-        model.addAttribute("navRoles",       roles);
-        model.addAttribute("navEsAdmin",     esAdmin);
-        model.addAttribute("navEsRecepcion", esRecepcion);
-        model.addAttribute("navEsLimpieza",  esLimpieza);
-        model.addAttribute("navEsStaff",     esStaff);
-        model.addAttribute("navEsCliente",   esCliente);
+        model.addAttribute("navAutenticado",   autenticado);
+        model.addAttribute("navUsuario",       displayName);
+        model.addAttribute("navEmail",         emailLogin);
+        model.addAttribute("navRoles",         roles);
+        model.addAttribute("navEsAdmin",       esAdmin);
+        model.addAttribute("navEsRecepcion",   esRecepcion);
+        model.addAttribute("navEsLimpieza",    esLimpieza);
+        model.addAttribute("navEsGimnasio",    esGimnasio);
+        model.addAttribute("navEsSpa",         esSpa);
+        model.addAttribute("navEsCoche",       esCoche);
+        model.addAttribute("navEsHosteleria",  esHosteleria);
+        model.addAttribute("navEsRoomService", esRoomService);
+        model.addAttribute("navEsStaff",       esStaff);
+        model.addAttribute("navEsCliente",     esCliente);
     }
 
     private static String extraerLocalPart(String email) {

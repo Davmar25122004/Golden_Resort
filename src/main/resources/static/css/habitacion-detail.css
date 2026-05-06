@@ -13,6 +13,8 @@
     overflow: hidden;
     background: #111;
 }
+@media (max-width: 768px) { .detailSwiper { height: 300px; } }
+@media (max-width: 480px) { .detailSwiper { height: 220px; } }
 
 .detail-swiper-slide {
     width: 100%;

@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Golden Resort | Lujo y Distinción</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230D0D0D'/><text x='50' y='72' font-size='68' text-anchor='middle' font-family='Georgia,serif' fill='%23C9A84C'>G</text></svg>">
 
     <!-- Bootstrap 5.3 -->
     <link rel="stylesheet" th:href="@{/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css}">
@@ -138,7 +139,7 @@
                             <p class="contact-label" data-i18n="contact_contact">Contáctanos</p>
                             <p class="contact-value">
                                 +34 900 123 456<br>
-                                <a href="mailto:info@hoteldaw.es" class="contacto-email-link">info@hoteldaw.es</a>
+                                <a href="mailto:hgoldenresort@gmail.com" class="contacto-email-link">hgoldenresort@gmail.com</a>
                             </p>
                         </div>
                         <div class="contact-info-item">
@@ -170,21 +171,29 @@
     <footer>
         <div class="container text-center">
             <p class="footer-brand serif mb-2">Golden Resort</p>
-            <p class="footer-text" data-i18n="footer_rights">© 2026 Golden Resort · Todos los derechos reservados</p>
+            <p class="footer-text mb-2" data-i18n="footer_rights">© 2026 Golden Resort · Todos los derechos reservados</p>
+            <div class="footer-links d-flex justify-content-center gap-3">
+                <a href="/privacidad" class="footer-link"><span data-i18n="footer_privacy">Política de Privacidad</span></a>
+                <span class="footer-sep">|</span>
+                <a href="/cookies" class="footer-link"><span data-i18n="footer_cookies">Política de Cookies</span></a>
+            </div>
         </div>
     </footer>
 
     <!-- MODAL AUTH -->
     <div class="modal fade modal-dark" id="authModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <img th:src="@{/images/logo.png}" alt="Golden Resort" style="height:64px;width:auto;">
+                    </div>
                     <ul class="nav nav-pills mb-4 justify-content-center border-bottom border-secondary pb-3">
                         <li class="nav-item">
-                            <button class="nav-link active" id="tab-login" onclick="showAuthTab('login')" data-i18n="auth_signin_tab">Iniciar Sesión</button>
+                            <button class="nav-link active" id="tab-login" onclick="mostrarPestanaAuth('login')" data-i18n="auth_signin_tab">Iniciar Sesión</button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link" id="tab-register" onclick="showAuthTab('register')" data-i18n="auth_register_tab">Registrarse</button>
+                            <button class="nav-link" id="tab-register" onclick="mostrarPestanaAuth('register')" data-i18n="auth_register_tab">Registrarse</button>
                         </li>
                     </ul>
 
@@ -200,12 +209,31 @@
                             <input type="password" class="form-control" id="login-password" required>
                         </div>
                         <button type="submit" class="btn-gold" data-i18n="auth_enter">Entrar</button>
+                        <div class="text-end mt-2 mb-1">
+                            <button type="button" class="btn btn-link p-0" style="font-size:12px;color:#9A9A9A;text-decoration:none;" onclick="mostrarPestanaAuth('forgot')">¿Olvidaste tu contraseña?</button>
+                        </div>
                         <div class="auth-divider"><span data-i18n="auth_or">o</span></div>
                         <a href="/oauth2/authorization/google" class="btn-google">
                             <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google">
                             <span data-i18n="auth_google">Continuar con Google</span>
                         </a>
                     </form>
+
+                    <!-- Panel recuperar contraseña -->
+                    <div id="form-forgot" class="d-none">
+                        <div class="mb-2" style="font-family:Georgia,serif;font-size:18px;color:#F5F0E8;">Recuperar contraseña</div>
+                        <p style="font-size:13px;color:#9A9A9A;margin-bottom:20px;line-height:1.6;">Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.</p>
+                        <div class="mb-3">
+                            <label class="form-label" style="font-size:12px;letter-spacing:1px;text-transform:uppercase;color:#9A9A9A;">Email</label>
+                            <input type="email" class="form-control" id="forgot-email" required>
+                        </div>
+                        <button type="button" class="btn-gold" id="btn-forgot" onclick="manejarOlvidePassword()">Enviar enlace</button>
+                        <div id="forgot-ok" class="alert mt-3 py-2 d-none" style="background:rgba(40,167,69,0.15);border:1px solid rgba(40,167,69,0.3);color:#6fcf97;font-size:13px;"></div>
+                        <div id="forgot-err" class="alert mt-3 py-2 d-none" style="background:rgba(220,53,69,0.15);border:1px solid rgba(220,53,69,0.3);color:#eb5757;font-size:13px;"></div>
+                        <div class="text-center mt-3">
+                            <button type="button" class="btn btn-link p-0" style="font-size:12px;color:#9A9A9A;text-decoration:none;" onclick="mostrarPestanaAuth('login')">← Volver al inicio de sesión</button>
+                        </div>
+                    </div>
 
                     <form id="form-register" class="d-none" onsubmit="handleRegister(event)">
                         <div class="mb-3">
@@ -216,9 +244,103 @@
                             <label class="form-label" data-i18n="auth_email">Email</label>
                             <input type="email" class="form-control" id="reg-email" required>
                         </div>
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label class="form-label" data-i18n="auth_password">Contraseña</label>
                             <input type="password" class="form-control" id="reg-password" required minlength="6">
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-5">
+                                <label class="form-label">Tipo de documento</label>
+                                <select class="form-select" id="reg-tipo-doc" onchange="actualizarPlaceholderDoc()">
+                                    <option value="">— Selecciona —</option>
+                                    <option value="DNI">DNI</option>
+                                    <option value="NIE">NIE</option>
+                                    <option value="PASAPORTE">Pasaporte</option>
+                                    <option value="TIE">TIE (Tarjeta de identidad extranjero)</option>
+                                </select>
+                            </div>
+                            <div class="col-7">
+                                <label class="form-label">Número de documento</label>
+                                <input type="text" class="form-control" id="reg-num-doc" placeholder="Selecciona un tipo primero" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Fecha de nacimiento</label>
+                            <input type="text" class="form-control" id="reg-fecha-nac" placeholder="Selecciona tu fecha de nacimiento" readonly>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-5">
+                                <label class="form-label">Prefijo</label>
+                                <select class="form-select" id="reg-prefijo">
+                                    <option value="+34">🇪🇸 +34 España</option>
+                                    <option value="+1">🇺🇸 +1 EE.UU / Canadá</option>
+                                    <option value="+44">🇬🇧 +44 Reino Unido</option>
+                                    <option value="+33">🇫🇷 +33 Francia</option>
+                                    <option value="+49">🇩🇪 +49 Alemania</option>
+                                    <option value="+39">🇮🇹 +39 Italia</option>
+                                    <option value="+351">🇵🇹 +351 Portugal</option>
+                                    <option value="+31">🇳🇱 +31 Países Bajos</option>
+                                    <option value="+32">🇧🇪 +32 Bélgica</option>
+                                    <option value="+41">🇨🇭 +41 Suiza</option>
+                                    <option value="+43">🇦🇹 +43 Austria</option>
+                                    <option value="+48">🇵🇱 +48 Polonia</option>
+                                    <option value="+46">🇸🇪 +46 Suecia</option>
+                                    <option value="+47">🇳🇴 +47 Noruega</option>
+                                    <option value="+45">🇩🇰 +45 Dinamarca</option>
+                                    <option value="+358">🇫🇮 +358 Finlandia</option>
+                                    <option value="+52">🇲🇽 +52 México</option>
+                                    <option value="+54">🇦🇷 +54 Argentina</option>
+                                    <option value="+57">🇨🇴 +57 Colombia</option>
+                                    <option value="+56">🇨🇱 +56 Chile</option>
+                                    <option value="+51">🇵🇪 +51 Perú</option>
+                                    <option value="+55">🇧🇷 +55 Brasil</option>
+                                    <option value="+58">🇻🇪 +58 Venezuela</option>
+                                    <option value="+593">🇪🇨 +593 Ecuador</option>
+                                    <option value="+591">🇧🇴 +591 Bolivia</option>
+                                    <option value="+598">🇺🇾 +598 Uruguay</option>
+                                    <option value="+595">🇵🇾 +595 Paraguay</option>
+                                    <option value="+502">🇬🇹 +502 Guatemala</option>
+                                    <option value="+504">🇭🇳 +504 Honduras</option>
+                                    <option value="+503">🇸🇻 +503 El Salvador</option>
+                                    <option value="+506">🇨🇷 +506 Costa Rica</option>
+                                    <option value="+507">🇵🇦 +507 Panamá</option>
+                                    <option value="+53">🇨🇺 +53 Cuba</option>
+                                    <option value="+1809">🇩🇴 +1809 Rep. Dominicana</option>
+                                    <option value="+212">🇲🇦 +212 Marruecos</option>
+                                    <option value="+213">🇩🇿 +213 Argelia</option>
+                                    <option value="+216">🇹🇳 +216 Túnez</option>
+                                    <option value="+20">🇪🇬 +20 Egipto</option>
+                                    <option value="+234">🇳🇬 +234 Nigeria</option>
+                                    <option value="+27">🇿🇦 +27 Sudáfrica</option>
+                                    <option value="+254">🇰🇪 +254 Kenia</option>
+                                    <option value="+91">🇮🇳 +91 India</option>
+                                    <option value="+86">🇨🇳 +86 China</option>
+                                    <option value="+81">🇯🇵 +81 Japón</option>
+                                    <option value="+82">🇰🇷 +82 Corea del Sur</option>
+                                    <option value="+7">🇷🇺 +7 Rusia</option>
+                                    <option value="+380">🇺🇦 +380 Ucrania</option>
+                                    <option value="+90">🇹🇷 +90 Turquía</option>
+                                    <option value="+972">🇮🇱 +972 Israel</option>
+                                    <option value="+966">🇸🇦 +966 Arabia Saudí</option>
+                                    <option value="+971">🇦🇪 +971 Emiratos Árabes</option>
+                                    <option value="+61">🇦🇺 +61 Australia</option>
+                                    <option value="+64">🇳🇿 +64 Nueva Zelanda</option>
+                                </select>
+                            </div>
+                            <div class="col-7">
+                                <label class="form-label">Número de teléfono</label>
+                                <input type="tel" class="form-control" id="reg-telefono" placeholder="Ej: 612345678" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="mb-3 d-flex align-items-start gap-2">
+                            <input type="checkbox" id="reg-terminos" style="margin-top:3px;accent-color:#c9a84c;flex-shrink:0;width:15px;height:15px;">
+                            <label for="reg-terminos" style="font-size:0.78rem;color:var(--text-muted-custom);line-height:1.4;cursor:pointer;">
+                                He leído y acepto la <a href="/privacidad" target="_blank" style="color:var(--gold);text-decoration:underline;">Política de Privacidad</a> y la <a href="/cookies" target="_blank" style="color:var(--gold);text-decoration:underline;">Política de Cookies</a>
+                            </label>
                         </div>
                         <button type="submit" class="btn-gold" data-i18n="auth_create">Crear Cuenta</button>
                         <div class="auth-divider"><span data-i18n="auth_or">o</span></div>
@@ -288,6 +410,8 @@
     <script th:src="@{/js/14-i18n.js}"></script>
     <script th:src="@{/js/15-accessibility.js}"></script>
     <script th:src="@{/js/01-globals.js}"></script>
+    <script th:src="@{/js/00-api-urls.js}"></script>
+    <script th:src="@{/js/00-enums.js}"></script>
     <script th:src="@{/js/02-flatpickr-config.js}"></script>
     <script th:src="@{/js/04-ui-core.js}"></script>
     <script th:src="@{/js/03-navegacion.js}"></script>
@@ -296,7 +420,6 @@
     <script th:src="@{/js/10-auth.js}"></script>
     <script th:src="@{/js/11-lightbox.js}"></script>
     <script th:src="@{/js/17-pago.js}"></script>
-    <script th:if="${navEsAdmin}" th:src="@{/js/admin-sidebar.js(v=2)}"></script>
     <script th:src="@{/js/13-init.js}"></script>
 
 </body>

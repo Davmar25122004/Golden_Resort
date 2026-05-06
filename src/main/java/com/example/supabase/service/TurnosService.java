@@ -26,17 +26,20 @@ public class TurnosService {
     private final TurnoPerfilRepository perfilRepo;
     private final TurnoPlanRepository planRepo;
     private final UsuarioRepository usuarioRepo;
+    private final EmpleadoRepository empleadoRepo;
     private final TurnoPlanDiaTramoRepository diaTramoRepo;
     private final TurnoPlanDiaRepository planDiaRepo;
 
     public TurnosService(HorarioRepository horarioRepo, TurnoPerfilRepository perfilRepo,
                          TurnoPlanRepository planRepo, UsuarioRepository usuarioRepo,
+                         EmpleadoRepository empleadoRepo,
                          TurnoPlanDiaTramoRepository diaTramoRepo,
                          TurnoPlanDiaRepository planDiaRepo) {
         this.horarioRepo  = horarioRepo;
         this.perfilRepo   = perfilRepo;
         this.planRepo     = planRepo;
         this.usuarioRepo  = usuarioRepo;
+        this.empleadoRepo = empleadoRepo;
         this.diaTramoRepo = diaTramoRepo;
         this.planDiaRepo  = planDiaRepo;
     }
@@ -227,10 +230,16 @@ public class TurnosService {
 
     @Transactional
     public void borrarPlan(Long id) {
-        // Quitar la asignación de los empleados que lo tienen
+        // Limpiar referencia en usuarios (evita FK violation en usuarios.turno_plan_id)
         usuarioRepo.findAll().forEach(u -> {
             if (u.getTurnoPlan() != null && u.getTurnoPlan().getId().equals(id)) {
                 u.setTurnoPlan(null); usuarioRepo.save(u);
+            }
+        });
+        // Limpiar referencia en empleados (fuente autoritativa desde la migración)
+        empleadoRepo.findAll().forEach(emp -> {
+            if (emp.getTurnoPlan() != null && emp.getTurnoPlan().getId().equals(id)) {
+                emp.setTurnoPlan(null); empleadoRepo.save(emp);
             }
         });
         planRepo.deleteById(id);
@@ -322,9 +331,15 @@ public class TurnosService {
 
         String dowFilter = "";
         if (diasRaw != null && !diasRaw.isEmpty()) {
-            // Values are integers 1-7 from Number::intValue — safe to inline
-            String inList = diasRaw.stream()
-                    .map(n -> String.valueOf(n.intValue()))
+            List<Integer> diasValidados = diasRaw.stream()
+                    .map(Number::intValue)
+                    .filter(d -> d >= 1 && d <= 7)
+                    .distinct()
+                    .collect(Collectors.toList());
+            if (diasValidados.isEmpty())
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "dias_semana debe contener valores entre 1 y 7");
+            String inList = diasValidados.stream()
+                    .map(String::valueOf)
                     .collect(Collectors.joining(","));
             dowFilter = " WHERE EXTRACT(ISODOW FROM g) IN (" + inList + ")";
         }
@@ -439,29 +454,36 @@ public class TurnosService {
     public Usuario asignarPlanEmpleado(Long usuarioId, Long planId, String departamento) {
         Usuario u = usuarioRepo.findById(usuarioId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Empleado no encontrado"));
+        Empleado emp = empleadoRepo.findByUsuarioId(usuarioId).orElseGet(() -> {
+            Empleado nuevo = new Empleado();
+            nuevo.setUsuario(u);
+            return nuevo;
+        });
         if (planId != null) {
             TurnoPlan p = planRepo.findById(planId)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Plan no encontrado"));
-            u.setTurnoPlan(p);
-        } else u.setTurnoPlan(null);
+            emp.setTurnoPlan(p);
+        } else emp.setTurnoPlan(null);
         if (departamento != null && !departamento.isBlank()) {
             String d = departamento.trim().toUpperCase();
             if (!Set.of("RECEPCION","LIMPIEZA","COCINA","MANTENIMIENTO","DIRECCION","OTRO").contains(d))
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Departamento inválido");
-            u.setDepartamento(d);
+            emp.setDepartamento(d);
         }
-        return usuarioRepo.save(u);
+        empleadoRepo.save(emp);
+        return u;
     }
 
     public Map<String, Object> resolverHorarioEmpleado(Long usuarioId, LocalDate fecha) {
-        Usuario u = usuarioRepo.findById(usuarioId)
+        usuarioRepo.findById(usuarioId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Empleado no encontrado"));
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("fecha", fecha.toString());
         short dow = (short) fecha.getDayOfWeek().getValue();
         out.put("dia_semana", dow);
 
-        TurnoPlan p = u.getTurnoPlan();
+        TurnoPlan p = empleadoRepo.findByUsuarioId(usuarioId)
+                .map(Empleado::getTurnoPlan).orElse(null);
         if (p == null) { out.put("slots", List.of()); return out; }
 
         DateTimeFormatter tf = DateTimeFormatter.ofPattern("HH:mm");
@@ -515,19 +537,24 @@ public class TurnosService {
     public List<Map<String, Object>> listarEmpleados(String departamento) {
         return usuarioRepo.findAll().stream()
                 .filter(u -> u.getRoles().stream().anyMatch(r -> !"ROLE_CLIENTE".equals(r.getName())))
-                .filter(u -> departamento == null || departamento.isBlank()
-                          || departamento.equalsIgnoreCase(u.getDepartamento()))
+                .filter(u -> {
+                    if (departamento == null || departamento.isBlank()) return true;
+                    String dep = empleadoRepo.findByUsuarioId(u.getId())
+                            .map(Empleado::getDepartamento).orElse(null);
+                    return departamento.equalsIgnoreCase(dep);
+                })
                 .sorted(Comparator.comparing(u -> Optional.ofNullable(u.getNombre()).orElse(u.getEmail())))
                 .map(u -> {
+                    Empleado emp = empleadoRepo.findByUsuarioId(u.getId()).orElse(null);
                     Map<String, Object> m = new LinkedHashMap<>();
                     m.put("id", u.getId());
                     m.put("email", u.getEmail());
                     m.put("nombre", u.getNombre());
-                    m.put("departamento", u.getDepartamento());
+                    m.put("departamento", emp != null ? emp.getDepartamento() : null);
                     m.put("roles", u.getRoles().stream().map(Rol::getName).sorted().toList());
-                    if (u.getTurnoPlan() != null) {
-                        m.put("planId", u.getTurnoPlan().getId());
-                        m.put("planNombre", u.getTurnoPlan().getNombre());
+                    if (emp != null && emp.getTurnoPlan() != null) {
+                        m.put("planId", emp.getTurnoPlan().getId());
+                        m.put("planNombre", emp.getTurnoPlan().getNombre());
                     }
                     return m;
                 }).collect(Collectors.toList());

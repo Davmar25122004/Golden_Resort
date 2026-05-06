@@ -1,10 +1,13 @@
 package com.example.supabase.controller;
 
+import com.example.supabase.domain.Empleado;
 import com.example.supabase.domain.MetodoPago;
 import com.example.supabase.domain.TipoMetodoPago;
 import com.example.supabase.domain.Usuario;
+import com.example.supabase.repository.EmpleadoRepository;
 import com.example.supabase.repository.UsuarioRepository;
 import com.example.supabase.service.MetodoPagoService;
+import com.example.supabase.service.RateLimitService;
 import com.example.supabase.service.SupabaseAuthService;
 import com.example.supabase.service.TurnosService;
 import com.example.supabase.service.UsuarioService;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,20 +30,32 @@ public class MainController {
 
     private final UsuarioService usuarioService;
     private final UsuarioRepository usuarioRepository;
+    private final EmpleadoRepository empleadoRepository;
     private final SupabaseAuthService supabaseAuthService;
     private final MetodoPagoService metodoPagoService;
     private final TurnosService turnosService;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    private final com.example.supabase.service.PasswordResetService passwordResetService;
+    private final RateLimitService rateLimitService;
 
     public MainController(UsuarioService usuarioService,
                           UsuarioRepository usuarioRepository,
+                          EmpleadoRepository empleadoRepository,
                           SupabaseAuthService supabaseAuthService,
                           MetodoPagoService metodoPagoService,
-                          TurnosService turnosService) {
-        this.usuarioService      = usuarioService;
-        this.usuarioRepository   = usuarioRepository;
-        this.supabaseAuthService = supabaseAuthService;
-        this.metodoPagoService   = metodoPagoService;
-        this.turnosService       = turnosService;
+                          TurnosService turnosService,
+                          org.springframework.security.crypto.password.PasswordEncoder passwordEncoder,
+                          com.example.supabase.service.PasswordResetService passwordResetService,
+                          RateLimitService rateLimitService) {
+        this.usuarioService       = usuarioService;
+        this.usuarioRepository    = usuarioRepository;
+        this.empleadoRepository   = empleadoRepository;
+        this.supabaseAuthService  = supabaseAuthService;
+        this.metodoPagoService    = metodoPagoService;
+        this.turnosService        = turnosService;
+        this.passwordEncoder      = passwordEncoder;
+        this.passwordResetService = passwordResetService;
+        this.rateLimitService     = rateLimitService;
     }
 
     private Long usuarioIdAutenticado(Authentication auth) {
@@ -89,6 +105,75 @@ public class MainController {
         return "admin";
     }
 
+    @GetMapping("/completar-perfil")
+    public String completarPerfil(Authentication auth,
+                                  jakarta.servlet.http.HttpServletRequest request,
+                                  org.springframework.ui.Model model) {
+        if (auth == null || !auth.isAuthenticated()) return "redirect:/";
+        if (!(auth instanceof OAuth2AuthenticationToken oauthToken)) return "redirect:/";
+
+        String email = (String) oauthToken.getPrincipal().getAttributes().get("email");
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if (usuario == null) return "redirect:/";
+
+        boolean perfilIncompleto = usuario.getTipoDocumento() == null
+                || usuario.getNumDocumento() == null
+                || usuario.getFechaNacimiento() == null
+                || usuario.getTelefono() == null;
+        if (!perfilIncompleto) return "redirect:/";
+
+        model.addAttribute("nombre", usuario.getNombre() != null ? usuario.getNombre() : "");
+        return "completar-perfil";
+    }
+
+    @PostMapping("/api/perfil/completar")
+    @ResponseBody
+    public ResponseEntity<?> guardarPerfilCompleto(@RequestBody Map<String, Object> datos,
+                                                   Authentication auth,
+                                                   jakarta.servlet.http.HttpServletRequest request) {
+        if (auth == null || !auth.isAuthenticated())
+            return ResponseEntity.status(401).body("No autenticado.");
+        if (!(auth instanceof OAuth2AuthenticationToken oauthToken))
+            return ResponseEntity.badRequest().body("Solo para usuarios de Google.");
+
+        String email = (String) oauthToken.getPrincipal().getAttributes().get("email");
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if (usuario == null) return ResponseEntity.status(404).body("Usuario no encontrado.");
+
+        String tipoDocumento   = nib((String) datos.get("tipoDocumento"));
+        String numDocumento    = nib((String) datos.get("numDocumento"));
+        String telefonoPrefijo = nib((String) datos.get("telefonoPrefijo"));
+        String telefono        = nib((String) datos.get("telefono"));
+
+        if (tipoDocumento == null) return ResponseEntity.badRequest().body("El tipo de documento es obligatorio.");
+        if (numDocumento == null)  return ResponseEntity.badRequest().body("El número de documento es obligatorio.");
+        if (telefono == null)      return ResponseEntity.badRequest().body("El teléfono es obligatorio.");
+
+        LocalDate fechaNacimiento = null;
+        try {
+            String fn = (String) datos.get("fechaNacimiento");
+            if (fn != null && !fn.isBlank()) fechaNacimiento = LocalDate.parse(fn);
+        } catch (DateTimeParseException ignored) {}
+        if (fechaNacimiento == null) return ResponseEntity.badRequest().body("La fecha de nacimiento es obligatoria.");
+
+        usuario.setTipoDocumento(tipoDocumento);
+        usuario.setNumDocumento(numDocumento);
+        usuario.setFechaNacimiento(fechaNacimiento);
+        usuario.setTelefonoPrefijo(telefonoPrefijo);
+        usuario.setTelefono(telefono);
+        usuarioRepository.save(usuario);
+
+        String redirect = (String) request.getSession().getAttribute("completar_perfil_redirect");
+        request.getSession().removeAttribute("completar_perfil_redirect");
+        return ResponseEntity.ok(Map.of("redirect", redirect != null ? redirect : "/"));
+    }
+
+    @GetMapping("/privacidad")
+    public String privacidad() { return "privacidad"; }
+
+    @GetMapping("/cookies")
+    public String cookies() { return "cookies"; }
+
     @GetMapping("/verificar-email")
     public String verificarEmail() {
         return "verificar-email";
@@ -102,7 +187,7 @@ public class MainController {
 
     @GetMapping("/api/perfil")
     @ResponseBody
-    public ResponseEntity<?> getPerfil(Authentication auth) {
+    public ResponseEntity<?> obtenerPerfil(Authentication auth) {
         if (auth == null || !auth.isAuthenticated())
             return ResponseEntity.status(401).body("No autenticado.");
 
@@ -131,10 +216,38 @@ public class MainController {
         body.put("rol",     rol);
         body.put("roles",   nombresRol);
         body.put("esOAuth", esOAuth);
-        body.put("departamento", usuario.getDepartamento());
-        if (usuario.getTurnoPlan() != null) {
-            body.put("planId",     usuario.getTurnoPlan().getId());
-            body.put("planNombre", usuario.getTurnoPlan().getNombre());
+        boolean tienePasswordLocal = usuario.getPassword() != null
+                && !usuario.getPassword().isBlank()
+                && !"OAUTH2_USER".equals(usuario.getPassword());
+        body.put("tienePasswordLocal", tienePasswordLocal);
+        body.put("tipoDocumento",   usuario.getTipoDocumento());
+        body.put("numDocumento",    usuario.getNumDocumento());
+        body.put("fechaNacimiento", usuario.getFechaNacimiento() != null ? usuario.getFechaNacimiento().toString() : null);
+        body.put("telefonoPrefijo", usuario.getTelefonoPrefijo());
+        body.put("telefono",        usuario.getTelefono());
+        Empleado emp = empleadoRepository.findByUsuarioId(usuario.getId()).orElse(null);
+        if (emp != null) {
+            body.put("apellidos",         emp.getApellidos());
+            body.put("genero",            emp.getGenero());
+            body.put("tipoDocumento",     emp.getTipoDocumento());
+            body.put("numDocumento",      emp.getNumDocumento());
+            body.put("telefono",          emp.getTelefono());
+            body.put("cargo",             emp.getCargo());
+            body.put("departamento",      emp.getDepartamento());
+            body.put("tipoEmpleado",      emp.getTipoEmpleado());
+            body.put("tipoContratacion",  emp.getTipoContratacion());
+            body.put("fechaNacimiento",   emp.getFechaNacimiento()   != null ? emp.getFechaNacimiento().toString()   : null);
+            body.put("fechaContratacion", emp.getFechaContratacion() != null ? emp.getFechaContratacion().toString() : null);
+            body.put("lugarNacimiento",   emp.getLugarNacimiento());
+            body.put("pais",              emp.getPais());
+            body.put("telefonoCasa",      emp.getTelefonoCasa());
+            body.put("direccionCasa",     emp.getDireccionCasa());
+            body.put("telefonoOficina",   emp.getTelefonoOficina());
+            body.put("direccionOficina",  emp.getDireccionOficina());
+            if (emp.getTurnoPlan() != null) {
+                body.put("planId",     emp.getTurnoPlan().getId());
+                body.put("planNombre", emp.getTurnoPlan().getNombre());
+            }
         }
         return ResponseEntity.ok(body);
     }
@@ -151,10 +264,11 @@ public class MainController {
                 : auth.getName();
         var usuario = usuarioRepository.findByEmail(email).orElse(null);
         if (usuario == null) return ResponseEntity.status(404).body("Usuario no encontrado.");
-        if (usuario.getTurnoPlan() == null)
+        var emp = empleadoRepository.findByUsuarioId(usuario.getId()).orElse(null);
+        if (emp == null || emp.getTurnoPlan() == null)
             return ResponseEntity.ok(List.of());
         var dias = turnosService.calendarioPlan(
-                usuario.getTurnoPlan().getId(),
+                emp.getTurnoPlan().getId(),
                 LocalDate.parse(from),
                 LocalDate.parse(to));
         return ResponseEntity.ok(dias);
@@ -291,16 +405,65 @@ public class MainController {
         }
     }
 
+    @PostMapping("/api/perfil/restablecer-password")
+    @ResponseBody
+    public ResponseEntity<?> restablecerPassword(Authentication auth,
+                                                  jakarta.servlet.http.HttpServletRequest request) {
+        if (auth == null || !auth.isAuthenticated())
+            return ResponseEntity.status(401).body("No autenticado.");
+
+        String email = auth instanceof OAuth2AuthenticationToken oauthToken
+                ? (String) oauthToken.getPrincipal().getAttributes().get("email")
+                : auth.getName();
+
+        String baseUrl = request.getScheme() + "://" + request.getServerName()
+                + (request.getServerPort() != 80 && request.getServerPort() != 443
+                    ? ":" + request.getServerPort() : "");
+
+        String mensaje = passwordResetService.solicitarReset(email, baseUrl);
+        return ResponseEntity.ok(Map.of("mensaje", mensaje));
+    }
+
+    @PostMapping("/api/perfil/password/crear")
+    @ResponseBody
+    public ResponseEntity<?> crearPasswordOAuth(@RequestBody Map<String, String> datos,
+                                                Authentication auth) {
+        if (auth == null || !auth.isAuthenticated())
+            return ResponseEntity.status(401).body("No autenticado.");
+        if (!(auth instanceof OAuth2AuthenticationToken oauthToken))
+            return ResponseEntity.badRequest().body("Solo para cuentas Google.");
+
+        String email = (String) oauthToken.getPrincipal().getAttributes().get("email");
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if (usuario == null) return ResponseEntity.status(404).body("Usuario no encontrado.");
+
+        String nueva = datos.get("nueva");
+        if (nueva == null || nueva.length() < 6)
+            return ResponseEntity.badRequest().body("La contraseña debe tener al menos 6 caracteres.");
+
+        usuario.setPassword(passwordEncoder.encode(nueva));
+        usuarioRepository.save(usuario);
+        return ResponseEntity.ok(Map.of("message", "OK"));
+    }
+
     @PutMapping("/api/perfil/password")
     @ResponseBody
     public ResponseEntity<?> cambiarPassword(@RequestBody Map<String, String> datos,
                                              Authentication auth) {
         if (auth == null || !auth.isAuthenticated())
             return ResponseEntity.status(401).body("No autenticado.");
-        if (auth instanceof OAuth2AuthenticationToken)
-            return ResponseEntity.badRequest().body("Los usuarios de Google no pueden cambiar la contraseña aquí.");
 
-        String email  = auth.getName();
+        String email = auth instanceof OAuth2AuthenticationToken oauthToken
+                ? (String) oauthToken.getPrincipal().getAttributes().get("email")
+                : auth.getName();
+
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if (usuario == null) return ResponseEntity.status(404).body("Usuario no encontrado.");
+
+        // OAuth sin contraseña local — usar el endpoint /crear
+        if ("OAUTH2_USER".equals(usuario.getPassword()) || usuario.getPassword() == null)
+            return ResponseEntity.badRequest().body("Primero añade una contraseña desde el panel de seguridad.");
+
         String actual = datos.get("actual");
         String nueva  = datos.get("nueva");
 
@@ -318,16 +481,71 @@ public class MainController {
         }
     }
 
+    @PutMapping("/api/perfil/empleado")
+    @ResponseBody
+    public ResponseEntity<?> actualizarEmpleado(@RequestBody Map<String, Object> datos,
+                                                 Authentication auth) {
+        if (auth == null || !auth.isAuthenticated())
+            return ResponseEntity.status(401).body("No autenticado.");
+
+        String email = auth instanceof OAuth2AuthenticationToken token
+                ? (String) token.getPrincipal().getAttributes().get("email")
+                : auth.getName();
+
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if (usuario == null) return ResponseEntity.status(404).body("Usuario no encontrado.");
+
+        String nombre = (String) datos.get("nombre");
+        if (nombre != null && !nombre.isBlank() && nombre.trim().length() >= 2)
+            usuarioService.actualizarNombre(email, nombre.trim());
+
+        var emp = empleadoRepository.findByUsuarioId(usuario.getId()).orElse(null);
+        if (emp != null) {
+            emp.setApellidos(nib((String) datos.get("apellidos")));
+            emp.setGenero(nib((String) datos.get("genero")));
+            emp.setTipoDocumento(nib((String) datos.get("tipoDocumento")));
+            emp.setNumDocumento(nib((String) datos.get("numDocumento")));
+            emp.setTelefono(nib((String) datos.get("telefono")));
+            emp.setLugarNacimiento(nib((String) datos.get("lugarNacimiento")));
+            emp.setPais(nib((String) datos.get("pais")));
+            String fn = (String) datos.get("fechaNacimiento");
+            emp.setFechaNacimiento(fn != null && !fn.isBlank() ? LocalDate.parse(fn) : null);
+            emp.setTelefonoCasa(nib((String) datos.get("telefonoCasa")));
+            emp.setDireccionCasa(nib((String) datos.get("direccionCasa")));
+            emp.setTelefonoOficina(nib((String) datos.get("telefonoOficina")));
+            emp.setDireccionOficina(nib((String) datos.get("direccionOficina")));
+            empleadoRepository.save(emp);
+        }
+
+        return ResponseEntity.ok(Map.of("message", "OK"));
+    }
+
+    private String nib(String s) { return (s != null && !s.isBlank()) ? s.trim() : null; }
+
     @PostMapping("/api/auth/register")
     @ResponseBody
     public ResponseEntity<?> registrar(@RequestBody Map<String, String> datos,
                                        HttpServletRequest request) {
+        if (!rateLimitService.bucketRegistro(request.getRemoteAddr()).tryConsume(1))
+            return ResponseEntity.status(429).body("Demasiados intentos de registro. Espera un momento.");
         try {
-            String email    = datos.get("email");
-            String nombre   = datos.get("nombre");
-            String password = datos.get("password");
+            String email           = datos.get("email");
+            String nombre          = datos.get("nombre");
+            String password        = datos.get("password");
+            String tipoDocumento   = datos.get("tipoDocumento");
+            String numDocumento    = datos.get("numDocumento");
+            String telefonoPrefijo = datos.get("telefonoPrefijo");
+            String telefono        = datos.get("telefono");
 
-            usuarioService.registrar(nombre, email, password);
+            LocalDate fechaNacimiento = null;
+            try {
+                String fn = datos.get("fechaNacimiento");
+                if (fn != null && !fn.isBlank()) fechaNacimiento = LocalDate.parse(fn);
+            } catch (DateTimeParseException ignored) {}
+
+            usuarioService.registrar(nombre, email, password,
+                    tipoDocumento, numDocumento, fechaNacimiento,
+                    telefonoPrefijo, telefono);
 
             // No hacemos auto-login: el usuario debe verificar su email primero
             return ResponseEntity.ok(Map.of("message", "CHECK_EMAIL"));

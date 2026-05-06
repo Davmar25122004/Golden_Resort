@@ -2,6 +2,7 @@ package com.example.supabase.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,4 +40,18 @@ public class Usuario {
 
     @Column(length = 40)
     private String departamento;   // RECEPCION | LIMPIEZA | COCINA | MANTENIMIENTO | DIRECCION | OTRO
+
+    @Column(length = 20)
+    private String tipoDocumento;
+
+    @Column(length = 20)
+    private String numDocumento;
+
+    private LocalDate fechaNacimiento;
+
+    @Column(length = 10)
+    private String telefonoPrefijo;
+
+    @Column(length = 20)
+    private String telefono;
 }

@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completar perfil · Golden Resort</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230D0D0D'/><text x='50' y='72' font-size='68' text-anchor='middle' font-family='Georgia,serif' fill='%23C9A84C'>G</text></svg>">
+    <link rel="stylesheet" th:href="@{/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/lib/flatpickr/flatpickr.min.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/flatpickr.css}">
+    <style>
+        body { background: #0D0D0D; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+        .card {
+            background: #1A1A1A;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 48px 40px;
+            max-width: 480px;
+            width: 100%;
+        }
+        .resort-logo  { height: 60px; width: auto; display: block; margin: 0 auto 12px; }
+        .resort-brand { font-family: Georgia, serif; font-size: 22px; letter-spacing: 5px; color: #C9A84C; text-align: center; margin-bottom: 4px; }
+        .resort-tag   { font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: #9A9A9A; text-align: center; margin-bottom: 32px; }
+        .page-title   { font-family: Georgia, serif; font-size: 20px; color: #F5F0E8; margin-bottom: 6px; }
+        .page-sub     { font-size: 13px; color: #9A9A9A; margin-bottom: 28px; line-height: 1.6; }
+        .form-label   { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #9A9A9A; margin-bottom: 4px; }
+        .form-control, .form-select {
+            background: #111; border: 1px solid #333; color: #F5F0E8; font-size: 14px;
+        }
+        .form-control:focus, .form-select:focus {
+            background: #111; border-color: #C9A84C; color: #F5F0E8; box-shadow: none;
+        }
+        .form-select option { background: #1A1A1A; }
+        .btn-gold {
+            width: 100%; background: #C9A84C; color: #0D0D0D; border: none;
+            padding: 12px; font-family: Georgia, serif; font-size: 14px;
+            letter-spacing: 2px; text-transform: uppercase; border-radius: 4px;
+            margin-top: 8px; cursor: pointer;
+        }
+        .btn-gold:hover { background: #e0bf6a; }
+        .btn-gold:disabled { opacity: 0.6; cursor: not-allowed; }
+        .alert-ok  { background: rgba(40,167,69,0.15); border: 1px solid rgba(40,167,69,0.3); color: #6fcf97; font-size: 13px; border-radius: 4px; padding: 10px 14px; margin-top: 16px; display: none; }
+        .alert-err { background: rgba(220,53,69,0.15); border: 1px solid rgba(220,53,69,0.3); color: #eb5757; font-size: 13px; border-radius: 4px; padding: 10px 14px; margin-top: 12px; display: none; }
+        .input-group-text { background: #1A1A1A; border: 1px solid #333; color: #9A9A9A; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <img th:src="@{/images/logo.png}" alt="Golden Resort" class="resort-logo">
+    <div class="resort-brand">GOLDEN RESORT</div>
+    <div class="resort-tag">Lujo · Distinción · Confort</div>
+
+    <div class="page-title">Completa tu perfil</div>
+    <p class="page-sub">
+        Bienvenido/a, <strong th:text="${nombre}" style="color:#C9A84C;">usuario</strong>.<br>
+        Necesitamos algunos datos adicionales para finalizar tu registro.
+    </p>
+
+    <form id="form-completar" onsubmit="enviar(event)" novalidate>
+
+        <!-- Documento -->
+        <div class="row g-2 mb-3">
+            <div class="col-5">
+                <label class="form-label">Tipo de documento</label>
+                <select class="form-select" id="cp-tipo-doc" onchange="actualizarPlaceholder()" required>
+                    <option value="">— Selecciona —</option>
+                    <option value="DNI">DNI</option>
+                    <option value="NIE">NIE</option>
+                    <option value="PASAPORTE">Pasaporte</option>
+                    <option value="TIE">TIE</option>
+                </select>
+            </div>
+            <div class="col-7">
+                <label class="form-label">Número de documento</label>
+                <input type="text" class="form-control text-uppercase" id="cp-num-doc" placeholder="Selecciona un tipo" required>
+            </div>
+        </div>
+
+        <!-- Fecha de nacimiento -->
+        <div class="mb-3">
+            <label class="form-label">Fecha de nacimiento</label>
+            <input type="text" class="form-control" id="cp-fecha-nac" placeholder="DD/MM/AAAA" required>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="mb-4">
+            <label class="form-label">Teléfono</label>
+            <div class="input-group">
+                <select class="form-select" id="cp-prefijo" style="max-width:110px;">
+                    <option value="+34">🇪🇸 +34</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <option value="+33">🇫🇷 +33</option>
+                    <option value="+49">🇩🇪 +49</option>
+                    <option value="+39">🇮🇹 +39</option>
+                    <option value="+351">🇵🇹 +351</option>
+                    <option value="+52">🇲🇽 +52</option>
+                    <option value="+54">🇦🇷 +54</option>
+                    <option value="+57">🇨🇴 +57</option>
+                    <option value="+56">🇨🇱 +56</option>
+                    <option value="+55">🇧🇷 +55</option>
+                </select>
+                <input type="tel" class="form-control" id="cp-telefono" placeholder="600000000" required>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-gold" id="btn-completar">Guardar y continuar</button>
+        <div class="alert-err" id="cp-err"></div>
+        <div class="alert-ok"  id="cp-ok"></div>
+    </form>
+</div>
+
+<script th:src="@{/lib/flatpickr/flatpickr.min.js}"></script>
+<script th:src="@{/lib/flatpickr/l10n/es.js}"></script>
+<script>
+const _placeholders = { DNI: '12345678A', NIE: 'X1234567A', PASAPORTE: 'ABC123456', TIE: 'X1234567A', '': 'Selecciona un tipo primero' };
+function actualizarPlaceholder() {
+    var tipo = document.getElementById('cp-tipo-doc').value;
+    var inp = document.getElementById('cp-num-doc');
+    inp.placeholder = _placeholders[tipo] || '';
+    inp.value = '';
+}
+
+flatpickr('#cp-fecha-nac', {
+    locale: 'es',
+    dateFormat: 'Y-m-d',
+    altInput: true,
+    altFormat: 'd/m/Y',
+    maxDate: 'today',
+    allowInput: false
+});
+
+async function enviar(e) {
+    e.preventDefault();
+    var err = document.getElementById('cp-err');
+    var ok  = document.getElementById('cp-ok');
+    err.style.display = 'none'; ok.style.display = 'none';
+
+    var tipoDocumento   = document.getElementById('cp-tipo-doc').value;
+    var numDocumento    = document.getElementById('cp-num-doc').value.trim().toUpperCase();
+    var fechaNacimiento = document.getElementById('cp-fecha-nac').value;
+    var telefonoPrefijo = document.getElementById('cp-prefijo').value;
+    var telefono        = document.getElementById('cp-telefono').value.replace(/[\s\-().]/g, '');
+
+    if (!tipoDocumento) { err.textContent = 'Selecciona un tipo de documento.'; err.style.display = 'block'; return; }
+    if (!numDocumento)  { err.textContent = 'Introduce tu número de documento.'; err.style.display = 'block'; return; }
+    if (!fechaNacimiento) { err.textContent = 'Introduce tu fecha de nacimiento.'; err.style.display = 'block'; return; }
+    if (!telefono || !/^\d{6,15}$/.test(telefono)) { err.textContent = 'Introduce un teléfono válido (solo dígitos, 6-15 cifras).'; err.style.display = 'block'; return; }
+
+    // Validación edad mínima 18
+    var fn = new Date(fechaNacimiento);
+    var hoy = new Date();
+    var edad = hoy.getFullYear() - fn.getFullYear();
+    var m = hoy.getMonth() - fn.getMonth();
+    if (m < 0 || (m === 0 && hoy.getDate() < fn.getDate())) edad--;
+    if (edad < 18) { err.textContent = 'Debes ser mayor de 18 años.'; err.style.display = 'block'; return; }
+
+    var btn = document.getElementById('btn-completar');
+    btn.disabled = true; btn.textContent = 'Guardando...';
+
+    try {
+        var res = await fetch('/api/perfil/completar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tipoDocumento, numDocumento, fechaNacimiento, telefonoPrefijo, telefono })
+        });
+        var data = await res.json();
+        if (res.ok) {
+            ok.textContent = '¡Perfil completado! Redirigiendo...';
+            ok.style.display = 'block';
+            setTimeout(() => { window.location.href = data.redirect || '/'; }, 1200);
+        } else {
+            err.textContent = typeof data === 'string' ? data : 'Error al guardar.';
+            err.style.display = 'block';
+            btn.disabled = false; btn.textContent = 'Guardar y continuar';
+        }
+    } catch (_) {
+        err.textContent = 'Error de conexión. Inténtalo de nuevo.';
+        err.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Guardar y continuar';
+    }
+}
+</script>
+
+</body>
+</html>

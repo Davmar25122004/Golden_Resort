@@ -55,10 +55,14 @@ function objCard(o) {
                 : o.estado === 'ENTREGADO'  ? '<span class="badge bg-success">Entregado</span>'
                 : '<span class="badge bg-secondary">Descartado</span>';
     const acciones = o.estado === 'DISPONIBLE' ? `
-        <div class="d-flex gap-2 mt-2">
+        <div class="d-flex gap-2 mt-2 flex-wrap">
             <button class="btn btn-sm btn-gold flex-grow-1" onclick="objAbrirEntregar(${o.id})">Entregar</button>
             <button class="btn btn-sm btn-outline-secondary" onclick="objDescartar(${o.id})">Descartar</button>
-        </div>` : '';
+            <button class="btn btn-sm" style="background:rgba(88,196,220,0.12);border:1px solid rgba(88,196,220,0.4);color:#58c4dc;flex-basis:100%;" onclick="objVerReclamaciones(${o.id})">📨 Ver reclamaciones</button>
+        </div>` : `
+        <div class="d-flex gap-2 mt-2">
+            <button class="btn btn-sm" style="background:rgba(88,196,220,0.12);border:1px solid rgba(88,196,220,0.4);color:#58c4dc;flex-grow:1;" onclick="objVerReclamaciones(${o.id})">📨 Ver reclamaciones</button>
+        </div>`;
     return `
     <div class="col-md-6 col-lg-4">
       <div class="obj-card ${cssEstado}">
@@ -133,6 +137,97 @@ window.objDescartar = async (id) => {
             body: JSON.stringify({ estado: 'DESCARTADO' })
         });
         if (!r.ok) { alert(await r.text() || 'Error.'); return; }
+        objRecargar();
+    } catch (e) { alert('Error: ' + e.message); }
+};
+
+// ── RECLAMACIONES ──────────────────────────────────────────────────────────
+window.objVerReclamaciones = async function (objetoId) {
+    let modal = document.getElementById('reclamModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'reclamModal';
+        modal.className = 'modal fade modal-dark';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header" style="border-bottom:1px solid rgba(201,168,76,0.15);">
+                        <div>
+                            <h5 class="modal-title" style="color:#c9a84c;font-family:'Playfair Display',serif;letter-spacing:0.06em;">Reclamaciones del objeto</h5>
+                            <small class="text-muted" id="reclam-objeto-info"></small>
+                        </div>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="reclam-body" style="min-height:200px;">
+                        <div class="text-center text-muted py-4">Cargando…</div>
+                    </div>
+                </div>
+            </div>`;
+        document.body.appendChild(modal);
+    }
+    const body = document.getElementById('reclam-body');
+    const info = document.getElementById('reclam-objeto-info');
+    body.innerHTML = '<div class="text-center text-muted py-4">Cargando…</div>';
+    info.textContent = 'Objeto #' + objetoId;
+    bootstrap.Modal.getOrCreateInstance(modal).show();
+
+    try {
+        const r = await fetch('/api/limpieza/objetos/' + objetoId + '/reclamaciones');
+        if (!r.ok) throw new Error();
+        const items = await r.json();
+        if (!items.length) {
+            body.innerHTML = '<div class="text-center text-muted py-5" style="font-style:italic;">Sin reclamaciones todavía.</div>';
+            return;
+        }
+        body.innerHTML = items.map(rec => renderReclamCard(rec, objetoId)).join('');
+    } catch (e) {
+        body.innerHTML = '<div class="alert alert-danger">No se pudieron cargar las reclamaciones.</div>';
+    }
+};
+
+function renderReclamCard(r, objetoId) {
+    const pillStyle = r.estado === 'ACEPTADA'  ? 'background:rgba(46,204,113,0.15);color:#2ecc71;border-color:rgba(46,204,113,0.4);'
+                    : r.estado === 'RECHAZADA' ? 'background:rgba(231,76,60,0.12);color:#e74c3c;border-color:rgba(231,76,60,0.4);'
+                    : 'background:rgba(201,168,76,0.15);color:#c9a84c;border-color:rgba(201,168,76,0.4);';
+    const acciones = r.estado === 'PENDIENTE' ? `
+        <div class="d-flex gap-2 mt-3">
+            <button class="btn btn-sm btn-success flex-grow-1" onclick="objDecidirReclam(${r.id}, 'ACEPTADA', ${objetoId})">✓ Aceptar y entregar</button>
+            <button class="btn btn-sm btn-outline-danger flex-grow-1" onclick="objDecidirReclam(${r.id}, 'RECHAZADA', ${objetoId})">✕ Rechazar</button>
+        </div>` : '';
+    const notas = r.notasStaff
+        ? `<div class="small mt-2" style="background:rgba(255,255,255,0.04);border-left:2px solid rgba(201,168,76,0.4);padding:6px 10px;border-radius:0 6px 6px 0;color:rgba(255,255,255,0.65);"><strong>Nota:</strong> ${esc(r.notasStaff)}</div>`
+        : '';
+    const tel = r.telefono ? `<div class="small text-muted">📞 ${esc(r.telefono)}</div>` : '';
+    return `
+    <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px 18px;margin-bottom:12px;">
+        <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
+            <div>
+                <div style="color:#e8e0c8;font-weight:600;">${esc(r.usuarioNombre || r.usuarioEmail)}</div>
+                <div class="small text-muted">${esc(r.usuarioEmail)}</div>
+                ${tel}
+            </div>
+            <span style="font-size:0.66rem;letter-spacing:0.12em;text-transform:uppercase;padding:5px 12px;border-radius:20px;font-weight:700;border:1px solid;${pillStyle}">${r.estado}</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);border-radius:6px;padding:10px 12px;margin-top:8px;color:rgba(255,255,255,0.78);font-size:0.86rem;font-style:italic;">"${esc(r.mensaje)}"</div>
+        <div class="small text-muted mt-2">Enviada: ${formatFechaHora(r.creadoEn)}${r.resueltoEn ? ' · resuelta: ' + formatFechaHora(r.resueltoEn) : ''}</div>
+        ${notas}
+        ${acciones}
+    </div>`;
+}
+
+window.objDecidirReclam = async function (recId, estado, objetoId) {
+    const verbo = estado === 'ACEPTADA' ? 'aceptar la reclamación y marcar el objeto como entregado al cliente' : 'rechazar la reclamación';
+    const notas = prompt('Notas (opcional) al ' + verbo + ':', '') || '';
+    if (notas === null) return;
+    try {
+        const r = await fetch('/api/limpieza/reclamaciones/' + recId + '/decidir', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estado: estado, notasStaff: notas })
+        });
+        if (!r.ok) { alert(await r.text() || 'Error.'); return; }
+        await objVerReclamaciones(objetoId);
         objRecargar();
     } catch (e) { alert('Error: ' + e.message); }
 };

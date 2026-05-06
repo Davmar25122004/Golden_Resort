@@ -20,41 +20,41 @@ public class TurnosController {
     public TurnosController(TurnosService service) { this.service = service; }
 
     // ── Horarios ────────────────────────────────────────────────────────────
-    @GetMapping("/horarios")            public List<Map<String,Object>> hList()            { return service.listarHorarios(); }
-    @GetMapping("/horarios/{id}")       public Map<String,Object>       hGet(@PathVariable Long id) { return service.detalleHorario(id); }
-    @PostMapping("/horarios")           public Map<String,Object>       hCreate(@RequestBody Map<String,Object> body) { return service.detalleHorario(service.crearHorario(body).getId()); }
-    @PutMapping("/horarios/{id}")       public Map<String,Object>       hUpdate(@PathVariable Long id, @RequestBody Map<String,Object> body) { return service.detalleHorario(service.actualizarHorario(id, body).getId()); }
-    @DeleteMapping("/horarios/{id}")    public ResponseEntity<?>        hDelete(@PathVariable Long id) {
+    @GetMapping("/horarios")            public List<Map<String,Object>> listarHorarios()            { return service.listarHorarios(); }
+    @GetMapping("/horarios/{id}")       public Map<String,Object>       obtenerHorario(@PathVariable Long id) { return service.detalleHorario(id); }
+    @PostMapping("/horarios")           public Map<String,Object>       crearHorario(@RequestBody Map<String,Object> body) { return service.detalleHorario(service.crearHorario(body).getId()); }
+    @PutMapping("/horarios/{id}")       public Map<String,Object>       actualizarHorario(@PathVariable Long id, @RequestBody Map<String,Object> body) { return service.detalleHorario(service.actualizarHorario(id, body).getId()); }
+    @DeleteMapping("/horarios/{id}")    public ResponseEntity<?>        eliminarHorario(@PathVariable Long id) {
         try { service.borrarHorario(id); return ResponseEntity.noContent().build(); }
         catch (ResponseStatusException e) { return ResponseEntity.status(e.getStatusCode()).body(e.getReason()); }
     }
 
     // ── Perfiles (tipos de jornada) ────────────────────────────────────────
-    @GetMapping("/perfiles-turno")           public List<Map<String,Object>> pList()            { return service.listarPerfiles(); }
-    @GetMapping("/perfiles-turno/{id}")      public Map<String,Object>       pGet(@PathVariable Long id) { return service.detallePerfil(id); }
-    @PostMapping("/perfiles-turno")          public Map<String,Object>       pCreate(@RequestBody Map<String,Object> body) { return service.detallePerfil(service.crearPerfil(body).getId()); }
-    @PutMapping("/perfiles-turno/{id}")      public Map<String,Object>       pUpdate(@PathVariable Long id, @RequestBody Map<String,Object> body) { return service.detallePerfil(service.actualizarPerfil(id, body).getId()); }
-    @DeleteMapping("/perfiles-turno/{id}")   public ResponseEntity<?>        pDelete(@PathVariable Long id) {
+    @GetMapping("/perfiles-turno")           public List<Map<String,Object>> listarPerfiles()            { return service.listarPerfiles(); }
+    @GetMapping("/perfiles-turno/{id}")      public Map<String,Object>       obtenerPerfil(@PathVariable Long id) { return service.detallePerfil(id); }
+    @PostMapping("/perfiles-turno")          public Map<String,Object>       crearPerfil(@RequestBody Map<String,Object> body) { return service.detallePerfil(service.crearPerfil(body).getId()); }
+    @PutMapping("/perfiles-turno/{id}")      public Map<String,Object>       actualizarPerfil(@PathVariable Long id, @RequestBody Map<String,Object> body) { return service.detallePerfil(service.actualizarPerfil(id, body).getId()); }
+    @DeleteMapping("/perfiles-turno/{id}")   public ResponseEntity<?>        eliminarPerfil(@PathVariable Long id) {
         try { service.borrarPerfil(id); return ResponseEntity.noContent().build(); }
         catch (ResponseStatusException e) { return ResponseEntity.status(e.getStatusCode()).body(e.getReason()); }
     }
 
     // ── Planes (cuadrantes) ────────────────────────────────────────────────
-    @GetMapping("/planes-turno")             public List<Map<String,Object>> plList()           { return service.listarPlanes(); }
-    @GetMapping("/planes-turno/{id}")        public Map<String,Object>       plGet(@PathVariable Long id) { return service.detallePlan(id); }
-    @PostMapping("/planes-turno")            public Map<String,Object>       plCreate(@RequestBody Map<String,Object> body) { return service.detallePlan(service.crearPlan(body).getId()); }
-    @PutMapping("/planes-turno/{id}")        public Map<String,Object>       plUpdate(@PathVariable Long id, @RequestBody Map<String,Object> body) { return service.detallePlan(service.actualizarPlan(id, body).getId()); }
-    @DeleteMapping("/planes-turno/{id}")     public ResponseEntity<?>        plDelete(@PathVariable Long id) { service.borrarPlan(id); return ResponseEntity.noContent().build(); }
+    @GetMapping("/planes-turno")             public List<Map<String,Object>> listarPlanes()           { return service.listarPlanes(); }
+    @GetMapping("/planes-turno/{id}")        public Map<String,Object>       obtenerPlan(@PathVariable Long id) { return service.detallePlan(id); }
+    @PostMapping("/planes-turno")            public Map<String,Object>       crearPlan(@RequestBody Map<String,Object> body) { return service.detallePlan(service.crearPlan(body).getId()); }
+    @PutMapping("/planes-turno/{id}")        public Map<String,Object>       actualizarPlan(@PathVariable Long id, @RequestBody Map<String,Object> body) { return service.detallePlan(service.actualizarPlan(id, body).getId()); }
+    @DeleteMapping("/planes-turno/{id}")     public ResponseEntity<?>        eliminarPlan(@PathVariable Long id) { service.borrarPlan(id); return ResponseEntity.noContent().build(); }
 
     @GetMapping("/planes-turno/{id}/calendario")
-    public List<Map<String, Object>> planCalendar(@PathVariable Long id,
+    public List<Map<String, Object>> calendarioPlan(@PathVariable Long id,
                                                   @RequestParam("from") String from,
                                                   @RequestParam("to") String to) {
         return service.calendarioPlan(id, LocalDate.parse(from), LocalDate.parse(to));
     }
 
     @PostMapping("/planes-turno/{id}/overrides/bulk")
-    public ResponseEntity<?> bulkOverride(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+    public ResponseEntity<?> sobrescribirMasivo(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         try {
             service.aplicarBulkOverride(id, body);
             return ResponseEntity.ok(Map.of("ok", true));
@@ -64,12 +64,12 @@ public class TurnosController {
     }
 
     @GetMapping("/planes-turno/{id}/dia/{fecha}/tramos")
-    public List<Map<String, Object>> getDiaTramos(@PathVariable Long id, @PathVariable String fecha) {
+    public List<Map<String, Object>> obtenerTramosDia(@PathVariable Long id, @PathVariable String fecha) {
         return service.getTramosDia(id, LocalDate.parse(fecha));
     }
 
     @PutMapping("/planes-turno/{id}/dia/{fecha}/tramos")
-    public ResponseEntity<?> setDiaTramos(@PathVariable Long id, @PathVariable String fecha,
+    public ResponseEntity<?> establecerTramosDia(@PathVariable Long id, @PathVariable String fecha,
                                           @RequestBody Map<String, Object> body) {
         try {
             @SuppressWarnings("unchecked")

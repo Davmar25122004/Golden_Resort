@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 
@@ -39,26 +40,50 @@ public class UsuarioService {
         this.mensajeriaService  = mensajeriaService;
     }
 
-    public void registrar(String nombre, String email, String password) {
-        if (usuarioRepository.findByEmail(email).isPresent()) {
+    public void registrar(String nombre, String email, String password,
+                          String tipoDocumento, String numDocumento, LocalDate fechaNacimiento,
+                          String telefonoPrefijo, String telefono) {
+        if (email == null || !email.contains("@"))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El email no es válido.");
+        if (usuarioRepository.findByEmail(email).isPresent())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El email ya está registrado.");
-        }
-        if (pendingRepository.findByEmail(email).isPresent()) {
+        if (pendingRepository.findByEmail(email).isPresent())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Ya existe un registro pendiente de verificación para este email. Revisa tu bandeja de entrada.");
+
+        // Unicidad de documento
+        if (numDocumento != null && !numDocumento.isBlank()) {
+            String docNorm = numDocumento.trim().toUpperCase();
+            if (usuarioRepository.findByNumDocumento(docNorm).isPresent() ||
+                pendingRepository.findByNumDocumento(docNorm).isPresent())
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Ya existe una cuenta registrada con ese número de documento.");
+            numDocumento = docNorm;
         }
 
-        // Llama a Supabase Auth → envía el email de verificación
+        // Unicidad de teléfono
+        if (telefono != null && !telefono.isBlank()) {
+            String telNorm = telefono.trim().replaceAll("\\s+", "");
+            if (usuarioRepository.findByTelefono(telNorm).isPresent() ||
+                pendingRepository.findByTelefono(telNorm).isPresent())
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Ya existe una cuenta registrada con ese número de teléfono.");
+            telefono = telNorm;
+        }
+
         String supabaseUid = supabaseAuthService.signUp(email, password);
 
-        // Guarda datos temporalmente hasta que el usuario verifique
-        PendingRegistration pending = new PendingRegistration(
-            email,
-            nombre,
-            passwordEncoder.encode(password),
-            supabaseUid,
-            LocalDateTime.now()
-        );
+        PendingRegistration pending = new PendingRegistration();
+        pending.setEmail(email);
+        pending.setNombre(nombre);
+        pending.setPasswordHash(passwordEncoder.encode(password));
+        pending.setSupabaseUid(supabaseUid);
+        pending.setCreatedAt(LocalDateTime.now());
+        pending.setTipoDocumento(tipoDocumento);
+        pending.setNumDocumento(numDocumento);
+        pending.setFechaNacimiento(fechaNacimiento);
+        pending.setTelefonoPrefijo(telefonoPrefijo);
+        pending.setTelefono(telefono);
         pendingRepository.save(pending);
     }
 
@@ -90,6 +115,11 @@ public class UsuarioService {
         usuario.setEmail(pending.getEmail());
         usuario.setPassword(pending.getPasswordHash());
         usuario.setSupabaseUid(pending.getSupabaseUid());
+        usuario.setTipoDocumento(pending.getTipoDocumento());
+        usuario.setNumDocumento(pending.getNumDocumento());
+        usuario.setFechaNacimiento(pending.getFechaNacimiento());
+        usuario.setTelefonoPrefijo(pending.getTelefonoPrefijo());
+        usuario.setTelefono(pending.getTelefono());
         usuario.setRoles(new HashSet<>());
 
         Rol rolCliente = roleRepository.findById(2L)

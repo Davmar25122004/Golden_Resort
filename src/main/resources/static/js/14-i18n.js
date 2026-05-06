@@ -36,6 +36,8 @@ window.TRANSLATIONS = {
 
     // FOOTER
     footer_rights:    '© 2026 Golden Resort · Todos los derechos reservados',
+    footer_privacy:   'Política de Privacidad',
+    footer_cookies:   'Política de Cookies',
 
     // AUTH
     auth_signin_tab:  'Iniciar Sesión',
@@ -310,6 +312,8 @@ window.TRANSLATIONS = {
 
     // FOOTER
     footer_rights:    '© 2026 Golden Resort · All rights reserved',
+    footer_privacy:   'Privacy Policy',
+    footer_cookies:   'Cookie Policy',
 
     // AUTH
     auth_signin_tab:  'Sign In',
@@ -616,6 +620,6 @@ window.applyTranslations = function() {
     }
   });
   document.documentElement.lang = LANG;
-  if (typeof updateNav === 'function') updateNav();
+  if (typeof actualizarNavbar === 'function') actualizarNavbar();
 };
 

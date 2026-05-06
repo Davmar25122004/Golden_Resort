@@ -70,12 +70,12 @@
 
 .rcp-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2.5rem;
 }
 
-@media (max-width: 992px) { .rcp-grid { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .rcp-grid { grid-template-columns: 1fr; } }
 
 .rcp-col {
     background: var(--dark-2);
@@ -418,7 +418,7 @@
 }
 .pet-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.5rem;
 }
 .pet-card {
@@ -493,3 +493,66 @@
     grid-column: 1 / -1;
 }
 .rcp-nueva-nota textarea:focus { border-color: var(--gold); }
+
+/* ── MODAL ASIGNAR LIMPIEZA ─────────────────────────────────────────────── */
+#asignarLimpiezaModal .modal-content {
+    background: #161616;
+    border: 1px solid rgba(201,168,76,0.35);
+    color: #f5f0e8;
+    box-shadow: 0 18px 48px rgba(0,0,0,0.7);
+}
+#asignarLimpiezaModal .modal-body {
+    padding: 1.8rem 2rem;
+}
+#asignarLimpiezaModal .form-label,
+#asignarLimpiezaModal .form-label.small.text-muted {
+    color: #d8d2c5 !important;
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    opacity: 1;
+}
+#asignarLimpiezaModal .form-select,
+#asignarLimpiezaModal .form-control {
+    background: rgba(0,0,0,0.45);
+    color: #f5f0e8;
+    border: 1px solid rgba(201,168,76,0.32);
+    border-radius: 6px;
+    padding: 0.55rem 0.8rem;
+}
+#asignarLimpiezaModal .form-select:focus,
+#asignarLimpiezaModal .form-control:focus {
+    background: rgba(0,0,0,0.65);
+    border-color: #c9a84c;
+    color: #fff;
+    outline: none;
+    box-shadow: 0 0 0 0.15rem rgba(201,168,76,0.18);
+}
+#asignarLimpiezaModal .form-control::placeholder { color: rgba(255,255,255,0.35); }
+#asignarLimpiezaModal .form-select option { background: #1a1a1a; color: #f5f0e8; }
+#asignarLimpiezaModal .form-select {
+    --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23c9a84c' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+#asignarLimpiezaModal .btn-gold {
+    background: #c9a84c;
+    color: #1a1a1a;
+    border: none;
+    padding: 0.65rem 1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 4px;
+    transition: background 0.15s;
+    cursor: pointer;
+}
+#asignarLimpiezaModal .btn-gold:hover { background: #d4b766; }
+#asignarLimpiezaModal .alert { border-radius: 6px; }
+
+/* Listas de habitaciones / limpiadores dentro del modal */
+#al-habitaciones,
+#al-limpiadores {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(201,168,76,0.3) transparent;
+}

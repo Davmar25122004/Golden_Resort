@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+import java.time.LocalTime;
+
 @Entity
 @Table(name = "reserva_servicio")
 @Getter @Setter
@@ -18,6 +21,17 @@ public class ReservaServicio {
 
     @Column(nullable = false)
     private Integer cantidad;
+
+    @Column(name = "hora")
+    private LocalTime hora;
+
+    /** Ubicación solicitada (solo para servicio de coche) */
+    @Column(name = "ubicacion", length = 60)
+    private String ubicacion;
+
+    /** Precio efectivo del servicio en el momento de la reserva (override de servicio.precio) */
+    @Column(name = "precio_servicio", precision = 10, scale = 2)
+    private BigDecimal precioServicio;
 
     // Muchos ReservaServicio pertenecen a una Reserva
     @JsonIgnore

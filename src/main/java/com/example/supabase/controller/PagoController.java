@@ -6,6 +6,8 @@ import com.example.supabase.domain.Usuario;
 import com.example.supabase.repository.PagoRepository;
 import com.example.supabase.repository.UsuarioRepository;
 import com.example.supabase.service.PagoService;
+import com.example.supabase.service.RateLimitService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -29,13 +31,16 @@ public class PagoController {
     private final PagoService pagoService;
     private final UsuarioRepository usuarioRepository;
     private final PagoRepository pagoRepository;
+    private final RateLimitService rateLimitService;
 
     public PagoController(PagoService pagoService,
                           UsuarioRepository usuarioRepository,
-                          PagoRepository pagoRepository) {
+                          PagoRepository pagoRepository,
+                          RateLimitService rateLimitService) {
         this.pagoService       = pagoService;
         this.usuarioRepository = usuarioRepository;
         this.pagoRepository    = pagoRepository;
+        this.rateLimitService  = rateLimitService;
     }
 
     private Usuario usuario(Authentication auth) {
@@ -160,7 +165,10 @@ public class PagoController {
     }
 
     @PostMapping("/confirmar")
-    public ResponseEntity<?> confirmar(@RequestBody Map<String, Object> body, Authentication auth) {
+    public ResponseEntity<?> confirmar(@RequestBody Map<String, Object> body, Authentication auth,
+                                       HttpServletRequest request) {
+        if (!rateLimitService.bucketPago(request.getRemoteAddr()).tryConsume(1))
+            return ResponseEntity.status(429).body("Demasiados intentos de pago. Espera un momento.");
         Usuario u = usuario(auth);
         if (u == null) return ResponseEntity.status(401).body("No autenticado.");
         Long reservaId     = body.get("reservaId")     instanceof Number n1 ? n1.longValue() : null;

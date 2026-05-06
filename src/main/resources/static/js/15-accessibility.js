@@ -72,14 +72,6 @@
 <!-- ACCESIBILIDAD: overlay -->
 <div id="acc-overlay" aria-hidden="true"></div>
 
-<!-- ACCESIBILIDAD: botón flotante (sticky) -->
-<button id="acc-toggle-btn" aria-label="Abrir menú de accesibilidad" aria-expanded="false" aria-controls="acc-panel">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="26" height="26">
-        <circle cx="12" cy="3.5" r="2"/>
-        <path d="M17.5 8.5H13V7h-2v1.5H6.5v2H11v2.8l-2.8 5.2H6.1l-1 1.8 1.8 1 1-1.8h1.6L12 14.9l2.5 4.6H16l1-1.8-1.8-1-2-3.7V10.5h4.3v-2z"/>
-    </svg>
-</button>
-
 <!-- ACCESIBILIDAD: panel lateral -->
 <aside id="acc-panel" role="complementary" aria-label="Opciones de accesibilidad" aria-hidden="true">
 
@@ -195,6 +187,9 @@
     }
 
     /* ── API pública ── */
+    window.accOpenPanel  = openPanel;
+    window.accClosePanel = closePanel;
+
     window.accAdjustFont = function (delta) {
         let newScale = state.fontScale + delta;
         if (newScale < 100) newScale = 100;

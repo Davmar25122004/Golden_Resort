@@ -1,5 +1,29 @@
 // Golden Resort | app.js
 
+// ── CSRF — interceptor global de fetch ───────────────────────────────────────
+// Spring pone el token en la cookie XSRF-TOKEN (no HttpOnly).
+// Lo leemos aquí y lo añadimos como cabecera en todas las peticiones
+// que cambian estado (POST, PUT, PATCH, DELETE), sin tocar ningún otro archivo.
+(function () {
+    function getCsrfToken() {
+        var match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : null;
+    }
+
+    var _origFetch = window.fetch;
+    window.fetch = function (url, options) {
+        options = options || {};
+        var method = (options.method || 'GET').toUpperCase();
+        if (['POST', 'PUT', 'PATCH', 'DELETE'].indexOf(method) !== -1) {
+            var token = getCsrfToken();
+            if (token) {
+                options.headers = Object.assign({ 'X-XSRF-TOKEN': token }, options.headers || {});
+            }
+        }
+        return _origFetch.call(window, url, options);
+    };
+})();
+
 // ── Horario fijo del hotel (cargado al inicio desde /api/hotel/info) ─────────
 window.HOTEL_INFO = { checkinTime: '15:00', checkoutTime: '11:00' };
 (function loadHotelInfo() {

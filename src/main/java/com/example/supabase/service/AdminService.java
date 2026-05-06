@@ -49,7 +49,7 @@ public class AdminService {
      *  type = "yearly"  → un punto por cada año con reservas (ascendente).
      * Devuelve: { labels[], reservas[], ingresos[] }
      */
-    public Map<String, Object> getSeries(String type, Integer year) {
+    public Map<String, Object> obtenerSeries(String type, Integer year) {
         java.util.List<String>     labels   = new java.util.ArrayList<>();
         java.util.List<Long>       reservas = new java.util.ArrayList<>();
         java.util.List<BigDecimal> ingresos = new java.util.ArrayList<>();
@@ -59,7 +59,7 @@ public class AdminService {
             java.util.Map<Integer, BigDecimal> ingresoPorAnyo = new java.util.TreeMap<>();
             for (Reserva r : reservaRepository.findAll()) {
                 int a = r.getFechaEntrada().getYear();
-                cuentaPorAnyo.merge(a, 1L, Long::sum);
+                cuentaPorAnyo.merge(a, 1L, (x, y) -> x + y);
                 ingresoPorAnyo.merge(a, reservaService.calcularTotal(r), BigDecimal::add);
             }
             int actual = LocalDate.now().getYear();
@@ -90,7 +90,7 @@ public class AdminService {
         return res;
     }
 
-    public Map<String, Object> getStats() {
+    public Map<String, Object> obtenerEstadisticas() {
         LocalDate hoy = LocalDate.now();
 
         long reservasHoy = reservaRepository.findByFechaEntrada(hoy).size();
@@ -131,7 +131,7 @@ public class AdminService {
         );
     }
 
-    public List<Map<String, Object>> getUsuarios() {
+    public List<Map<String, Object>> obtenerUsuarios() {
         return usuarioRepository.findAll().stream()
                 .map(u -> {
                     java.util.List<String> roles = u.getRoles().stream()
@@ -172,7 +172,7 @@ public class AdminService {
         usuarioRepository.delete(u);
     }
 
-    public Map<String, String> uploadImagen(String filename, MultipartFile file) {
+    public Map<String, String> subirImagen(String filename, MultipartFile file) {
         if (file.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is empty");
         }

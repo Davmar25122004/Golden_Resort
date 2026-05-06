@@ -66,6 +66,10 @@ public class EmailService {
             if (variables != null && variables.get("habitacionPng") instanceof byte[] habBytes && habBytes.length > 0) {
                 helper.addInline("habitacionImg", new ByteArrayResource(habBytes), "image/jpeg");
             }
+
+            if (variables != null && variables.get("logoPng") instanceof byte[] logoBytes && logoBytes.length > 0) {
+                helper.addInline("logoImg", new ByteArrayResource(logoBytes), MimeTypeUtils.IMAGE_PNG_VALUE);
+            }
             long tBuild = System.currentTimeMillis();
 
             mailSender.send(msg);

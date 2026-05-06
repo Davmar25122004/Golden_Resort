@@ -45,7 +45,7 @@ public class HabitacionService {
         return habitacionRepository.findByTipo(tipo);
     }
 
-    public Map<String, Long> getDisponibles(LocalDate fechaEntrada, LocalDate fechaSalida) {
+    public Map<String, Long> obtenerDisponibles(LocalDate fechaEntrada, LocalDate fechaSalida) {
         if (!fechaEntrada.isBefore(fechaSalida)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "fechaEntrada debe ser anterior a fechaSalida");

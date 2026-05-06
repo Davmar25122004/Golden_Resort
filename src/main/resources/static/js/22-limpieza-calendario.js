@@ -135,7 +135,11 @@
                         ${temporalBadge}
                     </div>
                     <div class="cal-dia-cliente">${escHtml(r.clienteNombre || r.clienteEmail || '—')}</div>
-                    <div class="cal-dia-fechas">${escHtml(r.fechaEntrada)} → ${escHtml(r.fechaSalida)}</div>
+                    <div class="cal-dia-fechas">
+                        ${escHtml(r.fechaEntrada)} <span class="cal-dia-hora">${(window.HOTEL_INFO && window.HOTEL_INFO.checkinTime) || '15:00'}h</span>
+                        →
+                        ${escHtml(r.fechaSalida)} <span class="cal-dia-hora">${(window.HOTEL_INFO && window.HOTEL_INFO.checkoutTime) || '11:00'}h</span>
+                    </div>
                     ${accionesHtml}
                 </div>
             </div>`;

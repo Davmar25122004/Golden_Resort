@@ -1,8 +1,13 @@
 // ── VISTA DE DETALLE POR TIPO ─────────────────────────────────────────────────
 
 window.selectRoom = async (tipo, precio, descripcion) => {
-    if (!state.token) { openAuthModal(); return; }
-    if (state.user && state.user.rol === 'ADMIN') return; // Los admins no reservan
+    if (!state.token) { abrirModalAuth(); return; }
+    // Solo los clientes pueden reservar; cualquier rol staff queda bloqueado
+    var STAFF_ROLES = ['ADMIN','RECEPCION','LIMPIEZA','GIMNASIO','SPA','COCHE','HOSTELERIA','ROOMSERVICE'];
+    if (state.user && state.user.rol && STAFF_ROLES.indexOf(String(state.user.rol).replace(/^ROLE_/, '').toUpperCase()) !== -1) {
+        alert('Las cuentas de personal del hotel no pueden hacer reservas.');
+        return;
+    }
 
     var tipoLabels = { NORMAL: t('tipo_normal'), DOBLE: t('tipo_doble'), SUITE: t('tipo_suite'), LUJO: t('tipo_lujo') };
     var label = tipoLabels[tipo] || tipo;
@@ -67,14 +72,61 @@ window.selectRoom = async (tipo, precio, descripcion) => {
                     </div>
                 </div>`;
             }
+            var nombreLower = (s.nombre || '').toLowerCase();
+            var requiereHora = nombreLower.includes('spa') || nombreLower.includes('coche') ||
+                               nombreLower.includes('desayuno') || nombreLower.includes('cena');
+            var esCoche = nombreLower.includes('coche');
+            var horaDefault = nombreLower.includes('desayuno') ? '08:30'
+                            : nombreLower.includes('cena')     ? '21:00'
+                            : nombreLower.includes('spa')      ? '17:00'
+                            : esCoche                          ? '10:00' : '';
+            var horaInputHtml = requiereHora
+                ? esCoche
+                    ? `<div id="hora-wrap-${s.id}" style="display:none; margin:6px 0 14px 26px; padding:10px 14px; background:rgba(255,255,255,0.04); border-left:2px solid rgba(185,149,77,0.4); border-radius:0 8px 8px 0;">
+                           <label style="display:block; font-size:0.7rem; letter-spacing:1px; color:var(--text-muted-custom); margin-bottom:6px;">Lugar de recogida</label>
+                           <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+                               <label style="display:flex; align-items:center; gap:8px; font-size:0.83rem; color:var(--cream); cursor:pointer;">
+                                   <input type="radio" name="coche-ubicacion-${s.id}" class="servicio-ubicacion" data-id="${s.id}" value="AEROPUERTO_VALENCIA" data-precio-extra="120"
+                                          style="accent-color:var(--gold); cursor:pointer;">
+                                   <span>Aeropuerto de Valencia</span>
+                                   <span style="color:var(--gold); margin-left:auto; flex-shrink:0;">120 €</span>
+                               </label>
+                               <label style="display:flex; align-items:center; gap:8px; font-size:0.83rem; color:var(--cream); cursor:pointer;">
+                                   <input type="radio" name="coche-ubicacion-${s.id}" class="servicio-ubicacion" data-id="${s.id}" value="RENFE_JOAQUIN_SOROLLA" data-precio-extra="80"
+                                          style="accent-color:var(--gold); cursor:pointer;">
+                                   <span>Estación Renfe Joaquín Sorolla</span>
+                                   <span style="color:var(--gold); margin-left:auto; flex-shrink:0;">80 €</span>
+                               </label>
+                               <label style="display:flex; align-items:center; gap:8px; font-size:0.83rem; color:var(--cream); cursor:pointer;">
+                                   <input type="radio" name="coche-ubicacion-${s.id}" class="servicio-ubicacion" data-id="${s.id}" value="RENFE_CULLERA" data-precio-extra="40"
+                                          style="accent-color:var(--gold); cursor:pointer;">
+                                   <span>Estación Renfe Cullera</span>
+                                   <span style="color:var(--gold); margin-left:auto; flex-shrink:0;">40 €</span>
+                               </label>
+                           </div>
+                           <label style="display:block; font-size:0.7rem; letter-spacing:1px; color:var(--text-muted-custom); margin-bottom:4px;">Hora de recogida</label>
+                           <input type="time" class="servicio-hora" data-id="${s.id}" value="${horaDefault}"
+                                  style="background:rgba(255,255,255,0.07); border:1px solid rgba(185,149,77,0.3); color:var(--cream); padding:6px 10px; border-radius:6px; font-size:0.85rem; width:130px;">
+                       </div>`
+                    : `<div id="hora-wrap-${s.id}" style="display:none; margin:6px 0 14px 26px; padding:10px 14px; background:rgba(255,255,255,0.04); border-left:2px solid rgba(185,149,77,0.4); border-radius:0 8px 8px 0;">
+                           <label style="display:block; font-size:0.7rem; letter-spacing:1px; color:var(--text-muted-custom); margin-bottom:4px;">Hora del servicio</label>
+                           <input type="time" class="servicio-hora" data-id="${s.id}" value="${horaDefault}"
+                                  style="background:rgba(255,255,255,0.07); border:1px solid rgba(185,149,77,0.3); color:var(--cream); padding:6px 10px; border-radius:6px; font-size:0.85rem; width:130px;">
+                       </div>`
+                : '';
+            var precioInicialCb = esCoche ? '0' : s.precio;
+            var precioLabel     = esCoche
+                ? '<span style="color:var(--gold); margin-left:auto; flex-shrink:0;">Seleccionar ubicación</span>'
+                : `<span style="color:var(--gold); margin-left:auto; flex-shrink:0;">${parseFloat(s.precio).toFixed(2)} €</span>`;
             return `
-            <label style="display:flex; align-items:center; gap:10px; margin-bottom:10px; cursor:pointer; font-size:0.85rem; color:var(--cream);">
+            <label style="display:flex; align-items:center; gap:10px; margin-bottom:6px; cursor:pointer; font-size:0.85rem; color:var(--cream);">
                 <input type="checkbox" class="servicio-check"
-                    data-id="${s.id}" data-precio="${s.precio}"
+                    data-id="${s.id}" data-precio="${precioInicialCb}" data-requiere-hora="${requiereHora}"
                     style="accent-color:var(--gold); width:16px; height:16px; cursor:pointer;">
                 <span>${(typeof LANG !== 'undefined' && LANG === 'en' && typeof SERVICIO_NOMBRES_EN !== 'undefined' && SERVICIO_NOMBRES_EN[s.id]) ? SERVICIO_NOMBRES_EN[s.id] : s.nombre}</span>
-                <span style="color:var(--gold); margin-left:auto; flex-shrink:0;">${parseFloat(s.precio).toFixed(2)} €</span>
-            </label>`;
+                ${precioLabel}
+            </label>
+            ${horaInputHtml}`;
         }).join('');
 
     var _mc = document.getElementById('main-content');
@@ -177,7 +229,30 @@ window.selectRoom = async (tipo, precio, descripcion) => {
     // Asignar como función global para que rsAjustarCantidad la pueda llamar
     window.recalcularTotalReserva = recalcularTotal;
 
-    document.querySelectorAll('.servicio-check').forEach(cb => cb.addEventListener('change', recalcularTotal));
+    document.querySelectorAll('.servicio-check').forEach(cb => {
+        cb.addEventListener('change', function() {
+            recalcularTotal();
+            if (cb.dataset.requiereHora === 'true') {
+                var wrap = document.getElementById('hora-wrap-' + cb.dataset.id);
+                if (wrap) wrap.style.display = cb.checked ? 'block' : 'none';
+                // Reset precio to 0 when unchecked (coche pricing comes from ubicacion)
+                if (!cb.checked) {
+                    var firstRadio = document.querySelector('.servicio-ubicacion[data-id="' + cb.dataset.id + '"]');
+                    if (firstRadio) cb.dataset.precio = '0';
+                }
+            }
+        });
+    });
+
+    document.querySelectorAll('.servicio-ubicacion').forEach(rb => {
+        rb.addEventListener('change', function() {
+            var cb = document.querySelector('.servicio-check[data-id="' + rb.dataset.id + '"]');
+            if (cb) {
+                cb.dataset.precio = rb.dataset.precioExtra;
+                recalcularTotal();
+            }
+        });
+    });
 
     // ── Disponibilidad en tiempo real ──────────────────────────────────────────
     async function actualizarDisponibilidad() {
@@ -272,7 +347,11 @@ window.confirmarReserva = async (tipo) => {
         var serviciosSeleccionados = [];
         document.querySelectorAll('.servicio-check:checked').forEach(cb => {
             if (!cb.classList.contains('rs-toggle')) { // rs-toggle marca el checkbox de Room Service
-                serviciosSeleccionados.push({ servicioId: parseInt(cb.dataset.id), cantidad: 1 });
+                var horaInput    = document.querySelector('.servicio-hora[data-id="' + cb.dataset.id + '"]');
+                var ubicInput    = document.querySelector('.servicio-ubicacion[data-id="' + cb.dataset.id + '"]:checked');
+                var hora     = horaInput  && horaInput.value  ? horaInput.value  : null;
+                var ubicacion = ubicInput ? ubicInput.value : null;
+                serviciosSeleccionados.push({ servicioId: parseInt(cb.dataset.id), cantidad: 1, hora: hora, ubicacion: ubicacion });
             }
         });
 
@@ -320,7 +399,7 @@ window.confirmarReserva = async (tipo) => {
             btn.disabled       = false;
             btn.textContent    = t('detail_confirm');
         } else if (res.status === 401) {
-            openAuthModal();
+            abrirModalAuth();
         } else {
             msg.style.display  = 'block';
             msg.style.color    = '#c0392b';

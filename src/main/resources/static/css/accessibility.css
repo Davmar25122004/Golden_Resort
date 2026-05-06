@@ -10,41 +10,8 @@
     --acc-border: #2a2a2a;
 }
 
-/* ---------- Botón flotante (Sticky) ---------- */
-#acc-toggle-btn {
-    position: fixed;
-    left: 0;
-    top: 25%;
-    z-index: 100000;
-    width: 44px;
-    height: 44px;
-    border-radius: 0 8px 8px 0;
-    background: var(--acc-bg-panel);
-    border: 1px solid var(--acc-primary);
-    border-left: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 2px 0 12px rgba(0,0,0,0.5);
-    transition: background 0.25s, transform 0.2s;
-    color: var(--acc-primary);
-    outline: none;
-    overflow: hidden;
-    padding: 0;
-}
-
-#acc-toggle-btn:hover,
-#acc-toggle-btn:focus-visible {
-    background: var(--acc-bg-panel);
-    transform: scale(1.05);
-}
-
-#acc-toggle-btn svg {
-    width: 24px;
-    height: 24px;
-    fill: currentColor;
-}
+/* Botón flotante eliminado — se accede desde el navbar */
+#acc-toggle-btn { display: none; }
 
 /* ---------- Panel lateral ---------- */
 #acc-panel {

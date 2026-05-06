@@ -58,6 +58,10 @@ footer {
 }
 .footer-brand { font-size: 1.4rem; color: var(--gold); letter-spacing: 3px; }
 .footer-text { font-size: 0.75rem; color: var(--text-muted-custom); letter-spacing: 1px; }
+.footer-links { margin-top: 0.5rem; }
+.footer-link { font-size: 0.72rem; color: var(--text-muted-custom); letter-spacing: 1px; text-decoration: none; transition: color 0.2s; }
+.footer-link:hover { color: var(--gold); }
+.footer-sep { font-size: 0.72rem; color: var(--text-muted-custom); }
 
 /* ── NAVBAR DESKTOP (restaurar layout original) ── */
 @media (min-width: 768px) {

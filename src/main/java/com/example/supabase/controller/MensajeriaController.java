@@ -86,7 +86,7 @@ public class MensajeriaController {
     @GetMapping("/api/mensajeria/recepcion/conversaciones")
     @ResponseBody
     @PreAuthorize("hasAnyRole('ADMIN','RECEPCION')")
-    public List<Map<String, Object>> inbox() {
+    public List<Map<String, Object>> bandeja() {
         return mensajeriaService.inboxRecepcion();
     }
 
@@ -168,7 +168,7 @@ public class MensajeriaController {
                 String nombreOriginal = file.getOriginalFilename() != null ? file.getOriginalFilename() : "adjunto";
                 String safe = nombreOriginal.replaceAll("[^A-Za-z0-9._-]", "_");
                 String unique = System.currentTimeMillis() + "_" + safe;
-                Map<String, String> r = adminService.uploadImagen(unique, file);
+                Map<String, String> r = adminService.subirImagen(unique, file);
                 adjuntoUrl    = r.get("filepath");
                 adjuntoNombre = nombreOriginal;
             }

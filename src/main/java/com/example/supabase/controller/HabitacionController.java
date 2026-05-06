@@ -39,10 +39,10 @@ public class HabitacionController {
     }
 
     @GetMapping("/disponibles")
-    public ResponseEntity<?> getDisponibles(
+    public ResponseEntity<?> obtenerDisponibles(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaEntrada,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaSalida) {
-        return ResponseEntity.ok(habitacionService.getDisponibles(fechaEntrada, fechaSalida));
+        return ResponseEntity.ok(habitacionService.obtenerDisponibles(fechaEntrada, fechaSalida));
     }
 
     @PostMapping

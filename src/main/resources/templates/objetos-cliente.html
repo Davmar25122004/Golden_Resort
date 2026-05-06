@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Resort | Objetos perdidos</title>
+
+    <link rel="stylesheet" th:href="@{/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+    <link rel="stylesheet" th:href="@{/css/accessibility.css}">
+    <link rel="stylesheet" th:href="@{/css/limpieza.css}">
+
+    <style>
+        .obj-c-page { padding: 28px 0 60px; }
+        .obj-c-hero {
+            text-align: center;
+            padding: 40px 20px 28px;
+            border-bottom: 1px solid rgba(201,168,76,0.15);
+            margin-bottom: 30px;
+        }
+        .obj-c-hero h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            color: #c9a84c; font-size: 2rem; letter-spacing: 0.04em;
+            margin: 0 0 8px;
+        }
+        .obj-c-hero p { color: rgba(255,255,255,0.55); font-size: 0.92rem; max-width: 580px; margin: 0 auto; line-height: 1.55; }
+
+        .obj-c-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 26px; flex-wrap: wrap; }
+        .obj-c-tab {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.55);
+            padding: 8px 20px; border-radius: 22px;
+            font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase;
+            cursor: pointer; transition: all .15s; font-weight: 600;
+        }
+        .obj-c-tab:hover { color: #c9a84c; border-color: rgba(201,168,76,0.4); }
+        .obj-c-tab.active { background: rgba(201,168,76,0.15); border-color: #c9a84c; color: #c9a84c; }
+
+        .obj-c-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(260px,1fr)); gap: 18px; }
+
+        .obj-c-card {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px; overflow: hidden;
+            display: flex; flex-direction: column;
+            transition: transform .18s, border-color .18s, box-shadow .18s;
+        }
+        .obj-c-card:hover { border-color: rgba(201,168,76,0.4); transform: translateY(-3px); box-shadow: 0 14px 38px rgba(0,0,0,0.5); }
+        .obj-c-img {
+            width: 100%; aspect-ratio: 16/11;
+            background: rgba(255,255,255,0.04) center/cover no-repeat;
+            position: relative;
+        }
+        .obj-c-img-empty {
+            display: flex; align-items: center; justify-content: center;
+            color: rgba(201,168,76,0.3);
+        }
+        .obj-c-badge {
+            position: absolute; top: 10px; right: 10px;
+            background: rgba(13,17,23,0.8); backdrop-filter: blur(6px);
+            color: #c9a84c; border: 1px solid rgba(201,168,76,0.3);
+            padding: 4px 10px; border-radius: 18px;
+            font-size: 0.62rem; letter-spacing: 0.1em;
+            text-transform: uppercase; font-weight: 700;
+        }
+        .obj-c-badge.reclamada {
+            color: #58c4dc; border-color: rgba(88,196,220,0.4); background: rgba(13,17,23,0.85);
+        }
+        .obj-c-body { padding: 14px 16px 16px; display: flex; flex-direction: column; flex: 1; }
+        .obj-c-desc { color: #e8e0c8; font-size: 0.92rem; line-height: 1.5; margin-bottom: 10px; }
+        .obj-c-meta { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+        .obj-c-meta-row {
+            font-size: 0.72rem; color: rgba(255,255,255,0.45);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .obj-c-claim-btn {
+            margin-top: auto;
+            background: rgba(201,168,76,0.12);
+            border: 1px solid rgba(201,168,76,0.4);
+            color: #c9a84c;
+            padding: 9px 14px; border-radius: 7px;
+            font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase;
+            font-weight: 700; cursor: pointer; transition: all .15s;
+        }
+        .obj-c-claim-btn:hover { background: rgba(201,168,76,0.22); border-color: #c9a84c; }
+        .obj-c-claim-btn:disabled {
+            background: rgba(88,196,220,0.1); color: rgba(88,196,220,0.7);
+            border-color: rgba(88,196,220,0.3); cursor: not-allowed;
+        }
+
+        .obj-c-empty {
+            text-align: center; padding: 70px 20px;
+            color: rgba(255,255,255,0.4); font-size: 0.95rem;
+        }
+        .obj-c-empty svg { color: rgba(201,168,76,0.4); margin-bottom: 12px; }
+
+        .rec-card {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 18px 22px; margin-bottom: 14px;
+            display: grid; grid-template-columns: 80px 1fr auto; gap: 18px; align-items: center;
+        }
+        .rec-card-img { width: 80px; height: 80px; border-radius: 8px; background: rgba(255,255,255,0.04) center/cover no-repeat; flex-shrink: 0; }
+        .rec-card-info > * + * { margin-top: 4px; }
+        .rec-card-desc { color: #e8e0c8; font-size: 0.92rem; }
+        .rec-card-msg { color: rgba(255,255,255,0.55); font-size: 0.78rem; font-style: italic; }
+        .rec-card-meta { font-size: 0.68rem; letter-spacing: 0.06em; color: rgba(255,255,255,0.4); }
+        .rec-card-notas {
+            color: rgba(255,255,255,0.6); font-size: 0.78rem;
+            background: rgba(255,255,255,0.04); border-left: 2px solid rgba(201,168,76,0.4);
+            padding: 6px 10px; border-radius: 0 6px 6px 0; margin-top: 6px;
+        }
+        .rec-pill {
+            font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase;
+            padding: 6px 14px; border-radius: 22px; font-weight: 700;
+        }
+        .rec-pill--PENDIENTE { background: rgba(201,168,76,0.15); color: #c9a84c; border: 1px solid rgba(201,168,76,0.35); }
+        .rec-pill--ACEPTADA  { background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid rgba(46,204,113,0.35); }
+        .rec-pill--RECHAZADA { background: rgba(231,76,60,0.12); color: #e74c3c; border: 1px solid rgba(231,76,60,0.35); }
+
+        @media (max-width: 600px) { .rec-card { grid-template-columns: 60px 1fr; } .rec-card-img { width:60px; height:60px; } .rec-card > .rec-pill { grid-column: 1/-1; justify-self: start; } }
+
+        /* Modal reclamar */
+        .modal-content { background: linear-gradient(180deg,#13181f 0%,#0d1117 100%); border: 1px solid rgba(201,168,76,0.25); }
+        #reclamarModal label { font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.45); font-weight: 600; display: block; margin-bottom: 6px; }
+        #reclamarModal textarea, #reclamarModal input {
+            background: rgba(255,255,255,0.04) !important; border: 1px solid rgba(255,255,255,0.12);
+            color: #fff; border-radius: 6px; padding: 10px 12px; width: 100%;
+        }
+        #reclamarModal textarea:focus, #reclamarModal input:focus { border-color: rgba(201,168,76,0.5); outline: none; }
+    </style>
+</head>
+<body>
+
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div id="main-content" style="display:block;">
+        <div class="container obj-c-page">
+
+            <header class="obj-c-hero">
+                <h1>Objetos perdidos</h1>
+                <p>Si has olvidado algo durante tu estancia, búscalo aquí. Pulsa «Reclamar» en cualquier objeto que reconozcas como tuyo y nuestro equipo se pondrá en contacto contigo.</p>
+            </header>
+
+            <div class="obj-c-tabs">
+                <button class="obj-c-tab active" data-tab="catalogo" onclick="oclTab('catalogo')">Catálogo</button>
+                <button class="obj-c-tab" data-tab="mias" onclick="oclTab('mias')">Mis reclamaciones</button>
+            </div>
+
+            <!-- TAB CATÁLOGO -->
+            <div id="ocl-tab-catalogo">
+                <div id="ocl-grid" class="obj-c-grid">
+                    <div class="obj-c-empty"><div>Cargando…</div></div>
+                </div>
+            </div>
+
+            <!-- TAB MIS RECLAMACIONES -->
+            <div id="ocl-tab-mias" style="display:none;">
+                <div id="ocl-mias">
+                    <div class="obj-c-empty"><div>Cargando…</div></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL RECLAMAR -->
+    <div class="modal fade" id="reclamarModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body" style="padding: 26px 28px;">
+                    <h3 style="font-family:'Playfair Display',serif; color:#c9a84c; font-size:1.3rem; letter-spacing:0.06em; margin-bottom:6px;">Reclamar objeto</h3>
+                    <p id="reclamar-objeto-desc" style="color:rgba(255,255,255,0.55); font-size:0.85rem; margin-bottom: 18px;"></p>
+
+                    <div id="reclamar-error" class="alert alert-danger d-none py-2" style="font-size:0.8rem;"></div>
+                    <div id="reclamar-success" class="alert alert-success d-none py-2" style="font-size:0.85rem;"></div>
+
+                    <input type="hidden" id="reclamar-objeto-id">
+
+                    <label>Por qué crees que es tuyo</label>
+                    <textarea id="reclamar-mensaje" rows="4" placeholder="Describe el objeto con detalles (color, marca, contenido, dónde lo perdiste…) para que el equipo pueda verificarlo."></textarea>
+
+                    <label style="margin-top:14px;">Teléfono de contacto (opcional)</label>
+                    <input type="tel" id="reclamar-telefono" placeholder="Para que podamos contactarte si es tuyo">
+
+                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:22px;">
+                        <button class="obj-c-tab" style="background:rgba(255,255,255,0.05);" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="obj-c-claim-btn" onclick="oclEnviarReclamacion()">Enviar reclamación</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/lib/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/14-i18n.js}"></script>
+    <script th:src="@{/js/15-accessibility.js}"></script>
+    <script th:src="@{/js/01-globals.js}"></script>
+    <script th:src="@{/js/04-ui-core.js}"></script>
+    <script th:src="@{/js/03-navegacion.js}"></script>
+    <script th:src="@{/js/10-auth.js}"></script>
+    <script th:src="@{/js/13-init.js}"></script>
+    <script th:src="@{/js/32-objetos-cliente.js}"></script>
+
+</body>
+</html>

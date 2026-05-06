@@ -1,6 +1,7 @@
 package com.example.supabase.service;
 
 import com.example.supabase.domain.*;
+import com.example.supabase.repository.HabitacionRepository;
 import com.example.supabase.repository.MetodoPagoRepository;
 import com.example.supabase.repository.PagoRepository;
 import com.example.supabase.repository.PedidoRoomServiceRepository;
@@ -53,6 +54,7 @@ public class PagoService {
 
     private final PagoRepository pagoRepository;
     private final ReservaRepository reservaRepository;
+    private final HabitacionRepository habitacionRepository;
     private final MetodoPagoRepository metodoPagoRepository;
     private final ReservaService reservaService;
     private final CodigoDescuentoService codigoDescuentoService;
@@ -63,6 +65,7 @@ public class PagoService {
 
     public PagoService(PagoRepository pagoRepository,
                        ReservaRepository reservaRepository,
+                       HabitacionRepository habitacionRepository,
                        MetodoPagoRepository metodoPagoRepository,
                        ReservaService reservaService,
                        CodigoDescuentoService codigoDescuentoService,
@@ -72,6 +75,7 @@ public class PagoService {
                        PedidoRoomServiceRepository pedidoRoomServiceRepository) {
         this.pagoRepository         = pagoRepository;
         this.reservaRepository      = reservaRepository;
+        this.habitacionRepository   = habitacionRepository;
         this.metodoPagoRepository   = metodoPagoRepository;
         this.reservaService         = reservaService;
         this.codigoDescuentoService = codigoDescuentoService;
@@ -247,12 +251,13 @@ public class PagoService {
         if (r.getServicios() != null) {
             for (ReservaServicio rs : r.getServicios()) {
                 if (rs.getServicio() == null) continue;
+                BigDecimal precioEfectivo = rs.getPrecioServicio() != null
+                        ? rs.getPrecioServicio() : rs.getServicio().getPrecio();
                 Map<String, Object> srv = new HashMap<>();
                 srv.put("nombre",   rs.getServicio().getNombre());
-                srv.put("precio",   rs.getServicio().getPrecio());
+                srv.put("precio",   precioEfectivo);
                 srv.put("cantidad", rs.getCantidad());
-                srv.put("subtotal", rs.getServicio().getPrecio()
-                        .multiply(BigDecimal.valueOf(rs.getCantidad())));
+                srv.put("subtotal", precioEfectivo.multiply(BigDecimal.valueOf(rs.getCantidad())));
                 serviciosLista.add(srv);
             }
         }
@@ -271,20 +276,23 @@ public class PagoService {
         pagoRepository.findTopByReservaIdAndEstadoOrderByCreatedAtDesc(reservaId, EstadoPago.COMPLETADO)
                 .ifPresent(p -> { throw new RuntimeException("Esta reserva ya está pagada."); });
 
+        if (reservaId == null || reservaId <= 0)
+            throw new RuntimeException("ID de reserva inválido");
+        if (metodoPagoId == null || metodoPagoId <= 0)
+            throw new RuntimeException("Selecciona un método de pago válido.");
+
+        habitacionRepository.findByIdWithLock(r.getHabitacion().getId())
+                .orElseThrow(() -> new RuntimeException("Habitación no encontrada"));
+
         long ocupadasPagadas = reservaRepository.contarReservasSolapadasExcluyendo(
                 r.getHabitacion(), r.getFechaEntrada(), r.getFechaSalida(), r.getId());
         if (ocupadasPagadas > 0) {
             throw new RuntimeException("Lo sentimos, esta habitación acaba de ser reservada por otro usuario.");
         }
 
-        MetodoPago metodo = null;
-        if (metodoPagoId != null) {
-            metodo = metodoPagoRepository.findById(metodoPagoId).orElse(null);
-            if (metodo == null || !metodo.getUsuarioId().equals(usuarioId))
-                throw new RuntimeException("Método de pago no válido.");
-        } else {
-            throw new RuntimeException("Selecciona un método de pago.");
-        }
+        MetodoPago metodo = metodoPagoRepository.findById(metodoPagoId).orElse(null);
+        if (metodo == null || !metodo.getUsuarioId().equals(usuarioId))
+            throw new RuntimeException("Método de pago no válido.");
 
         BigDecimal subtotal = reservaService.calcularTotal(r);
         CodigoDescuentoService.ResultadoDescuento rd = codigoDescuentoService.aplicar(codigoDescuento, subtotal);
@@ -362,6 +370,7 @@ public class PagoService {
             variables.put("pedidosRS",        pedidoRoomServiceRepository.findByReservaId(r.getId()));
             variables.put("horaCheckin",  horaCheckin);
             variables.put("horaCheckout", horaCheckout);
+            variables.put("logoPng",      leerImagenClasspath("logo.png"));
 
             emailService.enviarConPlantilla(
                     emailUsuario,

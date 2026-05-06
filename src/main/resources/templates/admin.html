@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Golden Resort | Admin</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%230D0D0D'/><text x='50' y='72' font-size='68' text-anchor='middle' font-family='Georgia,serif' fill='%23C9A84C'>G</text></svg>">
 
     <link rel="stylesheet" th:href="@{/lib/bootstrap-5.3.8-dist/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/lib/swiper-12.1.3/package/swiper-bundle.min.css}">
@@ -31,10 +32,97 @@
 </head>
 <body class="admin-body">
 
-    <!-- NAVBAR SIMPLIFICADO ADMIN -->
-    <header id="admin-nav">
-        <a href="/" class="admin-nav-brand">GOLDEN RESORT</a>
-        <div class="admin-nav-right">
+    <!-- NAVBAR ADMIN con dropdowns -->
+    <link rel="stylesheet" th:href="@{/css/nav-dropdowns.css}">
+    <header id="navbar"
+            class="admin-nav-header"
+            data-admin="true" data-staff="true"
+            th:attr="data-user=${navUsuario}"
+            style="display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:62px;background:transparent;border-bottom:1px solid rgba(201,168,76,0.15);position:absolute;top:0;left:0;right:0;z-index:1000;gap:24px;width:100%;box-sizing:border-box;">
+        <a href="/" class="admin-nav-brand" style="flex-shrink:0;font-family:'Playfair Display',Georgia,serif;font-size:1.05rem;letter-spacing:0.12em;color:#c9a84c;text-decoration:none;text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:10px;">
+            <img th:src="@{/images/logo.png}" alt="Logo" style="height:36px;width:auto;">
+            GOLDEN RESORT
+        </a>
+
+        <div class="nav-center-dropdowns" style="font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.85);font-weight:600;display:flex;align-items:center;gap:20px;flex:0 0 auto;justify-content:center;">
+
+            <!-- FAVORITOS (primero) -->
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropdown-toggle">
+                    <span>FAVORITOS</span>
+                    <svg class="nav-caret" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="nav-dropdown-menu" data-favs-dropdown>
+                    <div class="nav-dropdown-empty">Sin favoritos aún. Pulsa la ★ junto a cualquier opción para añadirla aquí.</div>
+                </div>
+            </div>
+
+            <!-- HOTEL -->
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropdown-toggle"><span>HOTEL</span><svg class="nav-caret" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+                <div class="nav-dropdown-menu">
+                    <a href="/" class="nav-dropdown-item" data-fav-id="adm-hotel-hab" onclick="event.preventDefault(); window.location.href='/#habitaciones';"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V11l9-6 9 6v10"/><path d="M9 21v-6h6v6"/></svg><span>Habitaciones</span></a>
+                    <a href="/" class="nav-dropdown-item" data-fav-id="adm-hotel-srv" onclick="event.preventDefault(); window.location.href='/#servicios';"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Servicios</span></a>
+                    <a href="/" class="nav-dropdown-item" data-fav-id="adm-hotel-cto" onclick="event.preventDefault(); window.location.href='/#contacto';"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg><span>Contacto</span></a>
+                </div>
+            </div>
+
+            <!-- ADMIN -->
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropdown-toggle"><span>ADMIN</span><svg class="nav-caret" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+                <div class="nav-dropdown-menu">
+                    <a href="javascript:void(0)" class="nav-dropdown-item" data-fav-id="adm-dashboard"    onclick="switchAdminTab('dashboard')"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg><span>Dashboard</span></a>
+                    <a href="javascript:void(0)" class="nav-dropdown-item" data-fav-id="adm-reservas"     onclick="switchAdminTab('reservas')"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Reservas</span></a>
+                    <a href="javascript:void(0)" class="nav-dropdown-item" data-fav-id="adm-habitaciones" onclick="switchAdminTab('habitaciones')"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V11l9-6 9 6v10"/><path d="M9 21v-6h6v6"/></svg><span>Habitaciones</span></a>
+                    <a href="javascript:void(0)" class="nav-dropdown-item" data-fav-id="adm-servicios"    onclick="switchAdminTab('servicios')"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/></svg><span>Servicios</span></a>
+                    <a href="javascript:void(0)" class="nav-dropdown-item" data-fav-id="adm-roomservice"  onclick="switchAdminTab('roomservice')"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2H2v2Z"/><path d="M20 16a8 8 0 1 0-16 0"/></svg><span>Room Service</span></a>
+                </div>
+            </div>
+
+            <!-- PERSONAL -->
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropdown-toggle"><span>PERSONAL</span><svg class="nav-caret" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+                <div class="nav-dropdown-menu">
+                    <a href="javascript:void(0)" class="nav-dropdown-item" data-fav-id="pers-horarios"   onclick="window._asbPersonalSubtab='horarios';switchAdminTab('personal')"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span>Horarios</span></a>
+                    <a href="javascript:void(0)" class="nav-dropdown-item" data-fav-id="pers-perfiles"   onclick="window._asbPersonalSubtab='perfiles';switchAdminTab('personal')"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>Tipos de jornada</span></a>
+                    <a href="javascript:void(0)" class="nav-dropdown-item" data-fav-id="pers-planes"     onclick="window._asbPersonalSubtab='planes';switchAdminTab('personal')"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Cuadrantes</span></a>
+                    <a href="javascript:void(0)" class="nav-dropdown-item" data-fav-id="pers-asignacion" onclick="window._asbPersonalSubtab='asignacion';switchAdminTab('personal')"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg><span>Asignación</span></a>
+                    <a href="javascript:void(0)" class="nav-dropdown-item" data-fav-id="pers-mensajes-staff" onclick="switchAdminTab('mensajes-staff')"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Mensajes staff</span></a>
+                    <a href="javascript:void(0)" class="nav-dropdown-item" data-fav-id="adm-usuarios"     onclick="switchAdminTab('usuarios')"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Usuarios</span></a>
+                </div>
+            </div>
+
+            <!-- CLIENTES -->
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropdown-toggle"><span>CLIENTES</span><svg class="nav-caret" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+                <div class="nav-dropdown-menu">
+                    <a href="javascript:void(0)" class="nav-dropdown-item" data-fav-id="cli-gestion"  onclick="switchAdminTab('clientes')"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Gestión de clientes</span></a>
+                    <a href="javascript:void(0)" class="nav-dropdown-item" data-fav-id="cli-reservas" onclick="switchAdminTab('reservas-manuales')"><svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg><span>Reservas manuales</span></a>
+                </div>
+            </div>
+
+            <!-- MI PERFIL -->
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropdown-toggle"><span>MI PERFIL</span><svg class="nav-caret" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+                <div class="nav-dropdown-menu">
+                    <a href="/perfil#info" class="nav-dropdown-item" data-fav-id="pf-adm-info">
+                        <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                        <span>Información</span>
+                    </a>
+                    <a href="/perfil#horario" class="nav-dropdown-item" data-fav-id="pf-adm-horario">
+                        <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span>Mi horario</span>
+                    </a>
+                    <a href="/perfil#seguridad" class="nav-dropdown-item" data-fav-id="pf-adm-seguridad">
+                        <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <span>Seguridad</span>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="admin-nav-right" style="flex-shrink:0;display:flex;align-items:center;gap:14px;">
             <span class="admin-nav-user" th:text="${navUsuario}"></span>
             <a href="/perfil" class="btn-perfil-nav" title="Mi Perfil" style="display:flex;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -51,17 +139,10 @@
         </div>
     </header>
 
-    <!-- SHELL: SIDEBAR + MAIN -->
-    <div id="admin-shell">
-
-        <!-- Sidebar inyectado por admin-sidebar.js (archivo estático) -->
-
-        <!-- CONTENIDO PRINCIPAL -->
-        <main id="admin-main">
-            <div id="admin-tab-body"></div>
-        </main>
-
-    </div>
+    <!-- CONTENIDO PRINCIPAL (sin sidebar lateral) -->
+    <main id="admin-main">
+        <div id="admin-tab-body"></div>
+    </main>
 
     <!-- Oculto, requerido por funciones globales de navegación -->
     <div id="main-content" style="display:none;"><div id="dynamic-view"></div></div>
@@ -73,10 +154,10 @@
                 <div class="modal-body">
                     <ul class="nav nav-pills mb-4 justify-content-center border-bottom border-secondary pb-3">
                         <li class="nav-item">
-                            <button class="nav-link active" id="tab-login" onclick="showAuthTab('login')" data-i18n="auth_signin_tab">Iniciar Sesión</button>
+                            <button class="nav-link active" id="tab-login" onclick="mostrarPestanaAuth('login')" data-i18n="auth_signin_tab">Iniciar Sesión</button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link" id="tab-register" onclick="showAuthTab('register')" data-i18n="auth_register_tab">Registrarse</button>
+                            <button class="nav-link" id="tab-register" onclick="mostrarPestanaAuth('register')" data-i18n="auth_register_tab">Registrarse</button>
                         </li>
                     </ul>
                     <div id="auth-error" class="alert alert-danger d-none py-2" style="font-size:0.8rem;"></div>
@@ -153,13 +234,20 @@
     <script th:src="@{/js/14-i18n.js}"></script>
     <script th:src="@{/js/15-accessibility.js}"></script>
     <script th:src="@{/js/01-globals.js}"></script>
+    <script th:src="@{/js/00-api-urls.js}"></script>
+    <script th:src="@{/js/00-enums.js}"></script>
     <script th:src="@{/js/02-flatpickr-config.js}"></script>
     <script th:src="@{/js/04-ui-core.js}"></script>
     <script th:src="@{/js/03-navegacion.js}"></script>
     <script th:src="@{/js/06-servicios-detalles.js}"></script>
     <script th:src="@{/js/09-admin.js}"></script>
     <script th:src="@{/js/25-admin-personal.js}"></script>
-    <script th:src="@{/js/admin-sidebar.js(v=2)}"></script>
+    <script th:src="@{/js/26-admin-empleados.js}"></script>
+    <script th:src="@{/js/27-admin-detalle-empleado.js}"></script>
+    <script th:src="@{/js/28-admin-mensajes-staff.js}"></script>
+    <script th:src="@{/js/29-admin-clientes.js}"></script>
+    <script th:src="@{/js/30-admin-reservas-manuales.js}"></script>
+    <script th:src="@{/js/nav-favs.js(v=1)}"></script>
     <script th:src="@{/js/10-auth.js}"></script>
     <script th:src="@{/js/13-init.js}"></script>
 

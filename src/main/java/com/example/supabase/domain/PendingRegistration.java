@@ -2,13 +2,13 @@ package com.example.supabase.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "pending_registrations")
 @Getter @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class PendingRegistration {
 
     @Id
@@ -19,4 +19,10 @@ public class PendingRegistration {
     private String passwordHash;
     private String supabaseUid;
     private LocalDateTime createdAt;
+
+    private String tipoDocumento;
+    private String numDocumento;
+    private LocalDate fechaNacimiento;
+    private String telefonoPrefijo;
+    private String telefono;
 }

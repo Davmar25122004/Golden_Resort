@@ -29,7 +29,7 @@ window.showMisReservas = async () => {
         return;
     }
 
-    if (res.status === 401) { openAuthModal(); return; }
+    if (res.status === 401) { abrirModalAuth(); return; }
     if (!res.ok) {
         document.getElementById('reservas-container').textContent = t('mr_error_load');
         return;
@@ -66,7 +66,7 @@ window.showMisReservas = async () => {
                 </div>
                 <p class="reserva-empty-title">${t('mr_empty_title')}</p>
                 <p class="reserva-empty-sub">${t('mr_empty_sub')}</p>
-                <button class="btn-reserva-empty" onclick="goHome(); setTimeout(()=>scrollToSection('habitaciones'),300)">
+                <button class="btn-reserva-empty" onclick="irAlInicio(); setTimeout(()=>desplazarASeccion('habitaciones'),300)">
                     ${t('mr_empty_btn')}
                 </button>
             </div>`;
@@ -84,7 +84,24 @@ window.showMisReservas = async () => {
 
         var tipoLabels = { NORMAL: t('tipo_normal'), DOBLE: t('tipo_doble'), SUITE: t('tipo_suite'), LUJO: t('tipo_lujo') };
 
-    var html = '<div class="reservas-list">';
+    var hayPasadas = reservas.some(r => calcularEstado(r.fechaEntrada, r.fechaSalida) === 'PASADA');
+
+    var html = '';
+    if (hayPasadas) {
+        html += `
+            <div id="btn-limpiar-wrap" style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
+                <button onclick="limpiarReservasPasadas()"
+                    style="background:none;border:1px solid rgba(154,154,154,0.3);color:var(--text-muted-custom);
+                           font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;
+                           border-radius:20px;cursor:pointer;transition:all .2s;"
+                    onmouseover="this.style.borderColor='rgba(201,168,76,0.5)';this.style.color='var(--gold)'"
+                    onmouseout="this.style.borderColor='rgba(154,154,154,0.3)';this.style.color='var(--text-muted-custom)'">
+                    ✕ Limpiar reservas pasadas
+                </button>
+            </div>`;
+    }
+
+    html += '<div class="reservas-list">';
     reservas.forEach(r => {
         var estado  = calcularEstado(r.fechaEntrada, r.fechaSalida);
         var noches  = Math.max(1, Math.round(
@@ -428,6 +445,12 @@ function grsActualizarSubtotal() {
 window.cerrarGestionRS = () => {
     var m = document.getElementById('modal-gestion-rs');
     if (m) m.remove();
+};
+
+window.limpiarReservasPasadas = () => {
+    document.querySelectorAll('.reserva-card--pasada').forEach(el => el.remove());
+    var wrap = document.getElementById('btn-limpiar-wrap');
+    if (wrap) wrap.remove();
 };
 
 window.guardarPedidoRS = async (reservaId) => {

@@ -36,6 +36,23 @@
     background: var(--dark-3);
     color: var(--cream);
 }
+.modal-dark .form-select {
+    background-color: var(--dark-3);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23c9a84c' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    border: 1px solid rgba(201,168,76,0.25);
+    color: var(--cream);
+    border-radius: 2px;
+}
+.modal-dark .form-select:focus {
+    border-color: var(--gold);
+    box-shadow: none;
+    background-color: var(--dark-3);
+    color: var(--cream);
+}
+.modal-dark .form-select option {
+    background: #1a1a1a;
+    color: var(--cream);
+}
 .btn-gold {
     background: var(--gold);
     color: var(--dark);

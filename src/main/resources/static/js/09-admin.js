@@ -34,7 +34,10 @@ window.switchAdminTab = (tab) => {
     if (tab === 'servicios')    loadAdminServicios();
     if (tab === 'roomservice')  loadAdminRoomService();
     if (tab === 'usuarios')     loadAdminUsuarios();
-    if (tab === 'personal')     loadAdminPersonal();
+    if (tab === 'personal')          loadAdminPersonal();
+    if (tab === 'mensajes-staff')    loadAdminMensajesStaff();
+    if (tab === 'clientes')          loadAdminClientes();
+    if (tab === 'reservas-manuales') loadAdminReservasManuales();
 };
 
 // ── ADMIN: DASHBOARD ──────────────────────────────────────────────────────────
@@ -1527,8 +1530,13 @@ async function loadAdminUsuarios() {
             body.innerHTML = '<p style="color:#c0392b;">' + t('adm_usr_error') + '</p>';
             return;
         }
-        _cachedUsuariosAdmin = await resUsr.json();
-        _cachedRolesAdmin    = resRoles.ok ? await resRoles.json() : [];
+        var todosUsuarios = await resUsr.json();
+        _cachedUsuariosAdmin = todosUsuarios.filter(u => {
+            var roles = u.roles || (u.rol ? [u.rol] : []);
+            return !roles.includes('ROLE_CLIENTE');
+        });
+        var todosRoles = resRoles.ok ? await resRoles.json() : [];
+        _cachedRolesAdmin = todosRoles.filter(r => r.name !== 'ROLE_CLIENTE');
     } catch (_) {
         body.innerHTML = '<p style="color:#c0392b;">' + t('adm_error_conn') + '</p>';
         return;
@@ -1560,6 +1568,7 @@ async function loadAdminUsuarios() {
                 </div>
                 <button class="admin-btn" onclick="loadAdminUsuarios()" style="font-size:0.7rem; padding:6px 14px;">↻ Refrescar</button>
             </div>
+            <button class="admin-btn admin-btn--gold" onclick="openNuevoEmpleadoModal()" style="font-size:0.75rem; padding:7px 18px; background:rgba(201,168,76,0.15); border-color:rgba(201,168,76,0.4); color:#c9a84c;">+ Nuevo Empleado</button>
         </div>
         <div id="admin-usr-table-container"></div>
     `;
@@ -1606,16 +1615,13 @@ window.renderUsuariosTable = (usuarios) => {
                     var badgesHtml = roles.length === 0
                         ? '<span class="admin-badge admin-badge--muted">SIN ROL</span>'
                         : roles.map(r => {
-                            var cls = 'admin-badge';
-                            if (r === 'ROLE_ADMIN')     cls += ' admin-badge--admin';
-                            if (r === 'ROLE_RECEPCION') cls += ' admin-badge--recepcion';
-                            if (r === 'ROLE_LIMPIEZA')  cls += ' admin-badge--limpieza';
+                            var cls = 'admin-badge ' + ENUMS.rolBadgeClass(r);
                             return `<span class="${cls}">${prettyRole(r)}</span>`;
                           }).join(' ');
                     return `
                         <tr>
                             <td>${u.id}</td>
-                            <td style="color:var(--cream);">${u.nombre || '—'}</td>
+                            <td><a href="javascript:void(0)" onclick="adminAbrirDetalleUsuario(${u.id})" style="color:#c9a84c;text-decoration:none;font-weight:600;cursor:pointer;border-bottom:1px dashed rgba(201,168,76,0.4);" onmouseover="this.style.borderBottomColor='#c9a84c'" onmouseout="this.style.borderBottomColor='rgba(201,168,76,0.4)'">${u.nombre || '—'}</a></td>
                             <td style="color:var(--text-muted-custom);">${u.email}</td>
                             <td>${badgesHtml}</td>
                             <td><button class="admin-btn admin-btn--danger" onclick="adminEliminarUsuario(${u.id})">${t('adm_usr_delete')}</button></td>
@@ -1626,9 +1632,7 @@ window.renderUsuariosTable = (usuarios) => {
 }
 
 function prettyRole(name) {
-    if (!name) return '—';
-    var clean = name.replace(/^ROLE_/, '');
-    return clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase();
+    return ENUMS.rolLabel(name);
 }
 
 window.adminEliminarUsuario = async (id) => {

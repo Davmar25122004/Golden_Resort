@@ -273,7 +273,7 @@ public class LimpiezaService {
         for (Reserva r : reservaRepository.findAll()) {
             LocalDate s = r.getFechaSalida();
             if (s != null && !s.isBefore(desde) && !s.isAfter(hasta)) {
-                conteo.merge(s.toString(), 1, Integer::sum);
+                conteo.merge(s.toString(), 1, (x, y) -> x + y);
             }
         }
         return conteo;

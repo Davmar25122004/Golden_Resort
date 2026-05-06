@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,19 @@ import java.util.stream.Collectors;
 
 @Service
 public class ReservaService {
+
+    private static final String SERVICIO_COCHE = "Servicio de Coche Privado";
+
+    /** Precio fijo por ubicación para el servicio de coche */
+    private static BigDecimal precioCochePorUbicacion(String ubicacion) {
+        if (ubicacion == null) return BigDecimal.ZERO;
+        return switch (ubicacion) {
+            case "AEROPUERTO_VALENCIA"   -> new BigDecimal("120.00");
+            case "RENFE_JOAQUIN_SOROLLA" -> new BigDecimal("80.00");
+            case "RENFE_CULLERA"         -> new BigDecimal("40.00");
+            default -> BigDecimal.ZERO;
+        };
+    }
 
     private final ReservaRepository reservaRepository;
     private final HabitacionRepository habitacionRepository;
@@ -105,6 +119,15 @@ public class ReservaService {
     // ── Creación ──────────────────────────────────────────────────────────────
 
     public Reserva crear(ReservaRequest request, String email) {
+        if (request.fechaEntrada == null || request.fechaSalida == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Las fechas son obligatorias");
+        if (request.fechaEntrada.isBefore(LocalDate.now()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de entrada no puede ser anterior a hoy");
+        if (!request.fechaEntrada.isBefore(request.fechaSalida))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha de entrada debe ser anterior a la de salida");
+        if (request.habitacionId == null || request.habitacionId <= 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Habitación inválida");
+
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no encontrado"));
         Habitacion habitacion = habitacionRepository.findById(request.habitacionId)
@@ -158,12 +181,21 @@ public class ReservaService {
         List<ReservaServicio> serviciosReserva = new ArrayList<>();
         if (request.servicios != null && !request.servicios.isEmpty()) {
             for (ServicioRequest sr : request.servicios) {
+                if (sr.servicioId == null || sr.servicioId <= 0)
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID de servicio inválido");
+                if (sr.cantidad == null || sr.cantidad <= 0)
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La cantidad debe ser mayor que cero");
                 Servicio servicio = servicioRepository.findById(sr.servicioId)
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                                 "Servicio no encontrado: id=" + sr.servicioId));
                 ReservaServicio rs = new ReservaServicio();
                 rs.setServicio(servicio);
                 rs.setCantidad(sr.cantidad);
+                rs.setHora(parseHora(sr.hora));
+                if (SERVICIO_COCHE.equals(servicio.getNombre()) && sr.ubicacion != null) {
+                    rs.setUbicacion(sr.ubicacion);
+                    rs.setPrecioServicio(precioCochePorUbicacion(sr.ubicacion));
+                }
                 serviciosReserva.add(rs);
             }
         }
@@ -187,9 +219,16 @@ public class ReservaService {
 
     // ── Servicios en reserva ──────────────────────────────────────────────────
 
-    public void agregarServicio(Long reservaId, ServicioRequest request) {
+    public void agregarServicio(Long reservaId, ServicioRequest request, String email, boolean isAdmin) {
+        if (request.servicioId == null || request.servicioId <= 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Servicio inválido");
+        if (request.cantidad == null || request.cantidad <= 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La cantidad debe ser mayor que cero");
+
         Reserva reserva = reservaRepository.findById(reservaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!isAdmin && !reserva.getUsuario().getEmail().equals(email))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permiso para modificar esta reserva");
         Servicio servicio = servicioRepository.findById(request.servicioId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
@@ -197,10 +236,19 @@ public class ReservaService {
         rs.setReserva(reserva);
         rs.setServicio(servicio);
         rs.setCantidad(request.cantidad);
+        rs.setHora(parseHora(request.hora));
+        if (SERVICIO_COCHE.equals(servicio.getNombre()) && request.ubicacion != null) {
+            rs.setUbicacion(request.ubicacion);
+            rs.setPrecioServicio(precioCochePorUbicacion(request.ubicacion));
+        }
         reservaServicioRepository.save(rs);
     }
 
-    public void quitarServicio(Long reservaId, Long servicioId) {
+    public void quitarServicio(Long reservaId, Long servicioId, String email, boolean isAdmin) {
+        Reserva reserva = reservaRepository.findById(reservaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!isAdmin && !reserva.getUsuario().getEmail().equals(email))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes permiso para modificar esta reserva");
         if (!reservaServicioRepository.existsByReservaIdAndServicioId(reservaId, servicioId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
@@ -243,6 +291,11 @@ public class ReservaService {
                         rs.setReserva(reserva);
                         rs.setServicio(servicio);
                         rs.setCantidad(sr.cantidad);
+                        rs.setHora(parseHora(sr.hora));
+                        if (SERVICIO_COCHE.equals(servicio.getNombre()) && sr.ubicacion != null) {
+                            rs.setUbicacion(sr.ubicacion);
+                            rs.setPrecioServicio(precioCochePorUbicacion(sr.ubicacion));
+                        }
                         nuevosServicios.add(rs);
                     });
                 }
@@ -291,6 +344,17 @@ public class ReservaService {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
+    private static LocalTime parseHora(String hora) {
+        if (hora == null || hora.isBlank()) return null;
+        try {
+            String h = hora.trim();
+            if (h.length() == 5) h = h + ":00"; // HH:mm → HH:mm:ss
+            return LocalTime.parse(h);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public ReservaDTO toDTO(Reserva r, boolean includeCliente) {
         long dias = ChronoUnit.DAYS.between(r.getFechaEntrada(), r.getFechaSalida());
 
@@ -298,13 +362,17 @@ public class ReservaService {
         BigDecimal totalServicios = BigDecimal.ZERO;
         if (r.getServicios() != null) {
             for (ReservaServicio rs : r.getServicios()) {
-                BigDecimal subtotal = rs.getServicio().getPrecio()
-                        .multiply(BigDecimal.valueOf(rs.getCantidad()));
+                // Usar precioServicio si existe (ej. coche con ubicación), si no el precio base
+                BigDecimal precioEfectivo = rs.getPrecioServicio() != null
+                        ? rs.getPrecioServicio()
+                        : rs.getServicio().getPrecio();
+                BigDecimal subtotal = precioEfectivo.multiply(BigDecimal.valueOf(rs.getCantidad()));
                 totalServicios = totalServicios.add(subtotal);
                 serviciosDTOs.add(new ServicioDTO(
                         rs.getServicio().getNombre(),
-                        rs.getServicio().getPrecio(),
-                        rs.getCantidad()
+                        precioEfectivo,
+                        rs.getCantidad(),
+                        rs.getUbicacion()
                 ));
             }
         }
@@ -328,8 +396,9 @@ public class ReservaService {
                 ))
                 .collect(Collectors.toList());
 
+        ReservaDTO dto;
         if (includeCliente) {
-            return new ReservaDTO(
+            dto = new ReservaDTO(
                     r.getId(), r.getFechaEntrada(), r.getFechaSalida(),
                     r.getHabitacion().getTipo().name(), r.getHabitacion().getNumero(),
                     r.getHabitacion().getPrecioNoche(), serviciosDTOs, total, subtotalRoomService,
@@ -338,14 +407,17 @@ public class ReservaService {
                     r.getUsuario().getEmail(),
                     r.getPeticionEspecial()
             );
+        } else {
+            dto = new ReservaDTO(
+                    r.getId(), r.getFechaEntrada(), r.getFechaSalida(),
+                    r.getHabitacion().getTipo().name(), r.getHabitacion().getNumero(),
+                    r.getHabitacion().getPrecioNoche(), serviciosDTOs, total, subtotalRoomService,
+                    pedidosRS,
+                    r.getPeticionEspecial()
+            );
         }
-        return new ReservaDTO(
-                r.getId(), r.getFechaEntrada(), r.getFechaSalida(),
-                r.getHabitacion().getTipo().name(), r.getHabitacion().getNumero(),
-                r.getHabitacion().getPrecioNoche(), serviciosDTOs, total, subtotalRoomService,
-                pedidosRS,
-                r.getPeticionEspecial()
-        );
+        dto.checkoutEn = r.getCheckoutEn();
+        return dto;
     }
 
     /** Usado por AdminService para calcular ingresos del mes */
@@ -355,8 +427,9 @@ public class ReservaService {
         BigDecimal servicios = BigDecimal.ZERO;
         if (r.getServicios() != null) {
             for (ReservaServicio rs : r.getServicios()) {
-                servicios = servicios.add(
-                        rs.getServicio().getPrecio().multiply(BigDecimal.valueOf(rs.getCantidad())));
+                BigDecimal precioEfectivo = rs.getPrecioServicio() != null
+                        ? rs.getPrecioServicio() : rs.getServicio().getPrecio();
+                servicios = servicios.add(precioEfectivo.multiply(BigDecimal.valueOf(rs.getCantidad())));
             }
         }
         BigDecimal subtotalRS = pedidoRoomServiceRepository.findByReservaId(r.getId())

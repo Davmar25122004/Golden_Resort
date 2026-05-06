@@ -149,7 +149,7 @@ public class MensajeriaService {
         boolean tieneAdjunto = adjuntoUrl != null && !adjuntoUrl.isBlank();
         if (!tieneTexto && !tieneAdjunto)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El mensaje debe llevar texto o adjunto.");
-        if (tieneTexto && texto.length() > TEXTO_MAX)
+        if (texto != null && texto.length() > TEXTO_MAX)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El mensaje supera los " + TEXTO_MAX + " caracteres.");
         permitirOLanzar(staff.getId());
 
@@ -160,7 +160,7 @@ public class MensajeriaService {
         m.setConversacionId(c.getId());
         m.setAutorId(staff.getId());
         m.setAutorRol("RECEPCION");
-        if (tieneTexto) m.setTexto(texto.trim());
+        if (tieneTexto && texto != null) m.setTexto(texto.trim());
         if (tieneAdjunto) {
             m.setAdjuntoUrl(adjuntoUrl);
             m.setAdjuntoNombre(adjuntoNombre);

@@ -22,14 +22,14 @@ public class RoomServiceController {
         this.roomServiceService = roomServiceService;
     }
 
-    private String getEmail(Authentication auth) {
+    private String obtenerEmail(Authentication auth) {
         if (auth instanceof OAuth2AuthenticationToken token) {
             return (String) token.getPrincipal().getAttributes().get("email");
         }
         return auth.getName();
     }
 
-    private boolean isAdmin(Authentication auth) {
+    private boolean esAdmin(Authentication auth) {
         return auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
@@ -98,12 +98,12 @@ public class RoomServiceController {
     // ── Helper de autorización ────────────────────────────────────────────────
 
     private boolean puedeAcceder(Long reservaId, Authentication auth) {
-        if (isAdmin(auth)) return true;
+        if (esAdmin(auth)) return true;
         // Verificamos que la reserva pertenezca al usuario autenticado
         // Reutilizamos el método del service que ya carga la reserva
         try {
             // Si el service lanzara excepción aquí sería un NOT_FOUND, lo dejamos pasar
-            String email = getEmail(auth);
+            String email = obtenerEmail(auth);
             // Necesitamos conocer el email del dueño de la reserva:
             // lo hacemos via listarPedido que ya valida existencia
             // La verificación real se hace comparando directamente en el service

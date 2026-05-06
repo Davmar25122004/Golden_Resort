@@ -128,7 +128,7 @@
 
 .admin-charts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 18px;
     margin-bottom: 32px;
 }
@@ -163,6 +163,75 @@
 }
 @media (max-width: 600px) {
     .admin-chart-canvas-wrap { height: 200px; }
+}
+
+@media (max-width: 480px) {
+    /* Stats: una columna, más compacto */
+    .admin-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    .admin-stat-card {
+        padding: 14px 16px;
+    }
+    .admin-stat-label {
+        font-size: 0.75rem;
+    }
+    .admin-stat-value {
+        font-size: 1.7rem;
+    }
+
+    /* Tabs: scroll horizontal si no caben */
+    .admin-tabs-bar {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        gap: 0;
+        padding-bottom: 0;
+    }
+    .admin-tab-btn {
+        flex-shrink: 0;
+        padding: 10px 12px;
+        font-size: 0.68rem;
+    }
+
+    /* Charts */
+    .admin-charts-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .admin-charts-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .admin-chart-canvas-wrap { height: 180px; }
+
+    /* Tablas */
+    .admin-table th,
+    .admin-table td {
+        font-size: 0.7rem;
+        padding: 6px 6px;
+    }
+
+    /* Botones */
+    .admin-btn {
+        font-size: 0.65rem;
+        padding: 5px 10px;
+        margin-right: 4px;
+        margin-bottom: 4px;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+    }
+    .admin-table th,
+    .admin-table td { padding: 8px 8px; font-size: 0.75rem; }
 }
 
 /* Table */
@@ -210,6 +279,26 @@
 .admin-badge--limpieza {
     background: rgba(46,204,113,0.18);
     color: #2ecc71;
+}
+.admin-badge--gimnasio {
+    background: rgba(88,196,220,0.18);
+    color: #58c4dc;
+}
+.admin-badge--spa {
+    background: rgba(216,138,196,0.18);
+    color: #d88ac4;
+}
+.admin-badge--coche {
+    background: rgba(120,180,255,0.18);
+    color: #78b4ff;
+}
+.admin-badge--hosteleria {
+    background: rgba(255,180,90,0.18);
+    color: #ffb45a;
+}
+.admin-badge--roomservice {
+    background: rgba(140,220,160,0.18);
+    color: #8cdca0;
 }
 .admin-badge--muted {
     background: rgba(255,255,255,0.06);

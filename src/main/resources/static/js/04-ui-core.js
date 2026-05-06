@@ -1,6 +1,6 @@
 // ── NAVBAR ────────────────────────────────────────────────────────────────────
 
-function setupNavbarScroll() {
+function configurarScrollNavbar() {
     window.addEventListener('scroll', () => {
         var navbar = document.getElementById('navbar');
         if (window.scrollY > 80) navbar.classList.add('scrolled');
@@ -8,7 +8,7 @@ function setupNavbarScroll() {
     });
 }
 
-window.scrollToSection = (id) => {
+window.desplazarASeccion = (id) => {
     var el = document.getElementById(id);
     if (el) {
         el.scrollIntoView({ behavior: 'smooth' });
@@ -17,13 +17,13 @@ window.scrollToSection = (id) => {
     }
 };
 
-window.goHome = () => {
+window.irAlInicio = () => {
     window.location.href = '/';
 };
 
 // Lee el estado del navbar renderizado por el servidor (NavbarAdvice).
 // El servidor es la fuente de verdad: no manipulamos display ni textos en JS.
-function readServerNavState() {
+function leerEstadoNavServidor() {
     var nav = document.getElementById('navbar');
     if (!nav) return { autenticado: false, usuario: null, roles: [], esStaff: false, esAdmin: false };
     return {
@@ -35,8 +35,8 @@ function readServerNavState() {
     };
 }
 
-function updateNav() {
-    var s = readServerNavState();
+function actualizarNavbar() {
+    var s = leerEstadoNavServidor();
 
     // Sincronizar el state JS con la sesión real del servidor para que el resto
     // del código (auth, reservas, peticiones, etc.) tenga la info correcta.
@@ -52,15 +52,15 @@ function updateNav() {
         state.user  = null;
     }
 
-    if (s.esStaff) startBellPolling();
-    else           stopBellPolling();
+    if (s.esStaff) iniciarPollingCampana();
+    else           detenerPollingCampana();
 }
 
 // ── Polling de la campanita (staff) ──────────────────────────────────────────
 
-var _bellTimer = null;
+var _timerCampana = null;
 
-async function refreshBellBadge() {
+async function actualizarBadgeCampana() {
     var bell  = document.getElementById('nav-bell');
     var badge = document.getElementById('nav-bell-badge');
     if (!bell || !badge) return;
@@ -75,19 +75,19 @@ async function refreshBellBadge() {
     } catch (_) {}
 }
 
-function startBellPolling() {
-    if (_bellTimer) return;
-    refreshBellBadge();
-    _bellTimer = setInterval(refreshBellBadge, 5000);
+function iniciarPollingCampana() {
+    if (_timerCampana) return;
+    actualizarBadgeCampana();
+    _timerCampana = setInterval(actualizarBadgeCampana, 5000);
 }
 
-function stopBellPolling() {
-    if (_bellTimer) { clearInterval(_bellTimer); _bellTimer = null; }
+function detenerPollingCampana() {
+    if (_timerCampana) { clearInterval(_timerCampana); _timerCampana = null; }
 }
 
 // ── VISTAS ────────────────────────────────────────────────────────────────────
 
-function showLanding() {
+function mostrarInicio() {
     var hero = document.getElementById('hero');
     var hab  = document.getElementById('habitaciones');
     var srv  = document.getElementById('servicios');
@@ -137,7 +137,7 @@ function setupSearch() {
                 state.searchDates = null;
                 sessionStorage.removeItem('searchDates');
                 if (errContainer) errContainer.classList.add('d-none');
-                showLanding();
+                mostrarInicio();
                 setTimeout(() => document.getElementById('habitaciones').scrollIntoView({ behavior: 'smooth' }), 50);
                 await loadRooms();
                 return;
@@ -169,7 +169,7 @@ function setupSearch() {
 
             if (errContainer) errContainer.classList.add('d-none');
             state.searchDates = { inDate, outDate };
-            showLanding();
+            mostrarInicio();
             setTimeout(() => document.getElementById('habitaciones').scrollIntoView({ behavior: 'smooth' }), 50);
             await loadRooms();
         };

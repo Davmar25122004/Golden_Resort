@@ -23,12 +23,15 @@ window.showPerfil = async () => {
     }
 
     var data = await res.json();
+    window._perfilData = data;
     var initials = (data.nombre || data.email || '?').slice(0, 2).toUpperCase();
-    var rolLabel = data.rol === 'ROLE_ADMIN'     ? 'Administrador'
-                 : data.rol === 'ROLE_RECEPCION' ? 'Recepción'
-                 : 'Cliente';
+    var rolLabel = ENUMS.rolLabel(data.rol);
     var esOAuth   = data.esOAuth || false;
     var esCliente = data.rol === 'ROLE_CLIENTE';
+    var _pf = (label, val) => val ? `<div class="perfil-info-row"><span class="perfil-field-label">${label}</span><span class="perfil-field-value">${val}</span></div>` : '';
+    var _pfGrid = (fields) => { var items = fields.filter(function(f){return !!f[1];}).map(function(f){return '<div class="perfil-grid-item"><span class="perfil-field-label">'+f[0]+'</span><span class="perfil-field-value pf-val">'+f[1]+'</span></div>';}).join(''); return items ? '<div class="perfil-fields-grid">'+items+'</div>' : ''; };
+    var _pfSub = (label) => '<div class="perfil-sub-label">'+label+'</div>';
+    var _pfGridEdit = (fields) => { var items = fields.map(function(f){ var ro = f[4] ? ' readonly' : ''; var roSt = f[4] ? ' style="opacity:0.5;cursor:not-allowed;"' : ''; return '<div class="perfil-grid-item"><span class="perfil-field-label">'+f[0]+'</span><input class="perfil-edit-input" id="emp-'+f[1]+'" type="'+(f[3]||'text')+'" value="'+(f[2]||'')+'"'+ro+roSt+'></div>'; }).join(''); return items ? '<div class="perfil-fields-grid">'+items+'</div>' : ''; };
 
     if (_dv) _dv.innerHTML = `
         <style>
@@ -213,9 +216,9 @@ window.showPerfil = async () => {
         
         @media (max-width: 992px) {
             .perfil-dashboard { grid-template-columns: 1fr; }
-            .perfil-sidebar { 
-                flex-direction: row; 
-                overflow-x: auto; 
+            .perfil-sidebar {
+                flex-direction: row;
+                overflow-x: auto;
                 padding-bottom: 12px;
                 scrollbar-width: none;
                 margin-bottom: 1rem;
@@ -223,6 +226,51 @@ window.showPerfil = async () => {
             .perfil-sidebar::-webkit-scrollbar { display: none; }
             .perfil-menu-item { white-space: nowrap; flex-shrink: 0; }
         }
+        .perfil-fields-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px 16px;
+            margin-bottom: 4px;
+        }
+        .perfil-grid-item {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.025);
+            border-radius: 8px;
+            border: 1px solid rgba(201,168,76,0.08);
+        }
+        .pf-val {
+            color: var(--cream, #f5f0e8);
+            font-size: 0.87rem;
+            font-weight: 500;
+        }
+        .perfil-sub-label {
+            font-size: 0.59rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(201,168,76,0.55);
+            font-weight: 700;
+            padding: 14px 0 6px;
+        }
+        @media (max-width: 600px) {
+            .perfil-fields-grid { grid-template-columns: 1fr; }
+        }
+        .perfil-edit-input {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(201,168,76,0.2);
+            border-radius: 6px;
+            color: var(--cream, #f5f0e8);
+            font-size: 0.84rem;
+            padding: 5px 8px;
+            outline: none;
+            font-family: inherit;
+            transition: border-color 0.15s;
+            box-sizing: border-box;
+        }
+        .perfil-edit-input:focus { border-color: rgba(201,168,76,0.65); }
         </style>
         
         <div class="perfil-page">
@@ -259,10 +307,15 @@ window.showPerfil = async () => {
                             Mensajes
                             <span id="perfil-mensajes-unread" class="perfil-menu-badge" style="display:none;"></span>
                         </button>` : ''}
-                        ${data.planId ? `
+                        ${!esCliente ? `
                         <button class="perfil-menu-item" onclick="perfilShowTab('horario',this)">
                             <span class="perfil-menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
                             Mi Horario
+                        </button>` : ''}
+                        ${(!esCliente && data.rol !== 'ROLE_ADMIN') ? `
+                        <button class="perfil-menu-item" onclick="perfilShowTab('mensajes-admin',this)">
+                            <span class="perfil-menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+                            Mensajes con Admin
                         </button>` : ''}
                         <button class="perfil-menu-item" onclick="perfilShowTab('seguridad',this)">
                             <span class="perfil-menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
@@ -273,19 +326,27 @@ window.showPerfil = async () => {
                     <main class="perfil-main" style="min-width:0;">
                         <!-- TAB: INFO -->
                         <div id="perfil-tab-info" class="perfil-tab-panel active">
-                            <div class="perfil-card" style="margin-bottom:0;">
-                                <div class="perfil-card-title">Detalles Personales</div>
-                                <div class="perfil-info-row"><span class="perfil-field-label">Nombre</span><span class="perfil-field-value" id="perfil-nombre-display">${data.nombre || '\u2014'}</span></div>
-                                <div class="perfil-info-row"><span class="perfil-field-label">Email</span><span class="perfil-field-value">${data.email}</span></div>
-                                <div class="perfil-info-row"><span class="perfil-field-label">Estado de la cuenta</span><span class="perfil-field-value" style="color:#5cb85c;display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;background:#5cb85c;border-radius:50%;"></span> Activa</span></div>
-                                <hr style="border-color:rgba(201,168,76,0.15);margin:2.5rem 0;">
-                                <div class="perfil-card-title" style="font-size:1.1rem;margin-bottom:1.5rem;border-bottom:none;padding-bottom:0;">Actualizar Nombre</div>
-                                <div class="mb-4">
-                                    <input type="text" id="input-nombre" class="perfil-form-input" placeholder="Tu nombre" value="${data.nombre || ''}" maxlength="50" style="padding:12px 16px;">
-                                </div>
-                                <button class="perfil-btn" onclick="guardarNombre()" style="width:100%;max-width:200px;">Guardar Cambios</button>
-                                <div id="alert-nombre" class="perfil-alert"></div>
-                            </div>
+                            ${!esCliente ? `
+                            <div class="perfil-card" style="margin-top:20px;margin-bottom:0;">
+                                <div class="perfil-card-title">Datos de Empleado</div>
+                                ${_pfSub('Información Personal')}
+                                ${_pfGrid([['Nombre',data.nombre],['Email',data.email],['Apellidos',data.apellidos],['Género',data.genero],['F. Nacimiento',data.fechaNacimiento],['Lugar nacimiento',data.lugarNacimiento],['País',data.pais],['Teléfono',data.telefono],['Tipo documento',data.tipoDocumento],['Nº documento',data.numDocumento]])}
+                                ${_pfSub('Información Laboral')}
+                                ${_pfGrid([['Cargo',data.cargo],['Departamento',data.departamento],['Tipo empleado',data.tipoEmpleado],['Tipo contratación',data.tipoContratacion],['F. Contratación',data.fechaContratacion]])}
+                                ${(data.telefonoCasa||data.direccionCasa||data.telefonoOficina||data.direccionOficina)?`${_pfSub('Contacto')}${_pfGrid([['Tel. casa',data.telefonoCasa],['Dir. casa',data.direccionCasa],['Tel. oficina',data.telefonoOficina],['Dir. oficina',data.direccionOficina]])}`:''}
+                            </div>` : `
+                            <div class="perfil-card" style="margin-top:20px;margin-bottom:0;">
+                                <div class="perfil-card-title">Datos Personales</div>
+                                ${_pfGrid([
+                                    ['Nombre', data.nombre],
+                                    ['Email', data.email],
+                                    ['F. Nacimiento', data.fechaNacimiento],
+                                    ['Tipo documento', data.tipoDocumento],
+                                    ['Nº documento', data.numDocumento],
+                                    ['Teléfono', (data.telefonoPrefijo ? data.telefonoPrefijo + ' ' : '') + (data.telefono || '')]
+                                ])}
+                                ${!data.tipoDocumento ? `<p style="font-size:0.82rem;color:var(--text-muted-custom);margin:16px 0 0;">Algunos datos están pendientes de completar. <a href="/completar-perfil" style="color:var(--gold);">Completar ahora →</a></p>` : ''}
+                            </div>`}
                         </div>
 
                         ${esCliente ? `
@@ -377,23 +438,52 @@ window.showPerfil = async () => {
                             </div>
                         </div>
 
+                        <!-- TAB: MENSAJES CON ADMIN (solo staff no admin) -->
+                        ${(!esCliente && data.rol !== 'ROLE_ADMIN') ? `
+                        <div id="perfil-tab-mensajes-admin" class="perfil-tab-panel">
+                            <div class="perfil-card" style="margin-bottom:0;padding:0;overflow:hidden;display:flex;flex-direction:column;height:600px;max-height:calc(100vh - 200px);">
+                                <div style="padding:18px 24px;border-bottom:1px solid rgba(201,168,76,0.15);background:linear-gradient(180deg,rgba(201,168,76,0.04) 0%,transparent 100%);">
+                                    <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:#c9a84c;letter-spacing:0.06em;">Conversación con administración</div>
+                                    <div style="font-size:0.78rem;color:rgba(255,255,255,0.5);margin-top:3px;">Habla con el administrador del hotel. Tus mensajes son privados.</div>
+                                </div>
+                                <div id="msa-list" style="flex:1;overflow-y:auto;padding:18px 24px;display:flex;flex-direction:column;gap:10px;">
+                                    <div style="text-align:center;color:rgba(255,255,255,0.4);padding:2rem;">Cargando…</div>
+                                </div>
+                                <div style="padding:14px 18px;border-top:1px solid rgba(255,255,255,0.06);display:flex;gap:10px;background:rgba(0,0,0,0.2);">
+                                    <input id="msa-input" type="text" placeholder="Escribe un mensaje…"
+                                           style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);color:#fff;padding:10px 14px;border-radius:8px;font-size:0.88rem;outline:none;"
+                                           onkeydown="if(event.key==='Enter') msaEnviar()">
+                                    <button onclick="msaEnviar()" style="background:#c9a84c;color:#0d1117;border:none;padding:10px 18px;border-radius:8px;font-size:0.78rem;font-weight:700;letter-spacing:0.08em;cursor:pointer;">Enviar</button>
+                                </div>
+                            </div>
+                        </div>` : ''}
+
                         <!-- TAB: SEGURIDAD -->
                         <div id="perfil-tab-seguridad" class="perfil-tab-panel">
                             <div class="perfil-card" style="margin-bottom:0;">
                                 <div class="perfil-card-title">Seguridad</div>
-                                ${esOAuth
-                                    ? `<div style="padding:3rem 2rem;text-align:center;background:rgba(255,255,255,0.02);border-radius:16px;border:1px dashed rgba(185,149,77,0.2);">
-                                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" style="margin-bottom:1.5rem;">
-                                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                                         </svg>
-                                         <p style="color:var(--cream);font-size:1.1rem;margin-bottom:0.5rem;font-weight:600;">Autenticaci\u00f3n con Google</p>
-                                         <p style="color:var(--text-muted-custom);font-size:0.9rem;line-height:1.6;max-width:400px;margin:0 auto;">Tu cuenta est\u00e1 protegida por Google. No es necesario gestionar una contrase\u00f1a local.</p>
-                                       </div>`
-                                    : `<div class="mb-3"><div class="perfil-field-label mb-2">Contrase\u00f1a actual</div><input type="password" id="input-pass-actual" class="perfil-form-input" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" style="padding:12px 16px;"></div>
-                                       <div class="mb-3"><div class="perfil-field-label mb-2">Nueva contrase\u00f1a</div><input type="password" id="input-pass-nueva" class="perfil-form-input" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" style="padding:12px 16px;"></div>
-                                       <div class="mb-4"><div class="perfil-field-label mb-2">Confirmar nueva contrase\u00f1a</div><input type="password" id="input-pass-confirm" class="perfil-form-input" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" style="padding:12px 16px;"></div>
-                                       <button class="perfil-btn" onclick="cambiarPassword()" style="width:100%;max-width:250px;">Actualizar Contrase\u00f1a</button>
-                                       <div id="alert-pass" class="perfil-alert"></div>`
+                                ${esOAuth && !data.tienePasswordLocal ? `
+                                    <p style="font-size:0.85rem;color:var(--text-muted-custom);margin-bottom:24px;line-height:1.6;">
+                                        Tu cuenta usa Google para iniciar sesi\u00f3n. Puedes a\u00f1adir una contrase\u00f1a para acceder tambi\u00e9n con tu email y contrase\u00f1a.
+                                    </p>
+                                    <div class="mb-3"><div class="perfil-field-label mb-2">Nueva contrase\u00f1a</div><input type="password" id="input-pass-nueva" class="perfil-form-input" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" style="padding:12px 16px;"></div>
+                                    <div class="mb-4"><div class="perfil-field-label mb-2">Confirmar contrase\u00f1a</div><input type="password" id="input-pass-confirm" class="perfil-form-input" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" style="padding:12px 16px;"></div>
+                                    <button class="perfil-btn" onclick="crearPasswordOAuth()" style="width:100%;max-width:250px;">A\u00f1adir contrase\u00f1a</button>
+                                    <div id="alert-pass" class="perfil-alert"></div>`
+                                : `
+                                   <div class="mb-4">
+                                       <div class="perfil-field-label mb-2">Contrase\u00f1a</div>
+                                       <div style="padding:12px 16px;letter-spacing:6px;color:var(--text-muted-custom);background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;font-size:1.1rem;">
+                                           \u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022
+                                       </div>
+                                   </div>
+                                   <p style="font-size:0.82rem;color:var(--text-muted-custom);margin-bottom:20px;line-height:1.6;">
+                                       Para cambiar tu contrase\u00f1a te enviaremos un enlace a <strong style="color:var(--cream);">${data.email}</strong>.
+                                   </p>
+                                   <button class="perfil-btn" onclick="solicitarRestablecerPassword()" style="width:100%;max-width:280px;">
+                                       Restablecer contrase\u00f1a
+                                   </button>
+                                   <div id="alert-pass" class="perfil-alert"></div>`
                                 }
                             </div>
                         </div>
@@ -481,6 +571,28 @@ window.showPerfil = async () => {
         cargarHabitacionesGuardadas();
         cargarMisReservas();
     }
+
+    // Si la URL trae un hash tipo #horario / #seguridad / #pagos / etc.,
+    // abrir directamente esa pestaña (usado desde el dropdown del navbar)
+    // y hacer scroll suave al panel para que no quede oculto bajo la cabecera.
+    var validTabs = ['info','reservas','guardadas','pagos','mensajes','horario','seguridad','mensajes-admin'];
+    var hash = (window.location.hash || '').replace('#','').trim();
+    if (hash && validTabs.indexOf(hash) !== -1) {
+        var btn = document.querySelector(".perfil-menu-item[onclick*=\"'" + hash + "'\"]");
+        perfilShowTab(hash, btn);
+
+        // Scroll al panel de la tab tras un breve delay para asegurar el render
+        setTimeout(function () {
+            var panel = document.getElementById('perfil-tab-' + hash);
+            if (!panel) return;
+            // Calcular offset considerando navbar sticky/fijo si existe
+            var navEl = document.getElementById('navbar');
+            var navH  = navEl ? navEl.getBoundingClientRect().height : 0;
+            var rect  = panel.getBoundingClientRect();
+            var top   = window.scrollY + rect.top - navH - 16;
+            window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+        }, 80);
+    }
 };
 
 window.perfilShowTab = (tab, btn) => {
@@ -497,6 +609,73 @@ window.perfilShowTab = (tab, btn) => {
         perfilPararPollingMensajes();
     }
     if (tab === 'horario') phCargarVista();
+    if (tab === 'mensajes-admin') msaCargar();
+};
+
+// ── MENSAJES STAFF ↔ ADMIN ──────────────────────────────────────────────────
+window.msaCargar = async function () {
+    var box = document.getElementById('msa-list');
+    if (!box) return;
+    try {
+        var r = await fetch('/api/perfil/mensajes-staff');
+        if (!r.ok) {
+            box.innerHTML = '<div style="text-align:center;color:#e74c3c;padding:2rem;">No se pudo cargar la conversación.</div>';
+            return;
+        }
+        var data = await r.json();
+        var msgs = data.mensajes || [];
+        if (msgs.length === 0) {
+            box.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.4);padding:2rem;font-style:italic;">Aún no has enviado ningún mensaje. Escribe abajo para iniciar la conversación con administración.</div>';
+            return;
+        }
+        box.innerHTML = msgs.map(msaBubble).join('');
+        box.scrollTop = box.scrollHeight;
+    } catch (_) {
+        box.innerHTML = '<div style="text-align:center;color:#e74c3c;padding:2rem;">Error de conexión.</div>';
+    }
+};
+
+function msaBubble(m) {
+    var fromAdmin = !!m.autorEsAdmin;
+    var styleBase = 'max-width:75%;padding:10px 14px;border-radius:14px;font-size:0.88rem;line-height:1.4;word-wrap:break-word;white-space:pre-wrap;';
+    var fechaTxt = '';
+    try { var d = new Date(m.creadoEn); fechaTxt = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+' · '+d.getDate()+'/'+(d.getMonth()+1); } catch(_){}
+    if (fromAdmin) {
+        return '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:3px;">'
+             +   '<div style="' + styleBase + 'background:rgba(201,168,76,0.15);color:#f5e9c8;border:1px solid rgba(201,168,76,0.25);border-bottom-left-radius:4px;">' + (m.texto || '').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'})[c]) + '</div>'
+             +   '<div style="font-size:0.66rem;color:rgba(201,168,76,0.7);letter-spacing:0.04em;padding-left:6px;">Administración · ' + fechaTxt + '</div>'
+             + '</div>';
+    }
+    return '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;">'
+         +   '<div style="' + styleBase + 'background:rgba(255,255,255,0.06);color:#e8e0c8;border:1px solid rgba(255,255,255,0.1);border-bottom-right-radius:4px;">' + (m.texto || '').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'})[c]) + '</div>'
+         +   '<div style="font-size:0.66rem;color:rgba(255,255,255,0.4);letter-spacing:0.04em;padding-right:6px;">Tú · ' + fechaTxt + '</div>'
+         + '</div>';
+}
+
+window.msaEnviar = async function () {
+    var inp = document.getElementById('msa-input');
+    if (!inp) return;
+    var texto = inp.value.trim();
+    if (!texto) return;
+    inp.disabled = true;
+    try {
+        var r = await fetch('/api/perfil/mensajes-staff', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ texto: texto })
+        });
+        if (!r.ok) {
+            alert(await r.text() || 'No se pudo enviar.');
+            return;
+        }
+        inp.value = '';
+        await msaCargar();
+    } catch (_) {
+        alert('Error de conexión.');
+    } finally {
+        inp.disabled = false;
+        inp.focus();
+    }
 };
 
 // ── MENSAJES (cliente ↔ recepción) ───────────────────────────────────────────
@@ -1115,6 +1294,56 @@ window.guardarNombre = async () => {
     }
 };
 
+window.solicitarRestablecerPassword = async () => {
+    var alertEl = document.getElementById('alert-pass');
+    var btn = document.querySelector('#perfil-tab-seguridad .perfil-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+
+    try {
+        var res = await fetch('/api/perfil/restablecer-password', { method: 'POST' });
+        var data = await res.json();
+        mostrarAlerta(alertEl, 'ok', data.mensaje || 'Enlace enviado. Revisa tu correo.');
+    } catch (_) {
+        mostrarAlerta(alertEl, 'err', 'Error de conexión. Inténtalo de nuevo.');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Restablecer contraseña'; }
+    }
+};
+
+window.crearPasswordOAuth = async () => {
+    var nueva   = document.getElementById('input-pass-nueva');
+    var confirm = document.getElementById('input-pass-confirm');
+    var alertEl = document.getElementById('alert-pass');
+    var valNueva   = nueva   ? nueva.value   : '';
+    var valConfirm = confirm ? confirm.value : '';
+
+    if (valNueva.length < 6) { mostrarAlerta(alertEl, 'err', 'La contraseña debe tener al menos 6 caracteres.'); return; }
+    if (!/[A-Z]/.test(valNueva) || !/[0-9]/.test(valNueva)) { mostrarAlerta(alertEl, 'err', 'Debe incluir al menos una mayúscula y un número.'); return; }
+    if (valNueva !== valConfirm) { mostrarAlerta(alertEl, 'err', 'Las contraseñas no coinciden.'); return; }
+
+    try {
+        var res = await fetch('/api/perfil/password/crear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nueva: valNueva })
+        });
+        if (res.ok) {
+            mostrarAlerta(alertEl, 'ok', 'Contraseña añadida. Ya puedes iniciar sesión con email y contraseña.');
+            if (nueva)   nueva.value   = '';
+            if (confirm) confirm.value = '';
+            // Actualizar la vista para mostrar el formulario de cambio en lugar de creación
+            window._perfilData.tienePasswordLocal = true;
+            var btn = document.querySelector('#perfil-tab-seguridad .perfil-btn');
+            if (btn) btn.textContent = 'Actualizar Contraseña';
+        } else {
+            var msg = await res.text();
+            mostrarAlerta(alertEl, 'err', msg || 'Error al guardar la contraseña.');
+        }
+    } catch (_) {
+        mostrarAlerta(alertEl, 'err', 'Error de conexión.');
+    }
+};
+
 window.cambiarPassword = async () => {
     var actual   = document.getElementById('input-pass-actual');
     var nueva    = document.getElementById('input-pass-nueva');
@@ -1205,6 +1434,30 @@ async function phCargarVista() {
     var body  = document.getElementById('ph-cal-body');
     if (!body) return;
     _phDayMap = {};
+
+    // Si el empleado no tiene cuadrante asignado, mostrar estado vacío
+    var _pd = window._perfilData;
+    if (!_pd || !_pd.planId) {
+        if (label) label.textContent = '—';
+        body.innerHTML = ''
+            + '<div style="text-align:center;padding:3.5rem 1.5rem;color:rgba(255,255,255,0.55);">'
+            +   '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(201,168,76,0.55)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:14px;opacity:0.85;">'
+            +     '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>'
+            +     '<line x1="16" y1="2" x2="16" y2="6"/>'
+            +     '<line x1="8" y1="2" x2="8" y2="6"/>'
+            +     '<line x1="3" y1="10" x2="21" y2="10"/>'
+            +     '<path d="M9 16l2 2 4-4" stroke="rgba(201,168,76,0.4)"/>'
+            +   '</svg>'
+            +   '<div style="font-family:Playfair Display,Georgia,serif;font-size:1.05rem;color:#c9a84c;letter-spacing:0.06em;margin-bottom:8px;">Sin cuadrante asignado</div>'
+            +   '<div style="font-size:0.85rem;line-height:1.55;max-width:380px;margin:0 auto;">El administrador todavía no te ha asignado un cuadrante de turnos. Cuando se te asigne uno, aquí podrás consultar tu horario por mes y por año, con los tipos de jornada y los tramos exactos.</div>'
+            + '</div>';
+        // Ocultar nav y vista-tabs ya que no hay calendario que mostrar
+        var navEl = document.querySelector('#perfil-tab-horario .ph-nav');
+        var tabsEl = document.querySelector('#perfil-tab-horario .ph-vista-tabs');
+        if (navEl)  navEl.style.display = 'none';
+        if (tabsEl) tabsEl.style.display = 'none';
+        return;
+    }
 
     var { vista, anyo, mes } = _phState;
 

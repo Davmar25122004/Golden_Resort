@@ -23,7 +23,7 @@ public class SupabaseAuthService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public String signUp(String email, String password) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -59,7 +59,7 @@ public class SupabaseAuthService {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public String getEmailFromToken(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("apikey", anonKey);
