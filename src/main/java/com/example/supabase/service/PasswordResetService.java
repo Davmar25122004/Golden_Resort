@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -62,7 +63,8 @@ public class PasswordResetService {
         Map<String, Object> vars = new HashMap<>();
         vars.put("nombre", usuario.getNombre() != null ? usuario.getNombre() : usuario.getEmail());
         vars.put("enlace", enlace);
-        vars.put("logoPng", cargarLogo());
+        byte[] logoBytes = cargarLogo();
+        vars.put("logoPng", logoBytes.length > 0 ? Base64.getEncoder().encodeToString(logoBytes) : null);
 
         emailService.enviarConPlantilla(
             usuario.getEmail(),
