@@ -143,10 +143,19 @@ footer {
     .nav-drawer-header {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        padding: 0 4px 16px;
+        padding: 0 4px 14px;
         border-bottom: 1px solid rgba(201,168,76,0.18);
         margin-bottom: 8px;
+    }
+    .nav-drawer-header img {
+        height: 22px !important;
+        width: auto;
+        flex-shrink: 0;
+    }
+    .nav-drawer-header span {
+        font-size: 0.78rem !important;
+        letter-spacing: 1.5px !important;
+        white-space: nowrap;
     }
     /* Backdrop: mitad derecha, borroso */
     #nav-drawer-backdrop {
