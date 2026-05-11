@@ -63,11 +63,17 @@
 .pers-tramos { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 
 /* ── Grid 7-columnas para horarios (estilo referencia) ─────────────── */
+.pers-h-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 14px;
+    border-radius: 6px;
+}
 .pers-h-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(46px, 1fr));
     gap: 1px;
-    margin-top: 14px;
+    min-width: 320px;
     background: rgba(201,168,76,0.18);
     border-radius: 6px;
     overflow: hidden;
@@ -82,7 +88,7 @@
     gap: 6px;
     transition: background 0.15s;
 }
-.pers-h-cell--on { background: rgba(201,168,76,0.06); }
+.pers-h-cell--on { background: rgba(100,160,200,0.08); }
 .pers-h-day {
     color: var(--text-muted-custom, #aaa);
     font-size: 0.7rem;
@@ -90,9 +96,19 @@
     text-transform: uppercase;
     font-weight: 700;
 }
-.pers-h-cell--on .pers-h-day { color: var(--gold); }
+.pers-h-cell--on .pers-h-day { color: #85b8d0; }
+
+@media (max-width: 600px) {
+    .pers-h-grid {
+        grid-template-columns: repeat(7, minmax(38px, 1fr));
+        min-width: unset;
+    }
+    .pers-h-cell { padding: 8px 2px; }
+    .pers-h-time { font-size: 0.6rem; }
+    .pers-h-day { font-size: 0.62rem; letter-spacing: 1px; }
+}
 .pers-h-time {
-    color: var(--cream);
+    color: #85b8d0;
     font-size: 0.78rem;
     font-family: 'Courier New', monospace;
     font-variant-numeric: tabular-nums;

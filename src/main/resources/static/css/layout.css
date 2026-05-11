@@ -105,13 +105,14 @@ footer {
         overflow: visible;
     }
 
-    /* El drawer ocupa la mitad izquierda, altura según contenido */
+    /* El drawer ocupa ~85% de la pantalla */
     #navCollapse {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
-        width: 52vw !important;
-        height: auto !important;
+        margin-top: 0 !important;
+        width: 85vw !important;
+        height: 100dvh !important;
         max-height: 100dvh !important;
         z-index: 1055 !important;
         overflow-y: auto !important;
@@ -120,22 +121,20 @@ footer {
         backdrop-filter: blur(16px) !important;
         -webkit-backdrop-filter: blur(16px) !important;
         border-right: 1px solid rgba(201,168,76,0.18) !important;
-        padding: 72px 16px 24px !important;
-        /* oculto por defecto: fuera de pantalla a la izquierda */
+        padding: 0 0 24px !important;
         transform: translateX(-100%) !important;
         transition: transform 0.3s cubic-bezier(.4,0,.2,1) !important;
-        /* anular comportamiento Bootstrap collapse */
-        display: block !important;
+        display: flex !important;
+        flex-direction: column !important;
         visibility: visible !important;
         opacity: 1 !important;
-        height: auto !important;
     }
     #navCollapse.nav-drawer-open {
         transform: translateX(0) !important;
     }
     /* Ocultar Bootstrap collapsing animation */
     #navCollapse.collapsing {
-        height: auto !important;
+        height: 100dvh !important;
         transition: none !important;
     }
 
@@ -143,30 +142,71 @@ footer {
     .nav-drawer-header {
         display: flex;
         align-items: center;
-        padding: 0 4px 14px;
+        padding: 16px 20px 16px;
         border-bottom: 1px solid rgba(201,168,76,0.18);
         margin-bottom: 8px;
+        flex-shrink: 0;
+        background: rgba(13, 13, 13, 0.98);
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
     .nav-drawer-header img {
-        height: 22px !important;
+        height: 26px !important;
         width: auto;
         flex-shrink: 0;
     }
     .nav-drawer-header span {
-        font-size: 0.78rem !important;
+        font-size: 0.9rem !important;
         letter-spacing: 1.5px !important;
         white-space: nowrap;
     }
-    /* Backdrop: mitad derecha, borroso */
+
+    /* Menú: crece para empujar la sección de usuario al fondo */
+    #navCollapse #nav-links {
+        flex: 1 !important;
+        align-items: flex-start !important;
+        padding: 0 20px !important;
+    }
+
+    /* Items del menú: más grandes y con más espacio */
+    #navCollapse .nav-link-custom {
+        font-size: 0.88rem !important;
+        padding: 12px 8px !important;
+        letter-spacing: 1.5px !important;
+        width: 100%;
+        display: block;
+    }
+    #navCollapse .nav-dropdown-toggle {
+        font-size: 0.88rem !important;
+        padding: 12px 8px !important;
+        letter-spacing: 1.5px !important;
+        width: 100%;
+    }
+    #navCollapse .nav-dropdown-item {
+        font-size: 0.82rem !important;
+        padding: 10px 14px !important;
+    }
+
+    /* Sección usuario/auth: pegada al fondo */
+    #navCollapse > div:last-child {
+        margin-top: auto !important;
+        padding: 16px 20px !important;
+        border-top: 1px solid rgba(201,168,76,0.15) !important;
+        flex-shrink: 0;
+        width: 100%;
+    }
+
+    /* Backdrop: franja derecha, borroso */
     #nav-drawer-backdrop {
         display: none;
         position: fixed;
         top: 0;
-        left: 52vw;
+        left: 85vw;
         right: 0;
         bottom: 0;
         z-index: 1054;
-        background: rgba(0, 0, 0, 0.45);
+        background: rgba(0, 0, 0, 0.55);
         backdrop-filter: blur(5px);
         -webkit-backdrop-filter: blur(5px);
     }

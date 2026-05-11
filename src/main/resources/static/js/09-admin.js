@@ -577,8 +577,8 @@ function adminCalRenderReservaCard(r) {
 
     var serviciosHtml = '';
     if (r.servicios && r.servicios.length > 0) {
-        serviciosHtml = '<div class="cal-dia-extra-line"><span class="cal-dia-extra-key">Servicios:</span> '
-            + r.servicios.map(s => adminCalEsc(s.nombre) + (s.cantidad > 1 ? ' ×' + s.cantidad : '')).join(', ')
+        serviciosHtml = '<div class="cal-dia-extra-line cal-dia-servicios"><span class="cal-dia-extra-key">Servicios:</span>'
+            + r.servicios.map(s => '<span class="cal-dia-srv-item">' + adminCalEsc(s.nombre) + (s.cantidad > 1 ? ' ×' + s.cantidad : '') + '</span>').join('')
             + '</div>';
     }
 

@@ -205,14 +205,14 @@
 
         var serviciosHtml = '';
         if (r.servicios&&r.servicios.length>0) {
-            serviciosHtml = '<div class="cal-dia-extra-line"><span class="cal-dia-extra-key">Servicios:</span> '
+            serviciosHtml = '<div class="cal-dia-extra-line cal-dia-servicios"><span class="cal-dia-extra-key">Servicios:</span>'
                 + r.servicios.map(function(s){
                     if (s.esRoomService) {
                         var horaTxt = s.hora ? ' · ' + s.hora.substring(0,5) + 'h' : '';
-                        return '<span style="display:inline-flex;align-items:center;gap:4px;vertical-align:middle;background:linear-gradient(135deg,rgba(140,220,160,0.18),rgba(140,220,160,0.08));color:'+RS_COLOR+';border:1px solid rgba(140,220,160,0.3);border-radius:6px;padding:1px 8px 1px 6px;font-weight:600;font-size:0.85em;">'+RS_SVG+escHtml(s.nombre)+horaTxt+(s.cantidad>1?' ×'+s.cantidad:'')+'</span>';
+                        return '<span class="cal-dia-srv-item"><span style="display:inline-flex;align-items:center;gap:4px;vertical-align:middle;background:linear-gradient(135deg,rgba(140,220,160,0.18),rgba(140,220,160,0.08));color:'+RS_COLOR+';border:1px solid rgba(140,220,160,0.3);border-radius:6px;padding:1px 8px 1px 6px;font-weight:600;font-size:0.85em;">'+RS_SVG+escHtml(s.nombre)+horaTxt+(s.cantidad>1?' ×'+s.cantidad:'')+'</span></span>';
                     }
-                    return escHtml(s.nombre)+(s.cantidad>1?' ×'+s.cantidad:'');
-                }).join(', ')+'</div>';
+                    return '<span class="cal-dia-srv-item">'+escHtml(s.nombre)+(s.cantidad>1?' ×'+s.cantidad:'')+'</span>';
+                }).join('')+'</div>';
         }
 
         var peticionHtml = r.peticionEspecial

@@ -216,17 +216,17 @@
 
         var serviciosHtml = '';
         if (r.servicios&&r.servicios.length>0) {
-            serviciosHtml = '<div class="cal-dia-extra-line"><span class="cal-dia-extra-key">Servicios:</span> '
+            serviciosHtml = '<div class="cal-dia-extra-line cal-dia-servicios"><span class="cal-dia-extra-key">Servicios:</span>'
                 + r.servicios.map(function(s){
                     var horaTxt = s.hora ? ' · ' + s.hora.substring(0,5) + 'h' : '';
                     if (s.esDesayuno) {
-                        return '<span style="display:inline-flex;align-items:center;gap:4px;vertical-align:middle;background:linear-gradient(135deg,rgba(255,200,90,0.18),rgba(255,200,90,0.08));color:#ffc85a;border:1px solid rgba(255,200,90,0.3);border-radius:6px;padding:1px 8px 1px 6px;font-weight:600;font-size:0.85em;">'+BREAKFAST_SVG+escHtml(s.nombre)+horaTxt+(s.cantidad>1?' ×'+s.cantidad:'')+'</span>';
+                        return '<span class="cal-dia-srv-item"><span style="display:inline-flex;align-items:center;gap:4px;vertical-align:middle;background:linear-gradient(135deg,rgba(255,200,90,0.18),rgba(255,200,90,0.08));color:#ffc85a;border:1px solid rgba(255,200,90,0.3);border-radius:6px;padding:1px 8px 1px 6px;font-weight:600;font-size:0.85em;">'+BREAKFAST_SVG+escHtml(s.nombre)+horaTxt+(s.cantidad>1?' ×'+s.cantidad:'')+'</span></span>';
                     }
                     if (s.esCena) {
-                        return '<span style="display:inline-flex;align-items:center;gap:4px;vertical-align:middle;background:linear-gradient(135deg,rgba(255,140,90,0.18),rgba(255,140,90,0.08));color:#ff8c5a;border:1px solid rgba(255,140,90,0.3);border-radius:6px;padding:1px 8px 1px 6px;font-weight:600;font-size:0.85em;">'+DINNER_SVG+escHtml(s.nombre)+horaTxt+(s.cantidad>1?' ×'+s.cantidad:'')+'</span>';
+                        return '<span class="cal-dia-srv-item"><span style="display:inline-flex;align-items:center;gap:4px;vertical-align:middle;background:linear-gradient(135deg,rgba(255,140,90,0.18),rgba(255,140,90,0.08));color:#ff8c5a;border:1px solid rgba(255,140,90,0.3);border-radius:6px;padding:1px 8px 1px 6px;font-weight:600;font-size:0.85em;">'+DINNER_SVG+escHtml(s.nombre)+horaTxt+(s.cantidad>1?' ×'+s.cantidad:'')+'</span></span>';
                     }
-                    return escHtml(s.nombre)+(s.cantidad>1?' ×'+s.cantidad:'');
-                }).join(', ')+'</div>';
+                    return '<span class="cal-dia-srv-item">'+escHtml(s.nombre)+(s.cantidad>1?' ×'+s.cantidad:'')+'</span>';
+                }).join('')+'</div>';
         }
 
         var peticionHtml = r.peticionEspecial

@@ -1,5 +1,37 @@
 // ── START ─────────────────────────────────────────────────────────────────────
 
+// ── DRAWER LATERAL ADMIN/STAFF ────────────────────────────────────────────────
+window.adminNavOpen = function(collapseId, backdropId) {
+    var c = document.getElementById(collapseId);
+    var b = backdropId ? document.getElementById(backdropId) : null;
+    if (c) c.classList.add('admin-nav-open');
+    if (b) b.classList.add('active');
+    document.body.style.overflow = 'hidden';
+};
+window.adminNavClose = function(collapseId, backdropId) {
+    var c = document.getElementById(collapseId);
+    var b = backdropId ? document.getElementById(backdropId) : null;
+    if (c) c.classList.remove('admin-nav-open');
+    if (b) b.classList.remove('active');
+    document.body.style.overflow = '';
+};
+window.adminNavToggle = function(collapseId, backdropId) {
+    var c = document.getElementById(collapseId);
+    if (!c) return;
+    if (c.classList.contains('admin-nav-open')) {
+        window.adminNavClose(collapseId, backdropId);
+    } else {
+        window.adminNavOpen(collapseId, backdropId);
+    }
+};
+// Cerrar al hacer resize a desktop
+window.addEventListener('resize', function() {
+    if (window.innerWidth >= 901) {
+        window.adminNavClose('adminNavCollapse', 'admin-nav-drawer-backdrop');
+        window.adminNavClose('staffNavCollapse', 'staff-nav-drawer-backdrop');
+    }
+});
+
 // Aplicar traducciones
 applyTranslations();
 
@@ -10,7 +42,10 @@ applyTranslations();
     var backdrop = document.getElementById('nav-drawer-backdrop');
     if (!toggler || !drawer) return;
 
+    var navbar = document.getElementById('navbar');
     function openDrawer() {
+        // Quitar backdrop-filter del navbar para que #navCollapse use el viewport como containing block
+        if (navbar) { navbar.style.backdropFilter = 'none'; navbar.style.webkitBackdropFilter = 'none'; }
         drawer.classList.add('nav-drawer-open');
         if (backdrop) backdrop.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -19,6 +54,8 @@ applyTranslations();
         drawer.classList.remove('nav-drawer-open');
         if (backdrop) backdrop.classList.remove('active');
         document.body.style.overflow = '';
+        // Restaurar backdrop-filter
+        if (navbar) { navbar.style.backdropFilter = ''; navbar.style.webkitBackdropFilter = ''; }
     }
     function isMobile() { return window.innerWidth < 768; }
 
@@ -65,12 +102,32 @@ document.querySelectorAll('.nav-dropdown-item').forEach(function(item) {
         }
     });
 });
-// Admin navbar: cerrar collapse al clicar un item
-document.querySelectorAll('#adminNavCollapse .nav-dropdown-item').forEach(function(item) {
-    item.addEventListener('click', function() {
-        var el = document.getElementById('adminNavCollapse');
-        if (el) el.classList.remove('admin-nav-open');
+// Admin/Staff drawer: cerrar correctamente al clicar un item
+(function() {
+    var drawers = [
+        { id: 'adminNavCollapse', backdropId: 'admin-nav-drawer-backdrop' },
+        { id: 'staffNavCollapse',  backdropId: 'staff-nav-drawer-backdrop'  }
+    ];
+    drawers.forEach(function(d) {
+        var el = document.getElementById(d.id);
+        if (!el) return;
+        el.addEventListener('click', function(e) {
+            if (window.innerWidth >= 901) return;
+            if (!e.target.closest('.nav-dropdown-item')) return;
+            window.adminNavClose(d.id, d.backdropId);
+        });
     });
+})();
+
+// hashchange → cambiar tab de perfil sin recargar la página
+window.addEventListener('hashchange', function() {
+    if (window.location.pathname !== '/perfil') return;
+    if (typeof window.perfilShowTab !== 'function') return;
+    var hash = window.location.hash.replace('#', '').trim();
+    var validTabs = ['info','reservas','guardadas','pagos','mensajes','horario','seguridad','mensajes-admin'];
+    if (!hash || validTabs.indexOf(hash) === -1) return;
+    var btn = document.querySelector(".perfil-menu-item[onclick*=\"'" + hash + "'\"]");
+    window.perfilShowTab(hash, btn);
 });
 
 init().then(() => {

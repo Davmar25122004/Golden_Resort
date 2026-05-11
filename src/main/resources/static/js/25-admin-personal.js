@@ -69,10 +69,10 @@ function persRenderHorarioGrid(tramos) {
     const porDia = {};
     (tramos || []).forEach(t => {
         if (!porDia[t.dia_semana]) porDia[t.dia_semana] = [];
-        porDia[t.dia_semana].push(`${t.hora_inicio.slice(0,5)}–${t.hora_fin.slice(0,5)}`);
+        porDia[t.dia_semana].push(`${t.hora_inicio.slice(0,5)}<br>${t.hora_fin.slice(0,5)}`);
     });
     return `
-    <div class="pers-h-grid">
+    <div class="pers-h-scroll"><div class="pers-h-grid">
         ${labels.map((lab, i) => {
             const dia = i + 1;
             const ts = porDia[dia];
@@ -81,7 +81,7 @@ function persRenderHorarioGrid(tramos) {
                         <span class="pers-h-time">${ts ? ts.join('<br>') : '—'}</span>
                     </div>`;
         }).join('')}
-    </div>`;
+    </div></div>`;
 }
 
 window.persEditarHorario = (h) => {

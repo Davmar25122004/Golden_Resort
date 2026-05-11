@@ -520,12 +520,31 @@
     margin-top: 2px;
     line-height: 1.35;
 }
+.cal-dia-extra-line.cal-dia-servicios {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    align-items: center;
+    line-height: 1.5;
+}
+.cal-dia-srv-item {
+    display: inline-flex;
+    align-items: center;
+}
+.cal-dia-srv-item + .cal-dia-srv-item::before {
+    content: '·';
+    margin-right: 6px;
+    color: var(--c-muted);
+    opacity: 0.5;
+}
 .cal-dia-extra-line--email {
     color: var(--c-muted);
     font-size: 0.75rem;
     margin-top: -2px;
     margin-bottom: 4px;
-    word-break: break-all;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .cal-dia-extra-key {
     color: var(--c-muted);
@@ -542,8 +561,8 @@
     margin-left: 4px;
     padding: 1px 6px;
     border-radius: 4px;
-    background: rgba(201, 168, 76, 0.12);
-    color: var(--c-accent);
+    background: rgba(100, 160, 200, 0.14);
+    color: #85b8d0;
     font-size: 0.7rem;
     font-weight: 600;
     letter-spacing: 0.3px;
@@ -563,4 +582,161 @@
     padding: 6px 14px;
     letter-spacing: 1px;
     text-transform: uppercase;
+}
+
+/* ── MÓVIL ───────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+
+    #cal-page {
+        padding-top: 72px;
+    }
+
+    .cal-container {
+        padding: 0 12px;
+    }
+
+    /* Header: apilar título + controles en columna */
+    .cal-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    /* Tabs de vista: ocupar todo el ancho */
+    .cal-view-tabs {
+        width: 100%;
+        justify-content: stretch;
+    }
+    .cal-tab {
+        flex: 1;
+        padding: 8px 6px;
+        font-size: 0.62rem;
+        letter-spacing: 1px;
+        text-align: center;
+    }
+
+    /* Selector de mes/semana: ancho completo */
+    .cal-context-selector {
+        width: 100%;
+        min-width: unset;
+    }
+
+    /* ── MENSUAL ── */
+    .cal-mensual-card {
+        padding: 14px 10px;
+    }
+    .cal-mensual-header {
+        font-size: 1.2rem;
+        margin-bottom: 14px;
+    }
+    .cal-grid {
+        gap: 3px;
+    }
+    .cal-celda {
+        padding: 3px 2px;
+        border-radius: 5px;
+    }
+    .cal-celda-num {
+        font-size: 0.72rem;
+    }
+    .cal-celda-badge {
+        font-size: 0.5rem;
+        min-width: 13px;
+        height: 13px;
+        top: 2px;
+        right: 2px;
+    }
+    .cal-grid--lg .cal-celda {
+        aspect-ratio: 1;
+        padding: 4px;
+    }
+    .cal-grid--lg .cal-celda-num {
+        font-size: 0.85rem;
+    }
+
+    /* ── SEMANAL ── */
+    .cal-semanal-card {
+        padding: 14px 10px;
+    }
+    .cal-sem-dia {
+        padding: 12px 12px;
+    }
+    .cal-sem-cabecera {
+        gap: 10px;
+    }
+    .cal-sem-num {
+        font-size: 1.4rem;
+        min-width: 28px;
+    }
+    .cal-sem-nombre {
+        font-size: 0.78rem;
+    }
+    .cal-sem-reservas {
+        margin-left: 0;
+        gap: 5px;
+    }
+    .cal-sem-empty {
+        margin-left: 0;
+    }
+    .cal-sem-reserva {
+        flex-wrap: wrap;
+        gap: 6px 10px;
+        padding: 8px 10px;
+        font-size: 0.74rem;
+    }
+    .cal-sem-hab {
+        min-width: unset;
+    }
+    .cal-sem-tipo {
+        min-width: unset;
+        font-size: 0.68rem;
+    }
+    .cal-sem-cliente {
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* ── MODAL DETALLE DÍA ── */
+    .cal-modal .modal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 14px 16px;
+    }
+    .cal-modal .modal-title {
+        font-size: 1.15rem;
+    }
+    .btn-volver-cal {
+        align-self: flex-start;
+    }
+    .cal-modal .modal-body {
+        padding: 14px 16px;
+    }
+
+    .cal-dia-card {
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px;
+    }
+    .cal-dia-img {
+        width: 100%;
+        height: 140px;
+        border-radius: 8px;
+    }
+    .cal-dia-cliente {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .cal-dia-actions {
+        justify-content: stretch;
+    }
+    .cal-dia-actions .admin-btn {
+        flex: 1;
+        text-align: center;
+    }
 }

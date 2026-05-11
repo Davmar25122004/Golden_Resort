@@ -213,15 +213,15 @@
 
         var serviciosHtml = '';
         if (r.servicios&&r.servicios.length>0) {
-            serviciosHtml = '<div class="cal-dia-extra-line"><span class="cal-dia-extra-key">Servicios:</span> '
+            serviciosHtml = '<div class="cal-dia-extra-line cal-dia-servicios"><span class="cal-dia-extra-key">Servicios:</span>'
                 + r.servicios.map(function(s){
                     if (s.esCoche) {
                         var horaTxt  = s.hora      ? ' · ' + s.hora.substring(0,5) + 'h'  : '';
                         var ubicTxt  = s.ubicacion ? ' · ' + labelUbicacion(s.ubicacion)   : '';
-                        return '<span style="display:inline-flex;align-items:center;gap:4px;vertical-align:middle;background:linear-gradient(135deg,rgba(120,180,255,0.18),rgba(120,180,255,0.08));color:'+COCHE_COLOR+';border:1px solid rgba(120,180,255,0.3);border-radius:6px;padding:1px 8px 1px 6px;font-weight:600;font-size:0.85em;">'+COCHE_SVG+escHtml(s.nombre)+horaTxt+ubicTxt+(s.cantidad>1?' ×'+s.cantidad:'')+'</span>';
+                        return '<span class="cal-dia-srv-item"><span style="display:inline-flex;align-items:center;gap:4px;vertical-align:middle;background:linear-gradient(135deg,rgba(120,180,255,0.18),rgba(120,180,255,0.08));color:'+COCHE_COLOR+';border:1px solid rgba(120,180,255,0.3);border-radius:6px;padding:1px 8px 1px 6px;font-weight:600;font-size:0.85em;">'+COCHE_SVG+escHtml(s.nombre)+horaTxt+ubicTxt+(s.cantidad>1?' ×'+s.cantidad:'')+'</span></span>';
                     }
-                    return escHtml(s.nombre)+(s.cantidad>1?' ×'+s.cantidad:'');
-                }).join(', ')+'</div>';
+                    return '<span class="cal-dia-srv-item">'+escHtml(s.nombre)+(s.cantidad>1?' ×'+s.cantidad:'')+'</span>';
+                }).join('')+'</div>';
         }
 
         var peticionHtml = r.peticionEspecial

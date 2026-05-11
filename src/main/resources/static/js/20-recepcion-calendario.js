@@ -290,8 +290,8 @@
 
         var serviciosHtml = '';
         if (r.servicios && r.servicios.length > 0) {
-            serviciosHtml = '<div class="cal-dia-extra-line"><span class="cal-dia-extra-key">Servicios:</span> '
-                + r.servicios.map(function (s) { return escHtml(s.nombre) + (s.cantidad > 1 ? ' ×' + s.cantidad : ''); }).join(', ')
+            serviciosHtml = '<div class="cal-dia-extra-line cal-dia-servicios"><span class="cal-dia-extra-key">Servicios:</span>'
+                + r.servicios.map(function (s) { return '<span class="cal-dia-srv-item">' + escHtml(s.nombre) + (s.cantidad > 1 ? ' ×' + s.cantidad : '') + '</span>'; }).join('')
                 + '</div>';
         }
 

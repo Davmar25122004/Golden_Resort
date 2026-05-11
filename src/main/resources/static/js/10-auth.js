@@ -31,8 +31,19 @@ function _inicializarExtrasRegistro() {
     }
 }
 
+function _cleanModalState() {
+    document.querySelectorAll('.modal-backdrop').forEach(function(b) { b.remove(); });
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+}
+
 function abrirModalAuth() {
-    if (!authModal) authModal = new bootstrap.Modal(document.getElementById('authModal'));
+    _cleanModalState();
+    var el = document.getElementById('authModal');
+    if (authModal) { try { authModal.dispose(); } catch(_) {} authModal = null; }
+    authModal = new bootstrap.Modal(el, { backdrop: true, keyboard: true });
+    el.addEventListener('hidden.bs.modal', _cleanModalState, { once: true });
     mostrarPestanaAuth('login');
     document.getElementById('auth-error').classList.add('d-none');
     authModal.show();
