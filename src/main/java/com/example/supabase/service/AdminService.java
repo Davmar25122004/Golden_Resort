@@ -143,11 +143,15 @@ public class AdminService {
                             .findFirst()
                             .orElse(roles.isEmpty() ? "SIN ROL" : roles.get(0));
                     java.util.Map<String, Object> m = new java.util.LinkedHashMap<>();
-                    m.put("id",     u.getId());
-                    m.put("nombre", u.getNombre() != null ? u.getNombre() : "");
-                    m.put("email",  u.getEmail());
-                    m.put("rol",    rolPrincipal);
-                    m.put("roles",  roles);
+                    m.put("id",              u.getId());
+                    m.put("nombre",          u.getNombre() != null ? u.getNombre() : "");
+                    m.put("email",           u.getEmail());
+                    m.put("rol",             rolPrincipal);
+                    m.put("roles",           roles);
+                    m.put("telefono",        u.getTelefono());
+                    m.put("telefonoPrefijo", u.getTelefonoPrefijo());
+                    m.put("tipoDocumento",   u.getTipoDocumento());
+                    m.put("numDocumento",    u.getNumDocumento());
                     return m;
                 })
                 .sorted((a, b) -> Long.compare((long) b.get("id"), (long) a.get("id")))
