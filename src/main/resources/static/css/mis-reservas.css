@@ -243,6 +243,9 @@
 @media (max-width: 600px) {
     .card-image-side { min-width: unset; height: 180px; }
     .card-content-side { border-left: none; border-top: 1px solid rgba(201,168,77,0.12); }
+    .card-actions { flex-wrap: wrap; }
+    .card-actions .btn-manage-rs,
+    .card-actions .btn-cancel-luxury { flex: 1 1 calc(50% - 6px); min-width: 0; }
 }
 
 /* ── EMPTY STATE ── */

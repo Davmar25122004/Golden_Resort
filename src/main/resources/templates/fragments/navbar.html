@@ -328,6 +328,18 @@
         </button>
 
         <div class="collapse navbar-collapse p-3 p-md-0 mt-2 mt-md-0" id="navCollapse">
+
+            <!-- Cabecera del drawer (solo móvil) -->
+            <div class="nav-drawer-header">
+                <a href="/" onclick="event.preventDefault(); irAlInicio()" style="display:inline-flex;align-items:center;gap:8px;text-decoration:none;">
+                    <img th:src="@{/images/logo.png}" alt="Logo" style="height:28px;width:auto;">
+                    <span style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--gold);letter-spacing:2px;">GOLDEN RESORT</span>
+                </a>
+                <button class="nav-drawer-close" onclick="document.getElementById('navCollapse').classList.remove('nav-drawer-open');document.getElementById('nav-drawer-backdrop').classList.remove('active');document.body.style.overflow='';" aria-label="Cerrar menú">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+
             <div class="d-flex flex-column flex-md-row align-items-center gap-2 gap-md-1 my-3 my-md-0 mx-md-auto" id="nav-links">
 
                 <!-- Estilos de los dropdowns del navbar público -->
