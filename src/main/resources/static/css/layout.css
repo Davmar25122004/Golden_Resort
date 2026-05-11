@@ -63,6 +63,30 @@ footer {
 .footer-link:hover { color: var(--gold); }
 .footer-sep { font-size: 0.72rem; color: var(--text-muted-custom); }
 
+/* ── NAVBAR MÓVIL — brand compacto ── */
+@media (max-width: 767px) {
+    #navbar {
+        padding: 10px 0;
+    }
+    .navbar-brand-custom {
+        font-size: 1rem !important;
+        letter-spacing: 1.5px;
+        gap: 6px !important;
+        white-space: nowrap;
+    }
+    .navbar-brand-custom img {
+        height: 26px !important;
+    }
+    .navbar-brand-custom span {
+        width: 26px !important;
+        height: 26px !important;
+    }
+    .navbar-brand-custom span svg {
+        width: 15px !important;
+        height: 15px !important;
+    }
+}
+
 /* ── NAVBAR MÓVIL — collapse scrollable ── */
 @media (max-width: 767px) {
     #navCollapse.show, #navCollapse.collapsing {
