@@ -89,7 +89,7 @@ window.selectRoom = async (tipo, precio, descripcion) => {
                     for (var mm = (hh === hMin ? mMin : 0); mm < 60; mm += 30) {
                         if (hh === hMax && mm > mMax) break;
                         var val = String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
-                        horaOptions += '<option value="' + val + '"' + (val === horaDefault ? ' selected' : '') + '>' + val + '</option>';
+                        horaOptions += '<option value="' + val + '" style="background:#1a1a1a; color:#e8d5a3;"' + (val === horaDefault ? ' selected' : '') + '>' + val + '</option>';
                     }
                 }
             }
