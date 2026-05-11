@@ -150,7 +150,10 @@
     font-size: 0.78rem;
     color: var(--cream);
     margin-bottom: 6px;
+    gap: 8px;
 }
+.service-item-mini span:first-child { white-space: nowrap; }
+.service-item-mini span:last-child { white-space: nowrap; }
 
 .service-item-mini span:last-child {
     color: var(--gold);
@@ -239,6 +242,7 @@
 @media (max-width: 850px) {
     .reserva-card-luxury { flex-direction: column; }
     .card-image-side { width: 100%; height: 200px; }
+    .info-grid { grid-template-columns: 1fr; gap: 12px; }
 }
 
 @media (max-width: 600px) {
