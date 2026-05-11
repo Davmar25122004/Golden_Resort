@@ -12,7 +12,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableMethodSecurity
@@ -35,14 +34,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                        .ignoringRequestMatchers(
-                                "/login",
-                                "/logout",
-                                "/api/auth/register",
-                                "/api/auth/confirmar-verificacion",
-                                "/api/auth/reset-password/**"))
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/mis-reservas", "/mis-reservas/**").hasRole("CLIENTE")
@@ -72,7 +64,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/habitaciones", "/api/habitaciones/**").permitAll()
                         .requestMatchers("/api/servicios").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/auth/register", "/api/auth/confirmar-verificacion", "/api/usuario-info").permitAll()
+                        .requestMatchers("/api/auth/register", "/api/auth/confirmar-verificacion", "/api/auth/reenviar-verificacion", "/api/usuario-info").permitAll()
                         .requestMatchers("/api/auth/reset-password/**", "/reset-password").permitAll()
                         .requestMatchers("/api/hotel/info").permitAll()
                         .requestMatchers("/verificar-email").permitAll()

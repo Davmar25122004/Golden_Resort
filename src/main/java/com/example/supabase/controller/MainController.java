@@ -578,6 +578,22 @@ public class MainController {
         return ResponseEntity.ok(Map.of("message", "OK"));
     }
 
+    @PostMapping("/api/auth/reenviar-verificacion")
+    @ResponseBody
+    public ResponseEntity<?> reenviarVerificacion(@RequestBody Map<String, String> datos,
+                                                   HttpServletRequest request) {
+        if (!rateLimitService.bucketRegistro(request.getRemoteAddr()).tryConsume(1))
+            return ResponseEntity.status(429).body("Demasiados intentos. Espera un momento.");
+        try {
+            usuarioService.reenviarVerificacion(datos.get("email"));
+            return ResponseEntity.ok(Map.of("message", "CHECK_EMAIL"));
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error al reenviar: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/api/usuario-info")
     @ResponseBody
     public Map<String, Object> info(Authentication auth) {

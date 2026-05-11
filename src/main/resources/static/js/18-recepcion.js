@@ -29,7 +29,6 @@ async function recepcionInit() {
                 <div class="rcp-actions">
                     <button class="rcp-btn" onclick="recepcionRecargar()">↻ Refrescar</button>
                     <button class="rcp-btn" onclick="recepcionAbrirAsignarLimpieza()">Asignar limpieza</button>
-                    <button class="rcp-btn rcp-btn--primary" onclick="recepcionAbrirWalkin()">+ Walk-in</button>
                 </div>
             </div>
 
@@ -72,7 +71,6 @@ async function recepcionInit() {
     if (search) search.addEventListener('input', debounceBuscar);
 
     await recepcionRecargar();
-    setupWalkinFlatpickr();
 }
 
 let _searchTimer = null;
@@ -330,66 +328,6 @@ window.recepcionGuardarNota = async (reservaId) => {
         ta.value = '';
         recepcionAbrirDetalle(reservaId);
     } catch (_) {}
-};
-
-// ── WALK-IN ──────────────────────────────────────────────────────────────────
-
-function setupWalkinFlatpickr() {
-    if (typeof flatpickr === 'undefined') return;
-    var entrada = document.getElementById('wi-entrada');
-    var salida  = document.getElementById('wi-salida');
-    if (entrada) flatpickr(entrada, { dateFormat: 'Y-m-d', minDate: 'today' });
-    if (salida)  flatpickr(salida,  { dateFormat: 'Y-m-d', minDate: 'today' });
-}
-
-window.recepcionAbrirWalkin = () => {
-    var modalEl = document.getElementById('walkinModal');
-    if (!modalEl) return;
-    var err = document.getElementById('walkin-error');
-    var ok  = document.getElementById('walkin-success');
-    if (err) err.classList.add('d-none');
-    if (ok)  ok.classList.add('d-none');
-    var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-    modal.show();
-};
-
-window.recepcionCrearWalkIn = async (ev) => {
-    ev.preventDefault();
-    var err = document.getElementById('walkin-error');
-    var ok  = document.getElementById('walkin-success');
-    if (err) err.classList.add('d-none');
-    if (ok)  ok.classList.add('d-none');
-
-    var payload = {
-        email:           document.getElementById('wi-email').value,
-        nombre:          document.getElementById('wi-nombre').value,
-        fechaEntrada:    document.getElementById('wi-entrada').value,
-        fechaSalida:     document.getElementById('wi-salida').value,
-        tipoHabitacion:  document.getElementById('wi-tipo').value,
-        peticionEspecial:document.getElementById('wi-peticion').value
-    };
-
-    try {
-        var r = await fetch('/api/recepcion/walkin', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        if (!r.ok) {
-            var t = await r.text();
-            if (err) { err.textContent = t || 'No se pudo crear la reserva.'; err.classList.remove('d-none'); }
-            return;
-        }
-        var data = await r.json();
-        if (ok) {
-            ok.textContent = 'Reserva creada · Habitación ' + (data.habitacionNumero || '') + ' (' + (data.habitacionTipo || '') + ')';
-            ok.classList.remove('d-none');
-        }
-        document.getElementById('form-walkin').reset();
-        await recepcionRecargar();
-    } catch (_) {
-        if (err) { err.textContent = 'Error de conexión.'; err.classList.remove('d-none'); }
-    }
 };
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────

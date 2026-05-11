@@ -37,7 +37,7 @@ function buildCartaHtml(items) {
         return `
             <p style="font-size:0.65rem; letter-spacing:2px; color:var(--text-muted-custom); margin:14px 0 8px; text-transform:uppercase;">${catLabels[cat]}</p>
             ${catItems.map(item => {
-                var itemNombre = (typeof LANG !== 'undefined' && LANG === 'en' && typeof RS_ITEMS_EN !== 'undefined' && RS_ITEMS_EN[item.id]) ? RS_ITEMS_EN[item.id] : item.nombre;
+                var itemNombre = item.nombre;
                 return `
                 <div class="rs-item-row" style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
                     <span style="flex:1; font-size:0.83rem; color:var(--cream);">${itemNombre}</span>
@@ -110,8 +110,7 @@ async function loadServicios() {
         var data  = SERVICIO_DATA[s.id];
         var bgImg = data && data.images && data.images[0] ? data.images[0] : '';
         var bgStyle = bgImg ? `style="background-image:url('${bgImg}')"` : '';
-        var nombreMostrar = (typeof LANG !== 'undefined' && LANG === 'en' && typeof SERVICIO_NOMBRES_EN !== 'undefined' && SERVICIO_NOMBRES_EN[s.id])
-            ? SERVICIO_NOMBRES_EN[s.id] : s.nombre;
+        var nombreMostrar = s.nombre;
             
         var slug = typeof slugify !== 'undefined' ? slugify(nombreMostrar) : encodeURIComponent(nombreMostrar.toLowerCase().replace(/ /g, '-'));
         

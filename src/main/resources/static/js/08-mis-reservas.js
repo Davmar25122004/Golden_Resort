@@ -84,10 +84,11 @@ window.showMisReservas = async () => {
 
         var tipoLabels = { NORMAL: t('tipo_normal'), DOBLE: t('tipo_doble'), SUITE: t('tipo_suite'), LUJO: t('tipo_lujo') };
 
+    var ocultarPasadas = localStorage.getItem('ocultar_reservas_pasadas') === '1';
     var hayPasadas = reservas.some(r => calcularEstado(r.fechaEntrada, r.fechaSalida) === 'PASADA');
 
     var html = '';
-    if (hayPasadas) {
+    if (hayPasadas && !ocultarPasadas) {
         html += `
             <div id="btn-limpiar-wrap" style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
                 <button onclick="limpiarReservasPasadas()"
@@ -104,6 +105,7 @@ window.showMisReservas = async () => {
     html += '<div class="reservas-list">';
     reservas.forEach(r => {
         var estado  = calcularEstado(r.fechaEntrada, r.fechaSalida);
+        if (ocultarPasadas && estado === 'PASADA') return;
         var noches  = Math.max(1, Math.round(
             (new Date(r.fechaSalida + 'T00:00:00') - new Date(r.fechaEntrada + 'T00:00:00')) / 86400000
         ));
@@ -123,7 +125,7 @@ window.showMisReservas = async () => {
             serviciosHtml = `
                <div style="margin-top:12px;">
                    <p class="reserva-meta" style="font-size:0.75rem;">
-                       ${t('mr_services_extra')}${r.servicios.map(s => { var nombreMostrar = s.nombre; if (typeof LANG !== 'undefined' && LANG === 'en' && typeof _serviciosCache !== 'undefined' && _serviciosCache) { var cached = _serviciosCache.find(c => c.nombre === s.nombre); if (cached && typeof SERVICIO_NOMBRES_EN !== 'undefined' && SERVICIO_NOMBRES_EN[cached.id]) nombreMostrar = SERVICIO_NOMBRES_EN[cached.id]; } return `${nombreMostrar} ×${s.cantidad}`; }).join(' · ')}
+                       ${t('mr_services_extra')}${r.servicios.map(s => `${s.nombre} ×${s.cantidad}`).join(' · ')}
                    </p>
                    <p class="reserva-meta" style="font-size:0.75rem; margin-top:4px;">
                        ${t('mr_services_total')}<strong style="color:var(--gold);">${totalServicios.toFixed(2)} €</strong>
@@ -157,7 +159,7 @@ window.showMisReservas = async () => {
                 `<span style="display:inline-flex;align-items:center;gap:4px;margin-right:6px;margin-bottom:4px;
                               background:rgba(185,149,77,0.1);border:1px solid rgba(185,149,77,0.25);
                               border-radius:20px;padding:2px 10px;font-size:0.72rem;color:var(--cream);">
-                    ${(() => { if (typeof LANG !== 'undefined' && LANG === 'en' && typeof _rsItemsCache !== 'undefined' && _rsItemsCache) { var ci = _rsItemsCache.find(c => c.nombre === p.nombre); if (ci && typeof RS_ITEMS_EN !== 'undefined' && RS_ITEMS_EN[ci.id]) return RS_ITEMS_EN[ci.id]; } return p.nombre; })()}&nbsp;<strong style="color:var(--gold);">×${p.cantidad}</strong>
+                    ${p.nombre}&nbsp;<strong style="color:var(--gold);">×${p.cantidad}</strong>
                     <span style="color:var(--text-muted-custom);margin-left:2px;">${parseFloat(p.subtotal).toFixed(2)} €</span>
                 </span>`
             ).join('');
@@ -340,6 +342,12 @@ window.cancelarReserva = async (id) => {
     try {
         var res = await fetch('/api/reservas/' + id, { method: 'DELETE' });
         if (res.ok || res.status === 204) {
+            var banner = document.createElement('div');
+            banner.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(39,174,96,0.95);color:#fff;padding:16px 32px;border-radius:10px;font-size:0.9rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);text-align:center;animation:fadeIn .3s;';
+            banner.textContent = t('mr_cancel_success');
+            document.body.appendChild(banner);
+            setTimeout(() => { banner.style.opacity = '0'; banner.style.transition = 'opacity .4s'; }, 2500);
+            setTimeout(() => { banner.remove(); }, 3000);
             showMisReservas();
         } else {
             alert(t('mr_cancel_error'));
@@ -381,7 +389,7 @@ window.abrirGestionRS = async (reservaId) => {
                 var qtyActual = pedidoMap[item.id] ? pedidoMap[item.id].cantidad : 0;
                 return `
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-                    <span style="flex:1;font-size:0.83rem;color:var(--cream);">${(typeof LANG !== 'undefined' && LANG === 'en' && typeof RS_ITEMS_EN !== 'undefined' && RS_ITEMS_EN[item.id]) ? RS_ITEMS_EN[item.id] : item.nombre}</span>
+                    <span style="flex:1;font-size:0.83rem;color:var(--cream);">${item.nombre}</span>
                     <span style="color:var(--gold);font-size:0.83rem;flex-shrink:0;">${parseFloat(item.precio).toFixed(2)} €</span>
                     <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
                         <button type="button" onclick="grsAjustar(${item.id},-1)"
@@ -448,6 +456,7 @@ window.cerrarGestionRS = () => {
 };
 
 window.limpiarReservasPasadas = () => {
+    localStorage.setItem('ocultar_reservas_pasadas', '1');
     document.querySelectorAll('.reserva-card--pasada').forEach(el => el.remove());
     var wrap = document.getElementById('btn-limpiar-wrap');
     if (wrap) wrap.remove();

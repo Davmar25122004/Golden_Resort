@@ -51,8 +51,8 @@
     transform: translateX(-50%) rotate(45deg);
 }
 
-.nav-dropdown:hover .nav-dropdown-menu,
-.nav-dropdown:focus-within .nav-dropdown-menu {
+.nav-dropdown:hover:not(.nav-dropdown--closing) .nav-dropdown-menu,
+.nav-dropdown:focus-within:not(.nav-dropdown--closing) .nav-dropdown-menu {
     opacity: 1; visibility: visible; pointer-events: auto;
     transform: translateX(-50%) translateY(0);
 }

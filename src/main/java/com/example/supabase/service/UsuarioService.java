@@ -47,31 +47,38 @@ public class UsuarioService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El email no es válido.");
         if (usuarioRepository.findByEmail(email).isPresent())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El email ya está registrado.");
-        if (pendingRepository.findByEmail(email).isPresent())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Ya existe un registro pendiente de verificación para este email. Revisa tu bandeja de entrada.");
 
-        // Unicidad de documento
+        // Si ya existe un registro pendiente para este email, guardamos el UID y lo borramos
+        String previousUid = null;
+        PendingRegistration existingPending = pendingRepository.findByEmail(email).orElse(null);
+        if (existingPending != null) {
+            previousUid = existingPending.getSupabaseUid();
+            pendingRepository.delete(existingPending);
+        }
+
+        // Unicidad de documento (solo contra usuarios verificados)
         if (numDocumento != null && !numDocumento.isBlank()) {
             String docNorm = numDocumento.trim().toUpperCase();
-            if (usuarioRepository.findByNumDocumento(docNorm).isPresent() ||
-                pendingRepository.findByNumDocumento(docNorm).isPresent())
+            if (usuarioRepository.findByNumDocumento(docNorm).isPresent())
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Ya existe una cuenta registrada con ese número de documento.");
+            // Liberar documento de registros pendientes no verificados
+            pendingRepository.findByNumDocumento(docNorm).ifPresent(pendingRepository::delete);
             numDocumento = docNorm;
         }
 
-        // Unicidad de teléfono
+        // Unicidad de teléfono (solo contra usuarios verificados)
         if (telefono != null && !telefono.isBlank()) {
             String telNorm = telefono.trim().replaceAll("\\s+", "");
-            if (usuarioRepository.findByTelefono(telNorm).isPresent() ||
-                pendingRepository.findByTelefono(telNorm).isPresent())
+            if (usuarioRepository.findByTelefono(telNorm).isPresent())
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Ya existe una cuenta registrada con ese número de teléfono.");
+            // Liberar teléfono de registros pendientes no verificados
+            pendingRepository.findByTelefono(telNorm).ifPresent(pendingRepository::delete);
             telefono = telNorm;
         }
 
-        String supabaseUid = supabaseAuthService.signUp(email, password);
+        String supabaseUid = supabaseAuthService.signUp(email, password, previousUid);
 
         PendingRegistration pending = new PendingRegistration();
         pending.setEmail(email);
@@ -103,6 +110,15 @@ public class UsuarioService {
         u.setPassword(passwordEncoder.encode(nueva));
         usuarioRepository.save(u);
         return true;
+    }
+
+    public void reenviarVerificacion(String email) {
+        if (email == null || email.isBlank())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email no proporcionado.");
+        if (pendingRepository.findByEmail(email).isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "No existe un registro pendiente para este email.");
+        supabaseAuthService.resendVerificationEmail(email);
     }
 
     @Transactional

@@ -218,16 +218,7 @@ window.handleRegister = async (e) => {
         if (res.ok) {
             const data = await res.json();
             if (data.message === 'CHECK_EMAIL') {
-                // Ocultar formulario y mostrar mensaje de verificación pendiente
-                document.getElementById('form-register').innerHTML = `
-                    <div class="text-center py-3">
-                        <div style="font-size:2.5rem">📧</div>
-                        <h6 class="mt-2 mb-1" style="color:#c9a96e">¡Revisa tu correo!</h6>
-                        <p class="small text-secondary mb-0">
-                            Te hemos enviado un enlace de verificación a <strong>${email}</strong>.<br>
-                            Haz clic en él para activar tu cuenta.
-                        </p>
-                    </div>`;
+                _mostrarMensajeVerificacion(email);
             } else {
                 window.location.reload();
             }
@@ -240,10 +231,61 @@ window.handleRegister = async (e) => {
     }
 };
 
+function _mostrarMensajeVerificacion(email) {
+    document.getElementById('form-register').innerHTML = `
+        <div class="text-center py-3">
+            <div style="font-size:2.5rem">📧</div>
+            <h6 class="mt-2 mb-1" style="color:#c9a96e">¡Revisa tu correo!</h6>
+            <p class="small text-secondary mb-2">
+                Te hemos enviado un enlace de verificación a <strong>${email}</strong>.<br>
+                Haz clic en él para activar tu cuenta.
+            </p>
+            <button id="btn-reenviar" class="btn btn-sm btn-outline-secondary mt-2"
+                    onclick="reenviarVerificacion('${email}')">
+                Reenviar email de verificación
+            </button>
+            <p id="reenviar-msg" class="small mt-2 d-none"></p>
+        </div>`;
+}
+
+window.reenviarVerificacion = async (email) => {
+    const btn = document.getElementById('btn-reenviar');
+    const msg = document.getElementById('reenviar-msg');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+    msg.classList.add('d-none');
+
+    try {
+        const res = await fetch('/api/auth/reenviar-verificacion', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        if (res.ok) {
+            msg.textContent = 'Email reenviado. Revisa tu bandeja de entrada.';
+            msg.className = 'small mt-2 text-success';
+        } else {
+            const text = await res.text();
+            msg.textContent = text || 'No se pudo reenviar. Inténtalo más tarde.';
+            msg.className = 'small mt-2 text-danger';
+        }
+    } catch (_) {
+        msg.textContent = 'Error de conexión. Inténtalo de nuevo.';
+        msg.className = 'small mt-2 text-danger';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Reenviar email de verificación';
+    }
+};
+
 function logout() {
     var savedLang = localStorage.getItem('lang');
+    var savedOcultarPasadas = localStorage.getItem('ocultar_reservas_pasadas');
+    var savedOcultarPerfil = localStorage.getItem('ocultar_reservas_perfil');
     localStorage.clear();
     if (savedLang) localStorage.setItem('lang', savedLang);
+    if (savedOcultarPasadas) localStorage.setItem('ocultar_reservas_pasadas', savedOcultarPasadas);
+    if (savedOcultarPerfil) localStorage.setItem('ocultar_reservas_perfil', savedOcultarPerfil);
     state.token        = null;
     state.user         = null;
     state.pendingRoom  = null;

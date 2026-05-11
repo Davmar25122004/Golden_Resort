@@ -89,54 +89,6 @@
         </div>
     </div>
 
-    <!-- MODAL walk-in -->
-    <div class="modal fade modal-dark" id="walkinModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <h3 class="serif text-gold mb-3" style="font-size:1.5rem;">Reserva walk-in</h3>
-                    <p class="text-muted" style="font-size:0.8rem; letter-spacing:1px;">Cliente que llega sin haber reservado online</p>
-                    <div id="walkin-error" class="alert alert-danger d-none py-2" style="font-size:0.8rem;"></div>
-                    <div id="walkin-success" class="alert alert-success d-none py-2" style="font-size:0.85rem;"></div>
-                    <form id="form-walkin" onsubmit="recepcionCrearWalkIn(event)">
-                        <div class="row g-2">
-                            <div class="col-12">
-                                <label class="form-label small text-muted">Email del cliente</label>
-                                <input type="email" class="form-control" id="wi-email" required>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label small text-muted">Nombre (opcional)</label>
-                                <input type="text" class="form-control" id="wi-nombre">
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label small text-muted">Entrada</label>
-                                <input type="text" class="form-control" id="wi-entrada" required>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label small text-muted">Salida</label>
-                                <input type="text" class="form-control" id="wi-salida" required>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label small text-muted">Tipo de habitación</label>
-                                <select class="form-select" id="wi-tipo" required>
-                                    <option value="NORMAL">Normal</option>
-                                    <option value="DOBLE">Doble</option>
-                                    <option value="SUITE">Suite</option>
-                                    <option value="LUJO">Lujo</option>
-                                </select>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label small text-muted">Notas / petición especial</label>
-                                <textarea class="form-control" id="wi-peticion" rows="2"></textarea>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-gold mt-3 w-100">Crear reserva</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- JS Libraries -->
     <script th:src="@{/lib/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/lib/aos-master/dist/aos.js}"></script>

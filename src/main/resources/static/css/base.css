@@ -72,6 +72,14 @@ body {
     overflow-x: hidden;
 }
 
+/* ── PANTALLAS GRANDES — escalar todo proporcionalmente ───────────────────── */
+@media (min-width: 1400px) {
+    .container { max-width: 1400px; }
+}
+@media (min-width: 1920px) {
+    body { zoom: calc(100vw / 1920); }
+}
+
 h1, h2, h3, h4, .serif {
     font-family: 'Cormorant Garamond', serif;
 }

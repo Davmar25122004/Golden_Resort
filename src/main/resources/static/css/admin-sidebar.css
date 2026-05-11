@@ -422,19 +422,106 @@ body.has-admin-sidebar > #admin-sidebar {
     #admin-main { padding: 20px 16px; overflow: visible; }
 }
 
-/* ── MÓVIL PEQUEÑO (≤480px — iPhone SE, Galaxy S) ───────────────────────── */
-@media (max-width: 480px) {
-    /* Navbar: ocultar dropdowns centrales, solo mostrar brand y acciones */
-    #admin-nav > .nav-center-dropdowns,
-    .admin-nav-header > .nav-center-dropdowns {
+/* ── ADMIN NAVBAR HAMBURGER (móvil) ──────────────────────────────────────── */
+.admin-nav-toggler {
+    display: none;
+    background: none;
+    border: 1px solid rgba(201,168,76,0.6);
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.admin-nav-toggler-icon {
+    display: block;
+    width: 1.2em;
+    height: 1.2em;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23c9a84c' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100%;
+}
+.admin-nav-collapse {
+    display: contents;
+}
+
+@media (max-width: 900px) {
+    .admin-nav-toggler {
+        display: block;
+    }
+    .admin-nav-header {
+        flex-wrap: wrap;
+        height: auto !important;
+        min-height: 52px;
+        padding: 8px 16px !important;
+        gap: 8px !important;
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(13, 13, 13, 0.97) !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+    .admin-nav-collapse {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px 0 8px;
+        max-height: calc(100dvh - 60px);
+        overflow-y: auto;
+    }
+    .admin-nav-collapse.admin-nav-open {
+        display: flex;
+    }
+    .admin-nav-collapse .nav-center-dropdowns {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0 !important;
+        width: 100%;
+    }
+    .admin-nav-collapse .nav-dropdown {
+        width: 100%;
+    }
+    .admin-nav-collapse .nav-dropdown-menu {
+        position: static !important;
+        transform: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        border-left: 2px solid rgba(201,168,76,0.25) !important;
+        border-radius: 0 !important;
+        margin-left: 12px;
+        padding: 4px 0 4px 8px !important;
+        min-width: 0 !important;
+    }
+    .admin-nav-collapse .nav-dropdown-menu::before {
         display: none !important;
     }
-    #admin-nav,
-    .admin-nav-header {
-        padding: 0 12px;
-        gap: 8px;
-        height: 52px;
+    .admin-nav-collapse .nav-dropdown-toggle .nav-caret {
+        display: none;
     }
+    .admin-nav-collapse .nav-dropdown-item:hover,
+    .admin-nav-collapse .nav-dropdown-item:active {
+        padding-left: 14px;
+    }
+    .admin-nav-collapse .admin-nav-right {
+        padding-top: 8px;
+        border-top: 1px solid rgba(201,168,76,0.15);
+        width: 100%;
+        justify-content: center;
+    }
+    .admin-nav-collapse .admin-nav-user {
+        display: inline !important;
+    }
+}
+
+/* ── MÓVIL PEQUEÑO (≤480px — iPhone SE, Galaxy S) ───────────────────────── */
+@media (max-width: 480px) {
     .admin-nav-brand {
         font-size: 0.85rem;
         letter-spacing: 0.06em;

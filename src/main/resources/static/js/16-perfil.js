@@ -796,26 +796,99 @@ window.cargarMisReservas = async () => {
         }
 
         var tipoLabels = { NORMAL: 'Normal', DOBLE: 'Doble', SUITE: 'Suite', LUJO: 'Lujo' };
-        cont.innerHTML = reservas.map(rv => {
+        var estadoStyles = {
+            EN_CURSO: { color: '#27ae60', border: 'rgba(39,174,96,0.4)', label: 'En curso' },
+            PROXIMA:  { color: 'var(--gold)', border: 'rgba(185,149,77,0.4)', label: 'Próxima' },
+            PASADA:   { color: 'var(--text-muted-custom)', border: 'rgba(154,154,154,0.3)', label: 'Pasada' }
+        };
+
+        var ocultarPasadas = localStorage.getItem('ocultar_reservas_perfil') === '1';
+        var hayPasadas = reservas.some(rv => calcularEstado(rv.fechaEntrada, rv.fechaSalida) === 'PASADA');
+
+        // Ordenar: en curso > próximas > pasadas
+        var estadoOrder = { EN_CURSO: 0, PROXIMA: 1, PASADA: 2 };
+        reservas.sort((a, b) => {
+            var ea = calcularEstado(a.fechaEntrada, a.fechaSalida);
+            var eb = calcularEstado(b.fechaEntrada, b.fechaSalida);
+            if (estadoOrder[ea] !== estadoOrder[eb]) return estadoOrder[ea] - estadoOrder[eb];
+            if (ea === 'PROXIMA') return new Date(a.fechaEntrada) - new Date(b.fechaEntrada);
+            return new Date(b.fechaEntrada) - new Date(a.fechaEntrada);
+        });
+
+        var html = '';
+        if (hayPasadas && !ocultarPasadas) {
+            html += `<div id="btn-limpiar-perfil-wrap" style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
+                <button onclick="limpiarReservasPerfil()"
+                    style="background:none;border:1px solid rgba(154,154,154,0.3);color:var(--text-muted-custom);
+                           font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;
+                           border-radius:20px;cursor:pointer;transition:all .2s;"
+                    onmouseover="this.style.borderColor='rgba(201,168,76,0.5)';this.style.color='var(--gold)'"
+                    onmouseout="this.style.borderColor='rgba(154,154,154,0.3)';this.style.color='var(--text-muted-custom)'">
+                    ✕ Limpiar reservas pasadas
+                </button>
+            </div>`;
+        }
+
+        html += reservas.map(rv => {
+            var estado = calcularEstado(rv.fechaEntrada, rv.fechaSalida);
+            if (ocultarPasadas && estado === 'PASADA') return '';
+            var est = estadoStyles[estado];
             var label = tipoLabels[rv.habitacionTipo] || rv.habitacionTipo;
             var img   = (TIPO_IMAGES[rv.habitacionTipo] || [])[0] || '';
+            var cancelBtn = estado === 'PROXIMA'
+                ? `<button onclick="cancelarReservaPerfil(${rv.id})"
+                    style="background:none;border:1px solid rgba(231,76,60,0.4);color:#e74c3c;padding:6px 14px;
+                           border-radius:6px;font-size:0.7rem;letter-spacing:1px;cursor:pointer;transition:all .2s;flex-shrink:0;"
+                    onmouseover="this.style.borderColor='#e74c3c';this.style.background='rgba(231,76,60,0.1)'"
+                    onmouseout="this.style.borderColor='rgba(231,76,60,0.4)';this.style.background='none'">Cancelar</button>`
+                : '';
             return `
-            <div class="guardada-card" style="border-left:4px solid var(--gold);">
-                ${img ? `<img src="${img}" style="width:88px;height:66px;object-fit:cover;border-radius:8px;flex-shrink:0;opacity:0.85;">` : ''}
+            <div class="guardada-card${estado === 'PASADA' ? ' perfil-reserva--pasada' : ''}" style="border-left:4px solid ${est.border};">
+                ${img ? `<img src="${img}" style="width:88px;height:66px;object-fit:cover;border-radius:8px;flex-shrink:0;opacity:${estado === 'PASADA' ? '0.5' : '0.85'};">` : ''}
                 <div style="flex:1; min-width:0;">
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
-                        <span style="color:var(--gold);font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;font-weight:700;">Confirmada</span>
+                        <span style="color:${est.color};font-size:0.6rem;letter-spacing:2px;text-transform:uppercase;font-weight:700;">${est.label}</span>
                         <span style="width:4px;height:4px;background:rgba(185,149,77,0.3);border-radius:50%;"></span>
                         <span style="color:var(--text-muted-custom);font-size:0.65rem;">Ref: GR-${rv.id}</span>
                     </div>
-                    <p style="color:var(--cream);font-size:0.92rem;font-weight:600;margin-bottom:3px;">${label} &middot; N&ordm; ${rv.habitacionNumero}</p>
+                    <p style="color:${estado === 'PASADA' ? 'var(--text-muted-custom)' : 'var(--cream)'};font-size:0.92rem;font-weight:600;margin-bottom:3px;">${label} &middot; N&ordm; ${rv.habitacionNumero}</p>
                     <p style="color:var(--text-muted-custom);font-size:0.75rem;">${rv.fechaEntrada} &rarr; ${rv.fechaSalida}</p>
                 </div>
+                ${cancelBtn}
             </div>`;
         }).join('');
+
+        cont.innerHTML = html;
     } catch (_) {
         if (cont) cont.innerHTML = `<p style="color:#e74c3c;font-size:0.8rem;">Error al cargar.</p>`;
     }
+};
+
+window.cancelarReservaPerfil = async (id) => {
+    if (!confirm('¿Seguro que quieres cancelar esta reserva?')) return;
+    try {
+        var res = await fetch('/api/reservas/' + id, { method: 'DELETE' });
+        if (res.ok || res.status === 204) {
+            var banner = document.createElement('div');
+            banner.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(39,174,96,0.95);color:#fff;padding:16px 32px;border-radius:10px;font-size:0.9rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);text-align:center;animation:fadeIn .3s;';
+            banner.textContent = 'Reserva cancelada. Se procesará la devolución en breve.';
+            document.body.appendChild(banner);
+            setTimeout(() => { banner.style.opacity = '0'; banner.style.transition = 'opacity .4s'; }, 2500);
+            setTimeout(() => { banner.remove(); }, 3000);
+            cargarMisReservas();
+        } else {
+            alert('No se pudo cancelar la reserva. Inténtalo de nuevo.');
+        }
+    } catch (_) {
+        alert('Error de conexión al cancelar.');
+    }
+};
+
+window.limpiarReservasPerfil = () => {
+    localStorage.setItem('ocultar_reservas_perfil', '1');
+    document.querySelectorAll('.perfil-reserva--pasada').forEach(el => el.remove());
+    var wrap = document.getElementById('btn-limpiar-perfil-wrap');
+    if (wrap) wrap.remove();
 };
 
 window.descargarFacturaReserva = async (reservaId) => {

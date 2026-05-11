@@ -148,44 +148,6 @@ public class RecepcionController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/api/recepcion/walkin")
-    @ResponseBody
-    public ResponseEntity<?> walkin(@RequestBody Map<String, Object> body, Authentication auth) {
-        Usuario u = usuario(auth);
-        if (u == null) return ResponseEntity.status(401).body("No autenticado.");
-        try {
-            String email           = cadenaONula(body.get("email"));
-            String nombre          = cadenaONula(body.get("nombre"));
-            LocalDate fechaEntrada = analizarFecha(body.get("fechaEntrada"));
-            LocalDate fechaSalida  = analizarFecha(body.get("fechaSalida"));
-            String tipoHabitacion  = cadenaONula(body.get("tipoHabitacion"));
-
-            if (email == null || email.isBlank()) return ResponseEntity.badRequest().body("El email es obligatorio.");
-            if (!email.contains("@")) return ResponseEntity.badRequest().body("Formato de email inválido.");
-            if (fechaEntrada == null || fechaSalida == null) return ResponseEntity.badRequest().body("Las fechas son obligatorias.");
-            if (!fechaEntrada.isBefore(fechaSalida)) return ResponseEntity.badRequest().body("La entrada debe ser anterior a la salida.");
-            if (tipoHabitacion == null && body.get("habitacionId") == null) return ResponseEntity.badRequest().body("Indica el tipo de habitación o una habitación concreta.");
-            Long habitacionId      = body.get("habitacionId") instanceof Number n ? n.longValue() : null;
-            String peticion        = cadenaONula(body.get("peticionEspecial"));
-
-            var r = recepcionService.crearWalkIn(email, nombre, fechaEntrada, fechaSalida,
-                    tipoHabitacion, habitacionId, peticion, u);
-
-            return ResponseEntity.ok(Map.of(
-                    "id", r.getId(),
-                    "habitacionNumero", r.getHabitacion().getNumero(),
-                    "habitacionTipo", r.getHabitacion().getTipo().name(),
-                    "fechaEntrada", r.getFechaEntrada(),
-                    "fechaSalida", r.getFechaSalida(),
-                    "clienteEmail", r.getUsuario().getEmail()
-            ));
-        } catch (org.springframework.web.server.ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("No se pudo crear: " + e.getMessage());
-        }
-    }
-
     // ── CHECKOUT (recepción/admin) ───────────────────────────────────────────
 
     @PostMapping("/api/recepcion/reservas/{id}/checkout")

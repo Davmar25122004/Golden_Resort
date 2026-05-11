@@ -1,12 +1,37 @@
 // ── START ─────────────────────────────────────────────────────────────────────
 
-// Aplicar idioma guardado antes de que la página sea visible
-document.querySelectorAll('.lang-btn').forEach(function(btn) {
-    btn.classList.toggle('lang-btn--active', btn.dataset.lang === LANG);
-});
+// Aplicar traducciones
 applyTranslations();
 
 // Inicialización común (sesión, navbar, AOS, flatpickr)
+// En móvil: cerrar el navbar collapse al hacer clic en cualquier item del menú
+document.querySelectorAll('#navCollapse .nav-dropdown-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+        var collapse = document.getElementById('navCollapse');
+        if (collapse && collapse.classList.contains('show')) {
+            var bsCollapse = bootstrap.Collapse.getInstance(collapse);
+            if (bsCollapse) bsCollapse.hide();
+        }
+    });
+});
+// Desktop: cerrar dropdown al clicar un item (evita que quede "pillado")
+document.querySelectorAll('.nav-dropdown-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+        var dd = item.closest('.nav-dropdown');
+        if (dd) {
+            dd.classList.add('nav-dropdown--closing');
+            setTimeout(function() { dd.classList.remove('nav-dropdown--closing'); }, 300);
+        }
+    });
+});
+// Admin navbar: cerrar collapse al clicar un item
+document.querySelectorAll('#adminNavCollapse .nav-dropdown-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+        var el = document.getElementById('adminNavCollapse');
+        if (el) el.classList.remove('admin-nav-open');
+    });
+});
+
 init().then(() => {
     // Restaurar searchDates desde sessionStorage (solo si NO estamos en la home)
     var _path = window.location.pathname;

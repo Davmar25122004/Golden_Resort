@@ -13,11 +13,6 @@ window.selectRoom = async (tipo, precio, descripcion) => {
     var label = tipoLabels[tipo] || tipo;
     var imgs  = TIPO_IMAGES[tipo] || [];
 
-    // Usar descripción en inglés si está disponible y el idioma es inglés
-    if (LANG === 'en' && typeof TIPO_DESCRIPTIONS_EN !== 'undefined' && TIPO_DESCRIPTIONS_EN[tipo]) {
-        descripcion = TIPO_DESCRIPTIONS_EN[tipo];
-    }
-
     var servicios       = await fetchServicios();
     var rsItems         = await fetchRoomServiceItems();
 
@@ -63,7 +58,7 @@ window.selectRoom = async (tipo, precio, descripcion) => {
                             data-id="${s.id}" data-precio="0"
                             onchange="toggleCartaRoomService(this.checked)"
                             style="accent-color:var(--gold); width:16px; height:16px; cursor:pointer;">
-                        <span>${(typeof LANG !== 'undefined' && LANG === 'en' && typeof SERVICIO_NOMBRES_EN !== 'undefined' && SERVICIO_NOMBRES_EN[s.id]) ? SERVICIO_NOMBRES_EN[s.id] : s.nombre}</span>
+                        <span>${s.nombre}</span>
                         <span style="color:var(--gold); margin-left:auto; flex-shrink:0;" id="rs-subtotal-label"></span>
                     </label>
                     <div id="carta-room-service" style="display:none; margin-top:10px; padding:12px 14px; background:rgba(255,255,255,0.04); border-left:2px solid rgba(185,149,77,0.4); border-radius:0 8px 8px 0;">
@@ -80,6 +75,24 @@ window.selectRoom = async (tipo, precio, descripcion) => {
                             : nombreLower.includes('cena')     ? '21:00'
                             : nombreLower.includes('spa')      ? '17:00'
                             : esCoche                          ? '10:00' : '';
+            var horaMin = nombreLower.includes('desayuno') ? '07:00'
+                        : nombreLower.includes('cena')     ? '19:30'
+                        : nombreLower.includes('spa')      ? '09:00' : '';
+            var horaMax = nombreLower.includes('desayuno') ? '11:00'
+                        : nombreLower.includes('cena')     ? '23:00'
+                        : nombreLower.includes('spa')      ? '21:00' : '';
+            var horaOptions = '';
+            if (horaMin && horaMax) {
+                var [hMin, mMin] = horaMin.split(':').map(Number);
+                var [hMax, mMax] = horaMax.split(':').map(Number);
+                for (var hh = hMin; hh <= hMax; hh++) {
+                    for (var mm = (hh === hMin ? mMin : 0); mm < 60; mm += 30) {
+                        if (hh === hMax && mm > mMax) break;
+                        var val = String(hh).padStart(2,'0') + ':' + String(mm).padStart(2,'0');
+                        horaOptions += '<option value="' + val + '"' + (val === horaDefault ? ' selected' : '') + '>' + val + '</option>';
+                    }
+                }
+            }
             var horaInputHtml = requiereHora
                 ? esCoche
                     ? `<div id="hora-wrap-${s.id}" style="display:none; margin:6px 0 14px 26px; padding:10px 14px; background:rgba(255,255,255,0.04); border-left:2px solid rgba(185,149,77,0.4); border-radius:0 8px 8px 0;">
@@ -109,9 +122,13 @@ window.selectRoom = async (tipo, precio, descripcion) => {
                                   style="background:rgba(255,255,255,0.07); border:1px solid rgba(185,149,77,0.3); color:var(--cream); padding:6px 10px; border-radius:6px; font-size:0.85rem; width:130px;">
                        </div>`
                     : `<div id="hora-wrap-${s.id}" style="display:none; margin:6px 0 14px 26px; padding:10px 14px; background:rgba(255,255,255,0.04); border-left:2px solid rgba(185,149,77,0.4); border-radius:0 8px 8px 0;">
-                           <label style="display:block; font-size:0.7rem; letter-spacing:1px; color:var(--text-muted-custom); margin-bottom:4px;">Hora del servicio</label>
-                           <input type="time" class="servicio-hora" data-id="${s.id}" value="${horaDefault}"
-                                  style="background:rgba(255,255,255,0.07); border:1px solid rgba(185,149,77,0.3); color:var(--cream); padding:6px 10px; border-radius:6px; font-size:0.85rem; width:130px;">
+                           <label style="display:block; font-size:0.7rem; letter-spacing:1px; color:var(--text-muted-custom); margin-bottom:4px;">Hora del servicio${horaMin && horaMax ? ' (' + horaMin + ' – ' + horaMax + ')' : ''}</label>
+                           ${horaOptions
+                               ? `<select class="servicio-hora" data-id="${s.id}"
+                                      style="background:rgba(255,255,255,0.07); border:1px solid rgba(185,149,77,0.3); color:var(--cream); padding:6px 10px; border-radius:6px; font-size:0.85rem; width:130px;">${horaOptions}</select>`
+                               : `<input type="time" class="servicio-hora" data-id="${s.id}" value="${horaDefault}"
+                                      style="background:rgba(255,255,255,0.07); border:1px solid rgba(185,149,77,0.3); color:var(--cream); padding:6px 10px; border-radius:6px; font-size:0.85rem; width:130px;">`
+                           }
                        </div>`
                 : '';
             var precioInicialCb = esCoche ? '0' : s.precio;
@@ -123,7 +140,7 @@ window.selectRoom = async (tipo, precio, descripcion) => {
                 <input type="checkbox" class="servicio-check"
                     data-id="${s.id}" data-precio="${precioInicialCb}" data-requiere-hora="${requiereHora}"
                     style="accent-color:var(--gold); width:16px; height:16px; cursor:pointer;">
-                <span>${(typeof LANG !== 'undefined' && LANG === 'en' && typeof SERVICIO_NOMBRES_EN !== 'undefined' && SERVICIO_NOMBRES_EN[s.id]) ? SERVICIO_NOMBRES_EN[s.id] : s.nombre}</span>
+                <span>${s.nombre}</span>
                 ${precioLabel}
             </label>
             ${horaInputHtml}`;
@@ -146,6 +163,9 @@ window.selectRoom = async (tipo, precio, descripcion) => {
             </div>
 
             <p class="detail-price">${precio}€ <small style="font-size:1rem; color:var(--text-muted-custom);">${t('room_per_night')}</small></p>
+            <p style="font-size:0.82rem; color:var(--text-muted); margin:8px 0 16px; letter-spacing:0.5px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:5px; opacity:0.6;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>${TIPO_CAPACIDAD[tipo] || ''}
+            </p>
             <p class="detail-description">${descripcion}</p>
 
             ${fechasHtml}

@@ -4,7 +4,7 @@ window.showAdmin = async () => {
     if (typeof asbInjectOnPage === 'function') asbInjectOnPage();
     else if (typeof asbInit === 'function') asbInit();
 
-    var initTab    = sessionStorage.getItem('asb_initTab')    || 'dashboard';
+    var initTab    = sessionStorage.getItem('asb_initTab')    || 'home';
     var initSubtab = sessionStorage.getItem('asb_initSubtab') || null;
     sessionStorage.removeItem('asb_initTab');
     sessionStorage.removeItem('asb_initSubtab');
@@ -28,6 +28,7 @@ window.switchAdminTab = (tab) => {
     if (!body) return;
     body.innerHTML = '<div style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px; padding:20px 0;">' + t('admin_loading') + '</div>';
 
+    if (tab === 'home')         loadAdminHome();
     if (tab === 'dashboard')    loadAdminDashboard();
     if (tab === 'reservas')     loadAdminReservas();
     if (tab === 'habitaciones') loadAdminHabitaciones();
@@ -39,6 +40,69 @@ window.switchAdminTab = (tab) => {
     if (tab === 'clientes')          loadAdminClientes();
     if (tab === 'reservas-manuales') loadAdminReservasManuales();
 };
+
+// ── ADMIN: HOME ──────────────────────────────────────────────────────────────
+
+function loadAdminHome() {
+    var body = document.getElementById('admin-tab-body');
+    if (!body) return;
+
+    var _ico = function(d) { return '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>'; };
+    var widgets = [
+        // ── ADMIN ──
+        { section: 'ADMIN' },
+        { tab: 'dashboard',         icon: _ico('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'), title: 'Dashboard', desc: 'Estadísticas, gráficos e ingresos' },
+        { tab: 'reservas',          icon: _ico('<path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'), title: 'Reservas', desc: 'Gestión de reservas activas' },
+        { tab: 'habitaciones',      icon: _ico('<path d="M3 21V11l9-6 9 6v10"/><path d="M9 21v-6h6v6"/>'), title: 'Habitaciones', desc: 'Tipos, precios y disponibilidad' },
+        { tab: 'servicios',         icon: _ico('<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/>'), title: 'Servicios', desc: 'Servicios del hotel' },
+        { tab: 'roomservice',       icon: _ico('<path d="M2 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2H2v2Z"/><path d="M20 16a8 8 0 1 0-16 0"/>'), title: 'Room Service', desc: 'Carta y pedidos a habitación' },
+        // ── CLIENTES ──
+        { section: 'CLIENTES' },
+        { tab: 'clientes',          icon: _ico('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'), title: 'Gestión de clientes', desc: 'Clientes registrados' },
+        { tab: 'reservas-manuales', icon: _ico('<path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/>'), title: 'Reservas manuales', desc: 'Crear reservas para clientes' },
+        // ── PERSONAL ──
+        { section: 'PERSONAL' },
+        { tab: 'personal',          icon: _ico('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'), title: 'Horarios', desc: 'Gestión de horarios del equipo', subtab: 'horarios' },
+        { tab: 'personal',          icon: _ico('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'), title: 'Tipos de jornada', desc: 'Perfiles y jornadas laborales', subtab: 'perfiles' },
+        { tab: 'personal',          icon: _ico('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>'), title: 'Cuadrantes', desc: 'Planificación de turnos', subtab: 'planes' },
+        { tab: 'personal',          icon: _ico('<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/>'), title: 'Asignación', desc: 'Asignación de personal', subtab: 'asignacion' },
+        { tab: 'usuarios',          icon: _ico('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'), title: 'Usuarios', desc: 'Empleados y roles del sistema' },
+        { tab: 'mensajes-staff',    icon: _ico('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'), title: 'Mensajes staff', desc: 'Comunicación con el equipo' },
+        // ── MI PERFIL ──
+        { section: 'MI PERFIL' },
+        { href: '/perfil#info',      icon: _ico('<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>'), title: 'Información', desc: 'Datos personales' },
+        { href: '/perfil#horario',   icon: _ico('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'), title: 'Mi horario', desc: 'Horario personal asignado' },
+        { href: '/perfil#seguridad', icon: _ico('<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'), title: 'Seguridad', desc: 'Contraseña y acceso' },
+    ];
+
+    body.innerHTML = `
+        <div class="admin-home-header">
+            <p class="admin-home-label">PANEL DE ADMINISTRACIÓN</p>
+            <h2 class="admin-home-title">Bienvenido de vuelta</h2>
+            <div class="gold-line" style="margin: 12px 0 0;"></div>
+        </div>
+        ${widgets.map(function(w) {
+            if (w.section) {
+                return '</div><p class="admin-home-section-label">' + w.section + '</p><div class="admin-home-grid">';
+            }
+            if (w.href) {
+                return '<a href="' + w.href + '" class="admin-home-widget">' +
+                    '<div class="admin-home-widget-icon">' + w.icon + '</div>' +
+                    '<h3 class="admin-home-widget-title">' + w.title + '</h3>' +
+                    '<p class="admin-home-widget-desc">' + w.desc + '</p>' +
+                '</a>';
+            }
+            var onclick = w.subtab
+                ? "window._asbPersonalSubtab='" + w.subtab + "';switchAdminTab('" + w.tab + "')"
+                : "switchAdminTab('" + w.tab + "')";
+            return '<div class="admin-home-widget" onclick="' + onclick + '">' +
+                '<div class="admin-home-widget-icon">' + w.icon + '</div>' +
+                '<h3 class="admin-home-widget-title">' + w.title + '</h3>' +
+                '<p class="admin-home-widget-desc">' + w.desc + '</p>' +
+            '</div>';
+        }).join('')}
+        </div>`;
+}
 
 // ── ADMIN: DASHBOARD ──────────────────────────────────────────────────────────
 

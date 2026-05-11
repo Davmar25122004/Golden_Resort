@@ -212,9 +212,7 @@ function calcularEstado(fechaEntrada, fechaSalida) {
 
 function formatFecha(dateStr) {
     if (!dateStr) return '—';
-    var meses = LANG === 'en'
-        ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-        : ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    var meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
     var parts = dateStr.split('-');
     if (parts.length < 3) return dateStr;
     return parts[2] + ' ' + meses[parseInt(parts[1]) - 1] + ' ' + parts[0];

@@ -30,44 +30,6 @@
             overflow-x: hidden;
         }
 
-        .lang-toggle {
-            position: fixed;
-            top: 30px;
-            right: 30px;
-            z-index: 1000;
-            display: flex;
-            gap: 8px;
-            background: rgba(36, 36, 36, 0.9);
-            padding: 8px;
-            border-radius: 50px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            border: 1px solid var(--border-color);
-            backdrop-filter: blur(10px);
-        }
-
-        .lang-btn {
-            padding: 10px 20px;
-            border: none;
-            background: transparent;
-            color: var(--text-light);
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 500;
-            font-size: 13px;
-            letter-spacing: 1px;
-            cursor: pointer;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-        }
-
-        .lang-btn.active {
-            background: var(--primary-gold);
-            color: white;
-        }
-
-        .lang-btn:hover:not(.active) {
-            color: var(--text-dark);
-        }
 
         .container {
             max-width: 900px;
@@ -229,11 +191,6 @@
                 right: calc(50% - 140px);
             }
 
-            .lang-toggle {
-                top: 20px;
-                right: 20px;
-            }
-
             .item-header {
                 flex-direction: column;
                 gap: 8px;
@@ -242,17 +199,11 @@
     </style>
 </head>
 <body>
-    <div class="lang-toggle">
-        <button class="lang-btn active" onclick="setLanguage('es')" id="btn-es">ES</button>
-        <button class="lang-btn" onclick="setLanguage('en')" id="btn-en">EN</button>
-    </div>
-
     <div class="container">
         <header>
             <h1 class="hotel-name">GOLDEN RESORT</h1>
             <h2 class="service-title">Room Service</h2>
-            <p class="subtitle" id="subtitle-es">Carta a la Habitación · Disponible las 24 horas</p>
-            <p class="subtitle hidden" id="subtitle-en">In-Room Dining · Available 24 Hours</p>
+            <p class="subtitle">Carta a la Habitación · Disponible las 24 horas</p>
         </header>
 
         <!-- DESAYUNO / BREAKFAST -->
@@ -284,35 +235,7 @@
             </div>
         </div>
 
-        <div id="section-breakfast-en" class="hidden">
-            <h3 class="section-title">B R E A K F A S T</h3>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Tomato Toast with Olive Oil</span>
-                    <span class="item-price">€6.50</span>
-                </div>
-                <p class="item-description">Freshly toasted sourdough bread, crushed garden tomato and extra virgin olive oil from our own harvest. A Mediterranean sunrise in every bite.</p>
-            </div>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Fresh Orange Juice</span>
-                    <span class="item-price">€4.00</span>
-                </div>
-                <p class="item-description">Valencia oranges squeezed to order, preserving all the vitality of the pulp and the perfect balance between sweetness and acidity.</p>
-            </div>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Porridge with Fruits</span>
-                    <span class="item-price">€8.00</span>
-                </div>
-                <p class="item-description">Slow-cooked oats in oat milk with cardamom, crowned with seasonal berries, chia seeds and a drizzle of orange blossom honey. Nutritious and refined start.</p>
-            </div>
-        </div>
-
-        <!-- ALMUERZO / LUNCH -->
+        <!-- ALMUERZO -->
         <div id="section-lunch-es">
             <h3 class="section-title">A L M U E R Z O</h3>
 
@@ -341,35 +264,7 @@
             </div>
         </div>
 
-        <div id="section-lunch-en" class="hidden">
-            <h3 class="section-title">L U N C H</h3>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Caesar Salad</span>
-                    <span class="item-price">€12.50</span>
-                </div>
-                <p class="item-description">Crispy romaine leaves, grilled chicken supreme, 24-month aged parmesan shavings and brioche croutons. Caesar dressing with Cantabrian anchovy from our own recipe.</p>
-            </div>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Club Sandwich</span>
-                    <span class="item-price">€14.00</span>
-                </div>
-                <p class="item-description">Layers of roasted turkey, smoked bacon, ripe tomato, iceberg lettuce and Dijon mustard mayonnaise between three slices of toasted sandwich bread. Accompanied by artisan potato chips.</p>
-            </div>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Soup of the Day</span>
-                    <span class="item-price">€9.00</span>
-                </div>
-                <p class="item-description">Prepared each morning by our kitchen team with the finest seasonal ingredients. Served with crispy wood-fired bread and Normandy butter. Please inquire for availability.</p>
-            </div>
-        </div>
-
-        <!-- CENA / DINNER -->
+        <!-- CENA -->
         <div id="section-dinner-es">
             <h3 class="section-title">C E N A</h3>
 
@@ -395,34 +290,6 @@
                     <span class="item-price">15,00 €</span>
                 </div>
                 <p class="item-description">Linguine de sémola artesanal salteados en pesto genovés elaborado con albahaca fresca, piñones tostados, ajo negro y parmesano. Terminados con tomates cherry confitados.</p>
-            </div>
-        </div>
-
-        <div id="section-dinner-en" class="hidden">
-            <h3 class="section-title">D I N N E R</h3>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Gourmet Burger</span>
-                    <span class="item-price">€18.00</span>
-                </div>
-                <p class="item-description">Aged Black Angus beef medallion, farm-aged cheddar cheese, lettuce, caramelized onion and house sauce. Rustic potatoes with rosemary and Maldon salt.</p>
-            </div>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Grilled Salmon</span>
-                    <span class="item-price">€22.00</span>
-                </div>
-                <p class="item-description">Norwegian ASC salmon loin seared on volcanic stone griddle, accompanied by green asparagus, cauliflower purée with brown butter and dill and caper sauce.</p>
-            </div>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Pesto Pasta</span>
-                    <span class="item-price">€15.00</span>
-                </div>
-                <p class="item-description">Artisan semolina linguine sautéed in Genoese pesto made with fresh basil, toasted pine nuts, black garlic and parmesan. Finished with confit cherry tomatoes.</p>
             </div>
         </div>
 
@@ -455,35 +322,7 @@
             </div>
         </div>
 
-        <div id="section-snacks-en" class="hidden">
-            <h3 class="section-title">S N A C K S</h3>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Cheese Board</span>
-                    <span class="item-price">€16.00</span>
-                </div>
-                <p class="item-description">Selection of artisan cheeses of controlled origin: aged manchego, brie de Meaux, sweet gorgonzola and mountain comté. Muscatel grapes, orange blossom honey and caramelized walnuts.</p>
-            </div>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Nachos with Guacamole</span>
-                    <span class="item-price">€10.00</span>
-                </div>
-                <p class="item-description">Artisan baked corn chips, guacamole made fresh with hass avocado, lime, cilantro and jalapeño. Accompanied by pico de gallo and sour cream.</p>
-            </div>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Seasonal Fruit</span>
-                    <span class="item-price">€7.00</span>
-                </div>
-                <p class="item-description">Selection of the freshest market fruits, cut and elegantly presented. Served with a touch of honey, fresh mint and lime juice.</p>
-            </div>
-        </div>
-
-        <!-- BEBIDAS / BEVERAGES -->
+        <!-- BEBIDAS -->
         <div id="section-beverages-es">
             <h3 class="section-title">B E B I D A S</h3>
 
@@ -520,84 +359,13 @@
             </div>
         </div>
 
-        <div id="section-beverages-en" class="hidden">
-            <h3 class="section-title">B E V E R A G E S</h3>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Mineral Water (1L)</span>
-                    <span class="item-price">€3.50</span>
-                </div>
-                <p class="item-description">Natural mineral water with or without gas. Premium selection: Vichy Catalán, San Pellegrino or Perrier. Served in original bottle at optimal consumption temperature.</p>
-            </div>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Red Wine (glass)</span>
-                    <span class="item-price">€8.00</span>
-                </div>
-                <p class="item-description">Glass of Denomination of Origin red wine selected by our sommelier. Seasonal rotation of high-expression Spanish and European varietals. Please inquire for availability.</p>
-            </div>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Soft Drink</span>
-                    <span class="item-price">€3.00</span>
-                </div>
-                <p class="item-description">Selection of classic and artisanal soft drinks. Coca-Cola, Schweppes Tonic, artisan Ginger Beer, homemade Lemonade. Served with ice and lemon.</p>
-            </div>
-
-            <div class="menu-item">
-                <div class="item-header">
-                    <span class="item-name">Craft Beer</span>
-                    <span class="item-price">€4.50</span>
-                </div>
-                <p class="item-description">Beer from local microbrewery selected by our team. Monthly rotation of styles: IPA, Pale Ale, premium Lager. Served in chilled glass at perfect temperature.</p>
-            </div>
-        </div>
-
         <footer>
-            <p id="footer-es">
+            <p>
                 Para realizar su pedido, marque el <span class="footer-highlight">interno 0</span> · Servicio disponible las 24 horas<br>
                 Los precios incluyen IVA · Alérgenos disponibles bajo petición · Golden Resort © 2025
-            </p>
-            <p id="footer-en" class="hidden">
-                To place your order, dial <span class="footer-highlight">extension 0</span> · Service available 24 hours<br>
-                Prices include VAT · Allergen information available upon request · Golden Resort © 2025
             </p>
         </footer>
     </div>
 
-    <script>
-        function setLanguage(lang) {
-            localStorage.setItem('lang', lang);
-
-            // Update button states
-            document.getElementById('btn-es').classList.toggle('active', lang === 'es');
-            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-
-            // Update subtitle
-            document.getElementById('subtitle-es').classList.toggle('hidden', lang !== 'es');
-            document.getElementById('subtitle-en').classList.toggle('hidden', lang !== 'en');
-
-            // Update sections
-            const sections = ['breakfast', 'lunch', 'dinner', 'snacks', 'beverages'];
-            sections.forEach(section => {
-                document.getElementById(`section-${section}-es`).classList.toggle('hidden', lang !== 'es');
-                document.getElementById(`section-${section}-en`).classList.toggle('hidden', lang !== 'en');
-            });
-
-            // Update footer
-            document.getElementById('footer-es').classList.toggle('hidden', lang !== 'es');
-            document.getElementById('footer-en').classList.toggle('hidden', lang !== 'en');
-
-            // Update HTML lang attribute
-            document.documentElement.lang = lang;
-        }
-
-        // Sync with main app language on load
-        var savedLang = localStorage.getItem('lang') || 'es';
-        setLanguage(savedLang);
-    </script>
 </body>
 </html>

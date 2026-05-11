@@ -7,8 +7,7 @@ window.openServicioDetail = async function(id) {
 
     if (!servicio) return;
 
-    var nombre = (typeof LANG !== 'undefined' && LANG === 'en' && typeof SERVICIO_NOMBRES_EN !== 'undefined' && SERVICIO_NOMBRES_EN[id])
-        ? SERVICIO_NOMBRES_EN[id] : servicio.nombre;
+    var nombre = servicio.nombre;
     var precioStr = nombre.toLowerCase().includes('room service') ? t('srv_a_la_carte') : `${parseFloat(servicio.precio).toFixed(2)} €`;
     var precioLabelHtml = nombre.toLowerCase().includes('room service') ? '' : `<span class="servicio-detail-precio-label">${t('srv_per_service')}</span>`;
 
@@ -21,11 +20,10 @@ window.openServicioDetail = async function(id) {
         slidesHtml = `<div class="swiper-slide servicio-detail-slide"><img src="/images/servicio-fallback.jpg" alt="${nombre}"></div>`;
     }
 
-    var isEn = (typeof LANG !== 'undefined' && LANG === 'en');
-    var descripcion     = data ? (isEn && data.descripcion_en  ? data.descripcion_en  : data.descripcion)  : '';
-    var horario         = data ? (isEn && data.horario_en ? data.horario_en : data.horario) : '–';
-    var capacidad       = data ? (isEn && data.capacidad_en    ? data.capacidad_en    : data.capacidad)    : '–';
-    var caracList       = data ? (isEn && data.caracteristicas_en ? data.caracteristicas_en : data.caracteristicas) : null;
+    var descripcion     = data ? data.descripcion : '';
+    var horario         = data ? data.horario : '–';
+    var capacidad       = data ? data.capacidad : '–';
+    var caracList       = data ? data.caracteristicas : null;
     var caracteristicas = caracList ? caracList.map(c => `<li>✦ ${c}</li>`).join('') : '';
         
     var pdfButtonHtml = '';
@@ -111,11 +109,7 @@ window.backToServicios = function() {
 
 window.loadAndShowServicio = async function(slug) {
     var servicios = await fetchServicios();
-    var s = servicios.find(sv => {
-        var nombre = (typeof LANG !== 'undefined' && LANG === 'en' && typeof SERVICIO_NOMBRES_EN !== 'undefined' && SERVICIO_NOMBRES_EN[sv.id])
-            ? SERVICIO_NOMBRES_EN[sv.id] : sv.nombre;
-        return slugify(nombre) === slug;
-    });
+    var s = servicios.find(sv => slugify(sv.nombre) === slug);
     if (!s) { window.location.href = '/'; return; }
     await openServicioDetail(s.id);
 };

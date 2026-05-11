@@ -68,7 +68,7 @@ function syncFancyMonth(instance) {
 
 var FP_CONFIG = {
     disableMobile: true,
-    locale: (typeof LANG !== 'undefined' && LANG === 'en') ? 'default' : 'es',
+    locale: 'es',
     onReady:       (_d, _s, instance) => initFancyMonthDropdown(instance),
     onMonthChange: (_d, _s, instance) => syncFancyMonth(instance),
 };

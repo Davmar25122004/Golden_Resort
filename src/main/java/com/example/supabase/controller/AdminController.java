@@ -589,21 +589,24 @@ public class AdminController {
         if (usuarioRepository.findByEmail(email.trim()).isPresent())
             return ResponseEntity.badRequest().body("Ya existe un usuario con ese email.");
 
+        // Limpiar registros pendientes con el mismo email
+        pendingRegistrationRepository.findByEmail(email.trim()).ifPresent(pendingRegistrationRepository::delete);
+
         String numDoc = datos.get("numDocumento");
         if (numDoc != null && !numDoc.isBlank()) {
             String docNorm = numDoc.trim().toUpperCase();
-            if (usuarioRepository.findByNumDocumento(docNorm).isPresent() ||
-                pendingRegistrationRepository.findByNumDocumento(docNorm).isPresent())
+            if (usuarioRepository.findByNumDocumento(docNorm).isPresent())
                 return ResponseEntity.status(409).body("Ya existe una cuenta con ese número de documento.");
+            pendingRegistrationRepository.findByNumDocumento(docNorm).ifPresent(pendingRegistrationRepository::delete);
             numDoc = docNorm;
         }
 
         String telefono = datos.get("telefono");
         if (telefono != null && !telefono.isBlank()) {
             String telNorm = telefono.trim().replaceAll("\\s+", "");
-            if (usuarioRepository.findByTelefono(telNorm).isPresent() ||
-                pendingRegistrationRepository.findByTelefono(telNorm).isPresent())
+            if (usuarioRepository.findByTelefono(telNorm).isPresent())
                 return ResponseEntity.status(409).body("Ya existe una cuenta con ese número de teléfono.");
+            pendingRegistrationRepository.findByTelefono(telNorm).ifPresent(pendingRegistrationRepository::delete);
             telefono = telNorm;
         }
 
