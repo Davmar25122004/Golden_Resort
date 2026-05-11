@@ -105,14 +105,14 @@ footer {
         overflow: visible;
     }
 
-    /* El drawer ocupa la mitad izquierda, de arriba a abajo */
+    /* El drawer ocupa la mitad izquierda, altura según contenido */
     #navCollapse {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
-        bottom: 0 !important;
         width: 52vw !important;
-        height: 100dvh !important;
+        height: auto !important;
+        max-height: 100dvh !important;
         z-index: 1055 !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
