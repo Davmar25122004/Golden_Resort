@@ -53,15 +53,15 @@
 /* ── FOOTER ── */
 footer {
     background: var(--surface);
-    padding: 40px 0;
+    padding: 20px 0;
     border-top: 1px solid rgba(201,168,76,0.15);
 }
-.footer-brand { font-size: 1.4rem; color: var(--gold); letter-spacing: 3px; }
-.footer-text { font-size: 0.75rem; color: var(--text-muted-custom); letter-spacing: 1px; }
-.footer-links { margin-top: 0.5rem; }
-.footer-link { font-size: 0.72rem; color: var(--text-muted-custom); letter-spacing: 1px; text-decoration: none; transition: color 0.2s; }
+.footer-brand { font-size: 1.1rem; color: var(--gold); letter-spacing: 3px; }
+.footer-text { font-size: 0.68rem; color: var(--text-muted-custom); letter-spacing: 1px; }
+.footer-links { margin-top: 0.3rem; }
+.footer-link { font-size: 0.65rem; color: var(--text-muted-custom); letter-spacing: 1px; text-decoration: none; transition: color 0.2s; }
 .footer-link:hover { color: var(--gold); }
-.footer-sep { font-size: 0.72rem; color: var(--text-muted-custom); }
+.footer-sep { font-size: 0.65rem; color: var(--text-muted-custom); }
 
 /* ── NAVBAR MÓVIL — brand compacto ── */
 @media (max-width: 767px) {
