@@ -3,7 +3,48 @@
 // Aplicar traducciones
 applyTranslations();
 
-// Inicialización común (sesión, navbar, AOS, flatpickr)
+// ── DRAWER LATERAL MÓVIL ───────────────────────────────────────────────────────
+(function() {
+    var toggler  = document.querySelector('.navbar-toggler[data-bs-target="#navCollapse"]');
+    var drawer   = document.getElementById('navCollapse');
+    var backdrop = document.getElementById('nav-drawer-backdrop');
+    if (!toggler || !drawer) return;
+
+    function openDrawer() {
+        drawer.classList.add('nav-drawer-open');
+        if (backdrop) backdrop.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeDrawer() {
+        drawer.classList.remove('nav-drawer-open');
+        if (backdrop) backdrop.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    function isMobile() { return window.innerWidth < 768; }
+
+    // Interceptar click del toggler en fase de captura (antes que Bootstrap)
+    toggler.addEventListener('click', function(e) {
+        if (!isMobile()) return;
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        drawer.classList.contains('nav-drawer-open') ? closeDrawer() : openDrawer();
+    }, true);
+
+    // Cerrar al pulsar el backdrop
+    if (backdrop) backdrop.addEventListener('click', closeDrawer);
+
+    // Cerrar al pulsar cualquier item del menú en móvil
+    drawer.addEventListener('click', function(e) {
+        if (!isMobile()) return;
+        if (e.target.closest('.nav-dropdown-item')) closeDrawer();
+    });
+
+    // En resize a desktop, limpiar estado
+    window.addEventListener('resize', function() {
+        if (!isMobile()) { closeDrawer(); document.body.style.overflow = ''; }
+    });
+})();
+
 // En móvil: cerrar el navbar collapse al hacer clic en cualquier item del menú
 document.querySelectorAll('#navCollapse .nav-dropdown-item').forEach(function(item) {
     item.addEventListener('click', function() {

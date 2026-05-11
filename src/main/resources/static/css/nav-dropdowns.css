@@ -135,9 +135,9 @@
         width: 100%;
         text-align: left;
         justify-content: flex-start;
-        padding: 8px 4px;
-        font-size: 0.75rem;
-        letter-spacing: 0.12em;
+        padding: 6px 4px;
+        font-size: 0.68rem;
+        letter-spacing: 0.1em;
         color: rgba(255,255,255,0.85);
         font-weight: 600;
     }
@@ -147,9 +147,13 @@
         background: transparent; box-shadow: none;
         border: none; border-left: 2px solid rgba(201,168,76,0.25);
         border-radius: 0;
-        margin-left: 12px; padding: 4px 0 4px 8px;
+        margin-left: 8px; padding: 2px 0 2px 6px;
         min-width: 0;
         max-height: none;
+    }
+    .nav-dropdown-item {
+        font-size: 0.72rem;
+        padding: 7px 10px;
     }
     .nav-dropdown:hover .nav-dropdown-menu,
     .nav-dropdown:focus-within .nav-dropdown-menu {
