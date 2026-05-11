@@ -4,13 +4,11 @@ import com.example.supabase.domain.PasswordResetToken;
 import com.example.supabase.domain.Usuario;
 import com.example.supabase.repository.PasswordResetTokenRepository;
 import com.example.supabase.repository.UsuarioRepository;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -63,8 +61,7 @@ public class PasswordResetService {
         Map<String, Object> vars = new HashMap<>();
         vars.put("nombre", usuario.getNombre() != null ? usuario.getNombre() : usuario.getEmail());
         vars.put("enlace", enlace);
-        byte[] logoBytes = cargarLogo();
-        vars.put("logoPng", logoBytes.length > 0 ? Base64.getEncoder().encodeToString(logoBytes) : null);
+        vars.put("logoUrl", baseUrl + "/images/logo.png");
 
         emailService.enviarConPlantilla(
             usuario.getEmail(),
@@ -100,11 +97,4 @@ public class PasswordResetService {
         return "OK";
     }
 
-    private byte[] cargarLogo() {
-        try (var in = new ClassPathResource("static/images/logo.png").getInputStream()) {
-            return in.readAllBytes();
-        } catch (Exception e) {
-            return new byte[0];
-        }
-    }
 }
