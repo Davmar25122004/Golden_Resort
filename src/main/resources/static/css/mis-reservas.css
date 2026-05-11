@@ -242,11 +242,21 @@
 }
 
 @media (max-width: 600px) {
-    .card-image-side { min-width: unset; height: 180px; }
-    .card-content-side { border-left: none; border-top: 1px solid rgba(201,168,77,0.12); }
-    .card-actions { flex-wrap: wrap; }
+    .card-image-side { min-width: unset; height: 160px; }
+    .card-content-side {
+        border-left: none;
+        border-top: 1px solid rgba(201,168,77,0.12);
+        padding: 16px;
+    }
+    .room-id-tag { font-size: 1.2rem; }
+    .ticket-dates { padding: 10px 12px; gap: 10px; margin-bottom: 16px; }
+    .d-value { font-size: 0.88rem !important; }
+    .info-grid { grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+    .total-row-luxury { margin-top: 8px; }
+    .total-value { font-size: 1.4rem; }
+    .card-actions { flex-wrap: wrap; gap: 8px; }
     .card-actions .btn-manage-rs,
-    .card-actions .btn-cancel-luxury { flex: 1 1 calc(50% - 6px); min-width: 0; }
+    .card-actions .btn-cancel-luxury { flex: 1 1 calc(50% - 4px); min-width: 0; text-align: center; }
 }
 
 /* ── EMPTY STATE ── */
