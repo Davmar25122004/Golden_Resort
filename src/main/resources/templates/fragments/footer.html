@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="footer">
+    <footer>
+        <div class="container text-center">
+            <p class="footer-brand serif mb-2">Golden Resort</p>
+            <p class="footer-text mb-2" data-i18n="footer_rights">© 2026 Golden Resort · Todos los derechos reservados</p>
+            <div class="footer-links d-flex justify-content-center gap-3">
+                <a href="/privacidad" class="footer-link"><span data-i18n="footer_privacy">Política de Privacidad</span></a>
+                <span class="footer-sep">|</span>
+                <a href="/cookies" class="footer-link"><span data-i18n="footer_cookies">Política de Cookies</span></a>
+            </div>
+        </div>
+    </footer>
+</th:block>
+</body>
+</html>
