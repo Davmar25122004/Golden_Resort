@@ -11,10 +11,6 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.springframework.core.io.ByteArrayResource;
@@ -39,65 +35,22 @@ public class EmailService {
     @Value("${spring.mail.username:}")
     private String smtpUser;
 
-    @Value("${resend.api-key:}")
-    private String resendApiKey;
-
     public EmailService(TemplateEngine templateEngine) {
         this.templateEngine = templateEngine;
     }
 
-    /** Envía un email con plantilla Thymeleaf. Usa Resend si hay API key, si no SMTP. */
+    /** Envía un email con plantilla Thymeleaf. Si no hay SMTP configurado, solo logea. */
     public boolean enviarConPlantilla(String para, String asunto, String plantilla, Map<String, Object> variables) {
-        long t0 = System.currentTimeMillis();
-
-        Context ctx = new Context();
-        if (variables != null) variables.forEach(ctx::setVariable);
-        String html = templateEngine.process(plantilla, ctx);
-
-        if (resendApiKey != null && !resendApiKey.isBlank()) {
-            return enviarConResend(para, asunto, html, t0);
-        }
-
         if (mailSender == null || smtpUser == null || smtpUser.isBlank()) {
-            log.warn("SMTP y Resend no configurados; email a {} omitido.", para);
+            log.warn("SMTP no configurado; email a {} (asunto: {}) omitido.", para, asunto);
             return false;
         }
-        return enviarConSmtp(para, asunto, html, variables, t0);
-    }
-
-    private boolean enviarConResend(String para, String asunto, String html, long t0) {
+        long t0 = System.currentTimeMillis();
         try {
-            String fromField = fromName + " <" + from + ">";
-            String body = "{\"from\":\"" + escapeJson(fromField) + "\","
-                        + "\"to\":[\"" + escapeJson(para) + "\"],"
-                        + "\"subject\":\"" + escapeJson(asunto) + "\","
-                        + "\"html\":\"" + escapeJson(html) + "\"}";
+            Context ctx = new Context();
+            if (variables != null) variables.forEach(ctx::setVariable);
+            String html = templateEngine.process(plantilla, ctx);
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.resend.com/emails"))
-                    .header("Authorization", "Bearer " + resendApiKey)
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
-                    .build();
-
-            HttpResponse<String> response = HttpClient.newHttpClient()
-                    .send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200 || response.statusCode() == 201) {
-                log.info("Email Resend -> {} | total={}ms", para, System.currentTimeMillis() - t0);
-                return true;
-            } else {
-                log.error("Resend error {} -> {}: {}", response.statusCode(), para, response.body());
-                return false;
-            }
-        } catch (Exception e) {
-            log.error("Error Resend a {} (tras {}ms): {}", para, System.currentTimeMillis() - t0, e.getMessage());
-            return false;
-        }
-    }
-
-    private boolean enviarConSmtp(String para, String asunto, String html, Map<String, Object> variables, long t0) {
-        try {
             MimeMessage msg = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(msg, true, StandardCharsets.UTF_8.name());
             helper.setFrom(from, fromName);
@@ -116,20 +69,11 @@ public class EmailService {
             }
 
             mailSender.send(msg);
-            log.info("Email SMTP -> {} | total={}ms", para, System.currentTimeMillis() - t0);
+            log.info("Email -> {} | total={}ms", para, System.currentTimeMillis() - t0);
             return true;
         } catch (Exception e) {
-            log.error("Error SMTP a {} (tras {}ms): {}", para, System.currentTimeMillis() - t0, e.getMessage());
+            log.error("Error enviando email a {} (tras {}ms): {}", para, System.currentTimeMillis() - t0, e.getMessage());
             return false;
         }
-    }
-
-    private static String escapeJson(String s) {
-        if (s == null) return "";
-        return s.replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\n", "\\n")
-                .replace("\r", "\\r")
-                .replace("\t", "\\t");
     }
 }
