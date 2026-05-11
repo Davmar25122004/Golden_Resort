@@ -648,8 +648,7 @@
                 <!-- Botón Auth: distinto según haya sesión -->
                 <button id="btn-auth" class="btn-reservar"
                         th:if="${!navAutenticado}"
-                        onclick="abrirModalAuth()"
-                        data-bs-toggle="collapse" data-bs-target=".navbar-collapse.show"
+                        onclick="var d=document.getElementById('navCollapse');if(d&&d.classList.contains('nav-drawer-open')){d.classList.remove('nav-drawer-open');var b=document.getElementById('nav-drawer-backdrop');if(b){b.classList.remove('active');}document.body.style.overflow='';}setTimeout(abrirModalAuth,50);"
                         data-i18n="nav_signin">Iniciar Sesión</button>
                 <button id="btn-auth" class="btn-reservar"
                         th:if="${navAutenticado}"
