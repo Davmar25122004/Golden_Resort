@@ -44,18 +44,30 @@ applyTranslations();
 
     var navbar = document.getElementById('navbar');
     function openDrawer() {
-        // Quitar backdrop-filter del navbar para que #navCollapse use el viewport como containing block
-        if (navbar) { navbar.style.backdropFilter = 'none'; navbar.style.webkitBackdropFilter = 'none'; }
+        if (navbar) {
+            navbar.style.backdropFilter = 'none';
+            navbar.style.webkitBackdropFilter = 'none';
+            navbar.style.background = 'transparent';
+            navbar.style.borderBottom = 'none';
+            navbar.style.boxShadow = 'none';
+        }
+        drawer.style.visibility = 'visible';
         drawer.classList.add('nav-drawer-open');
         if (backdrop) backdrop.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
     function closeDrawer() {
         drawer.classList.remove('nav-drawer-open');
+        drawer.style.visibility = '';
         if (backdrop) backdrop.classList.remove('active');
         document.body.style.overflow = '';
-        // Restaurar backdrop-filter
-        if (navbar) { navbar.style.backdropFilter = ''; navbar.style.webkitBackdropFilter = ''; }
+        if (navbar) {
+            navbar.style.backdropFilter = '';
+            navbar.style.webkitBackdropFilter = '';
+            navbar.style.background = '';
+            navbar.style.borderBottom = '';
+            navbar.style.boxShadow = '';
+        }
     }
     function isMobile() { return window.innerWidth < 768; }
 
