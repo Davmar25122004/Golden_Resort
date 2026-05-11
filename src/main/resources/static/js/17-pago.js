@@ -48,6 +48,13 @@ function crearModalPago() {
 window.cerrarPago = () => {
     var el = document.getElementById('pago-overlay');
     if (el) el.classList.remove('is-open');
+    var btnConf = document.getElementById('btn-confirmar-reserva');
+    if (btnConf) {
+        btnConf.disabled    = false;
+        btnConf.textContent = typeof t === 'function' ? t('detail_confirm') : 'Confirmar Reserva';
+    }
+    var msg = document.getElementById('reserva-msg');
+    if (msg) msg.style.display = 'none';
 };
 
 async function cargarDatosPago() {
