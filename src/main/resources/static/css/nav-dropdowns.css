@@ -151,6 +151,11 @@
         min-width: 0;
         max-height: none;
     }
+    .nav-dropdown:hover .nav-dropdown-menu,
+    .nav-dropdown:focus-within .nav-dropdown-menu {
+        transform: none;
+        position: static;
+    }
     .nav-dropdown-menu::before { display: none; }
     .nav-dropdown-toggle .nav-caret { display: none; }
     .nav-fav-star { opacity: 1; }

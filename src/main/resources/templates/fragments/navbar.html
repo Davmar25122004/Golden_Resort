@@ -414,6 +414,11 @@
                             margin-left: 12px; padding: 4px 0 4px 8px;
                             min-width: 0;
                         }
+                        .nav-dropdown:hover .nav-dropdown-menu,
+                        .nav-dropdown:focus-within .nav-dropdown-menu {
+                            transform: none;
+                            position: static;
+                        }
                         .nav-dropdown-menu::before { display: none; }
                         .nav-dropdown-toggle .nav-caret { display: none; }
                         .nav-dropdown-item:hover,
