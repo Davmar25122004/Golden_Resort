@@ -15,7 +15,7 @@
                 <!-- Header -->
                 <tr>
                     <td style="padding:40px 40px 28px; text-align:center; border-bottom:1px solid rgba(201,168,76,0.25);">
-                        <img th:if="${logoPng != null}" src="cid:logoImg" alt="Golden Resort" style="height:60px;width:auto;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto;">
+                        <img th:if="${logoUrl != null}" th:src="${logoUrl}" alt="Golden Resort" style="height:60px;width:auto;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto;">
                         <div style="font-family: Georgia, 'Times New Roman', serif; font-size:28px; letter-spacing:6px; color:#C9A84C;">
                             GOLDEN RESORT
                         </div>
@@ -210,7 +210,7 @@
                 </tr>
 
                 <!-- QR Code -->
-                <tr th:if="${qrCid != null}">
+                <tr th:if="${qrUrl != null}">
                     <td style="padding:32px 40px 0; text-align:center;">
                         <div style="color:#C9A84C; font-family: Georgia, serif; font-size:16px; margin-bottom:8px;">
                             Tu código de acceso
@@ -219,20 +219,20 @@
                             <span th:text="${habitacionTipo}">SUITE</span>
                             <span th:if="${habitacionNumero}"> · Nº <span th:text="${habitacionNumero}">301</span></span>
                         </div>
-                        <img th:src="'cid:' + ${qrCid}" alt="Código QR de la reserva" style="width:180px; height:180px; border:6px solid #ffffff; border-radius:8px; display:block; margin: 0 auto; background:#ffffff;">
+                        <img th:src="${qrUrl}" alt="Código QR de la reserva" style="width:180px; height:180px; border:6px solid #ffffff; border-radius:8px; display:block; margin: 0 auto; background:#ffffff;">
                         <div style="color:#9A9A9A; font-size:11px; letter-spacing:1px; margin-top:10px;">
                             Ref · <span style="color:#C9A84C;" th:text="${referencia}">GR-XXXX</span>
                         </div>
                     </td>
                 </tr>
 
-                <!-- Foto de la habitación (embebida inline cid: para que se vea sin descargas externas) -->
-                <tr th:if="${habitacionCid != null}">
+                <!-- Foto de la habitación -->
+                <tr th:if="${habitacionUrl != null}">
                     <td style="padding:32px 40px 0; text-align:center;">
                         <div style="color:#C9A84C; font-family: Georgia, serif; font-size:16px; margin-bottom:14px;">
                             Tu habitación te espera
                         </div>
-                        <img th:src="'cid:' + ${habitacionCid}" alt="Foto de la habitación"
+                        <img th:src="${habitacionUrl}" alt="Foto de la habitación"
                              style="width:100%; max-width:520px; border-radius:8px; border:1px solid #2a2a2a; display:block; margin: 0 auto;">
                         <div style="color:#9A9A9A; font-size:11px; letter-spacing:2px; text-transform:uppercase; margin-top:10px;">
                             <span th:text="${habitacionTipo}">SUITE</span>

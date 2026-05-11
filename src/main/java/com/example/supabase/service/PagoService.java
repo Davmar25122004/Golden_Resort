@@ -359,18 +359,13 @@ public class PagoService {
                     + "Entrada: "     + r.getFechaEntrada().format(df) + "\n"
                     + "Salida: "      + r.getFechaSalida().format(df)  + "\n"
                     + "Total: "       + pago.getTotal() + " €";
-            byte[] qrPng    = qrGenerator.generarPng(qrContenido, 320);
-            byte[] habImg   = leerImagenClasspath(imagenHabitacion(r.getHabitacion().getTipo().name()));
-
-            variables.put("qrPng",        qrPng);
-            variables.put("qrCid",        qrPng.length > 0 ? "qrImg" : null);
-            variables.put("habitacionPng",  habImg);
-            variables.put("habitacionCid",  habImg.length > 0 ? "habitacionImg" : null);
-            variables.put("servicios",    r.getServicios());
-            variables.put("pedidosRS",        pedidoRoomServiceRepository.findByReservaId(r.getId()));
-            variables.put("horaCheckin",  horaCheckin);
-            variables.put("horaCheckout", horaCheckout);
-            variables.put("logoPng",      leerImagenClasspath("logo.png"));
+            variables.put("qrUrl",          publicUrl + "/api/pagos/qr/" + pago.getReferencia() + ".png");
+            variables.put("habitacionUrl",  publicUrl + "/images/" + imagenHabitacion(r.getHabitacion().getTipo().name()));
+            variables.put("logoUrl",        publicUrl + "/images/logo.png");
+            variables.put("servicios",      r.getServicios());
+            variables.put("pedidosRS",      pedidoRoomServiceRepository.findByReservaId(r.getId()));
+            variables.put("horaCheckin",    horaCheckin);
+            variables.put("horaCheckout",   horaCheckout);
 
             emailService.enviarConPlantilla(
                     emailUsuario,
