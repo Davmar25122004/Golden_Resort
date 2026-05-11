@@ -256,6 +256,20 @@ window.showPerfil = async () => {
         }
         @media (max-width: 600px) {
             .perfil-fields-grid { grid-template-columns: 1fr; }
+            .guardada-card {
+                flex-wrap: wrap;
+                gap: 12px;
+                padding: 14px;
+            }
+            .guardada-card > img {
+                width: 72px !important;
+                height: 54px !important;
+            }
+            .guardada-card > button[onclick*="cancelar"] {
+                order: 3;
+                width: 100%;
+                margin-top: 4px;
+            }
         }
         .perfil-edit-input {
             width: 100%;
