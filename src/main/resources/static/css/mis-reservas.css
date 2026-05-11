@@ -185,6 +185,7 @@
     color: var(--gold);
     font-weight: 600;
     font-family: 'Cormorant Garamond', serif;
+    white-space: nowrap;
 }
 
 .card-actions {
