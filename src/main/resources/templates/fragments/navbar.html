@@ -46,16 +46,7 @@
     <!-- ── DROPDOWNS CENTRALES ────────────────────────────────────────── -->
     <div class="nav-center-dropdowns" style="font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.85);font-weight:600;">
 
-        <!-- FAVORITOS (primero) -->
-        <div class="nav-dropdown">
-            <button type="button" class="nav-dropdown-toggle">
-                <span>FAVORITOS</span>
-                <svg class="nav-caret" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="nav-dropdown-menu" data-favs-dropdown>
-                <div class="nav-dropdown-empty">Sin favoritos aún. Pulsa la ★ junto a cualquier opción para añadirla aquí.</div>
-            </div>
-        </div>
+
 
         <!-- HOTEL (común) -->
         <div class="nav-dropdown">
@@ -183,7 +174,6 @@
         </a>
         <button class="btn-reservar" style="padding:6px 16px;font-size:0.78rem;" onclick="logout()" data-i18n="nav_signout">Cerrar Sesión</button>
     </div>
-    <script th:src="@{/js/nav-favs.js(v=1)}"></script>
 </header>
 
 <!-- ▸▸ NAVBAR ADMIN (mismo aspecto que el de la página /admin) ▸▸
@@ -208,13 +198,7 @@
     <div id="adminNavCollapse" class="admin-nav-collapse">
     <div class="nav-center-dropdowns" style="font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.85);font-weight:600;display:flex;align-items:center;gap:20px;flex:0 0 auto;justify-content:center;">
 
-        <!-- FAVORITOS -->
-        <div class="nav-dropdown">
-            <button type="button" class="nav-dropdown-toggle"><span>FAVORITOS</span><svg class="nav-caret" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="nav-dropdown-menu" data-favs-dropdown>
-                <div class="nav-dropdown-empty">Sin favoritos aún. Pulsa la ★ junto a cualquier opción para añadirla aquí.</div>
-            </div>
-        </div>
+
 
         <!-- HOTEL -->
         <div class="nav-dropdown">
@@ -282,7 +266,6 @@
         <button class="btn-reservar" style="padding:6px 16px;font-size:0.78rem;" onclick="logout()" data-i18n="nav_signout">Cerrar Sesión</button>
     </div>
     </div><!-- /admin-nav-collapse -->
-    <script th:src="@{/js/nav-favs.js(v=1)}"></script>
 </header>
 
 <!-- ▸▸ NAVBAR PÚBLICO (invitado / cliente) ▸▸ -->
@@ -443,16 +426,6 @@
                     }
                 </style>
 
-                <!-- Dropdown FAVORITOS (primero, autenticados) -->
-                <div class="nav-dropdown" th:if="${navAutenticado and !navEsAdmin and !navEsRecepcion and !navEsLimpieza and !navEsGimnasio and !navEsSpa and !navEsCoche and !navEsHosteleria and !navEsRoomService}">
-                    <button type="button" class="nav-link-custom nav-dropdown-toggle">
-                        <span>FAVORITOS</span>
-                        <svg class="nav-caret" xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                    </button>
-                    <div class="nav-dropdown-menu" data-favs-dropdown>
-                        <div class="nav-dropdown-empty">Sin favoritos aún. Pulsa la ★ junto a cualquier opción para añadirla aquí.</div>
-                    </div>
-                </div>
 
                 <!-- Dropdown HOTEL -->
                 <div class="nav-dropdown" th:if="${(!navEsRecepcion and !navEsLimpieza and !navEsGimnasio and !navEsSpa and !navEsCoche and !navEsHosteleria and !navEsRoomService) and !navEsAdmin}">
@@ -646,7 +619,6 @@
         </div>
     </div>
     <link rel="stylesheet" th:href="@{/css/nav-dropdowns.css}">
-    <script th:src="@{/js/nav-favs.js(v=1)}"></script>
 </nav>
 
 </th:block>
