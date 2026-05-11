@@ -68,23 +68,35 @@ footer {
     #navbar {
         padding: 10px 0;
     }
+    /* Container: toggler | brand (centro) | acc */
+    #navbar .container {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
     .navbar-brand-custom {
         font-size: 1rem !important;
         letter-spacing: 1.5px;
         gap: 6px !important;
         white-space: nowrap;
+        flex: 1;
+        justify-content: center;
+        margin: 0 !important;
     }
     .navbar-brand-custom img {
         height: 26px !important;
     }
-    .navbar-brand-custom span {
-        width: 26px !important;
-        height: 26px !important;
+    /* Botón accesibilidad */
+    .nav-acc-btn {
+        width: 28px !important;
+        height: 28px !important;
+        flex-shrink: 0;
     }
-    .navbar-brand-custom span svg {
+    .nav-acc-btn svg {
         width: 15px !important;
         height: 15px !important;
     }
+    /* Ocultar botón acc en desktop (se muestra via nav-acc-btn) */
 }
 
 /* ── NAVBAR MÓVIL — drawer lateral ── */
@@ -136,20 +148,6 @@ footer {
         border-bottom: 1px solid rgba(201,168,76,0.18);
         margin-bottom: 8px;
     }
-    .nav-drawer-close {
-        background: none;
-        border: 1px solid rgba(201,168,76,0.35);
-        color: var(--gold);
-        border-radius: 6px;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        flex-shrink: 0;
-    }
-
     /* Backdrop: mitad derecha, borroso */
     #nav-drawer-backdrop {
         display: none;
@@ -171,6 +169,8 @@ footer {
 /* ── NAVBAR DESKTOP (restaurar layout original) ── */
 @media (min-width: 768px) {
     .nav-drawer-header { display: none; }
+    .nav-acc-btn { display: none !important; }
+    .navbar-brand-custom { justify-content: flex-start; flex: unset; }
 
     #navbar .container {
         display: flex;
