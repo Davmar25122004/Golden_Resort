@@ -43,31 +43,28 @@ applyTranslations();
     if (!toggler || !drawer) return;
 
     var navbar = document.getElementById('navbar');
+    var drawerOriginalParent = drawer.parentNode;
+    var drawerNextSibling    = drawer.nextSibling;
+
     function openDrawer() {
-        if (navbar) {
-            navbar.style.backdropFilter = 'none';
-            navbar.style.webkitBackdropFilter = 'none';
-            navbar.style.background = 'transparent';
-            navbar.style.borderBottom = 'none';
-            navbar.style.boxShadow = 'none';
-        }
-        drawer.style.visibility = 'visible';
+        // Mover drawer y backdrop al body para salir del stacking context del navbar
+        document.body.appendChild(drawer);
+        if (backdrop) document.body.appendChild(backdrop);
         drawer.classList.add('nav-drawer-open');
         if (backdrop) backdrop.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
     function closeDrawer() {
         drawer.classList.remove('nav-drawer-open');
-        drawer.style.visibility = '';
         if (backdrop) backdrop.classList.remove('active');
         document.body.style.overflow = '';
-        if (navbar) {
-            navbar.style.backdropFilter = '';
-            navbar.style.webkitBackdropFilter = '';
-            navbar.style.background = '';
-            navbar.style.borderBottom = '';
-            navbar.style.boxShadow = '';
+        // Devolver al lugar original dentro del navbar
+        if (drawerNextSibling) {
+            drawerOriginalParent.insertBefore(drawer, drawerNextSibling);
+        } else {
+            drawerOriginalParent.appendChild(drawer);
         }
+        if (backdrop) drawerOriginalParent.insertBefore(backdrop, drawer);
     }
     function isMobile() { return window.innerWidth < 768; }
 
