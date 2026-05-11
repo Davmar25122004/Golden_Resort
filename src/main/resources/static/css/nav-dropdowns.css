@@ -128,6 +128,19 @@
 
 /* Móvil: aplanar dropdowns dentro del collapse */
 @media (max-width: 767px) {
+    .nav-dropdown {
+        width: 100%;
+    }
+    .nav-dropdown-toggle {
+        width: 100%;
+        text-align: left;
+        justify-content: flex-start;
+        padding: 8px 4px;
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        color: rgba(255,255,255,0.85);
+        font-weight: 600;
+    }
     .nav-dropdown-menu {
         position: static; transform: none;
         opacity: 1; visibility: visible; pointer-events: auto;
