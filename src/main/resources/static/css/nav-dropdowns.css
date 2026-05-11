@@ -168,6 +168,10 @@
     .nav-dropdown-menu::before { display: none; }
     .nav-dropdown-toggle .nav-caret { display: none; }
     .nav-fav-star { opacity: 1; }
+    /* Sin animaciones en móvil */
+    .nav-dropdown-menu,
+    .nav-dropdown-item { transition: none !important; }
+    .nav-dropdown-item:hover { padding-left: 10px; }
 }
 
 /* Contenedor central de dropdowns en navbar staff/admin */
