@@ -14,7 +14,7 @@
 <th:block th:fragment="navbar">
 
 <!-- ▸▸ NAVBAR STAFF (recepción/limpieza/gimnasio/spa/coche/hostelería/roomservice) ▸▸
-     Brand + dropdowns centrales (HOTEL + rol + FAVORITOS) + usuario/perfil/idiomas. -->
+     Brand + dropdowns centrales (HOTEL + rol) + usuario/perfil/idiomas. -->
 <header id="navbar"
         th:if="${(navEsStaff ?: false) and !(navEsAdmin ?: false)}"
         th:attr="data-auth=${navAutenticado},
