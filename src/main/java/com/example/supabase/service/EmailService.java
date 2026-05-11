@@ -12,6 +12,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 
 @Service
@@ -46,11 +47,28 @@ public class EmailService {
             if (variables != null) variables.forEach(ctx::setVariable);
             String html = templateEngine.process(plantilla, ctx);
 
+            // Inline images: buscar variables *Png (byte[]) y su CID correspondiente (*Cid o *Img)
+            StringBuilder attachments = new StringBuilder();
+            if (variables != null) {
+                for (Map.Entry<String, Object> entry : variables.entrySet()) {
+                    String key = entry.getKey();
+                    if (!key.endsWith("Png") || !(entry.getValue() instanceof byte[] imgBytes) || imgBytes.length == 0) continue;
+                    String cidKey = key.replace("Png", "Cid");
+                    Object cidVal = variables.get(cidKey);
+                    String cid = (cidVal instanceof String s && !s.isBlank()) ? s : key.replace("Png", "Img");
+                    if (attachments.length() > 0) attachments.append(",");
+                    attachments.append("{\"name\":\"").append(cid).append(".png\",")
+                               .append("\"content\":\"").append(Base64.getEncoder().encodeToString(imgBytes)).append("\",")
+                               .append("\"contentId\":\"").append(cid).append("\"}");
+                }
+            }
+
             String body = "{"
                 + "\"sender\":{\"name\":\"" + escapeJson(fromName) + "\",\"email\":\"" + escapeJson(from) + "\"},"
                 + "\"to\":[{\"email\":\"" + escapeJson(para) + "\"}],"
                 + "\"subject\":\"" + escapeJson(asunto) + "\","
                 + "\"htmlContent\":\"" + escapeJson(html) + "\""
+                + (attachments.length() > 0 ? ",\"attachment\":[" + attachments + "]" : "")
                 + "}";
 
             HttpRequest request = HttpRequest.newBuilder()
