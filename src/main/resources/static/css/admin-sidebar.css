@@ -506,6 +506,7 @@ body.has-admin-sidebar > #admin-sidebar {
         -webkit-backdrop-filter: blur(16px) !important;
         border-right: 1px solid rgba(201,168,76,0.18) !important;
         padding: 0 0 24px !important;
+        outline: none !important;
         transform: translateX(-100%) !important;
         transition: transform 0.3s cubic-bezier(.4,0,.2,1) !important;
         display: flex !important;

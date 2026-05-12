@@ -1001,9 +1001,12 @@ window.cerrarModalModRe = () => {
 window.guardarModificacionReserva = async (id) => {
     var inDate = document.getElementById('mod-llegada').value;
     var outDate = document.getElementById('mod-salida').value;
-    
+
     var checks = document.querySelectorAll('.mod-serv-check:checked');
     var serviciosArr = Array.from(checks).map(c => ({ servicioId: parseInt(c.value), cantidad: 1 }));
+
+    var btn = document.querySelector('#modal-mod-reserva .admin-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
 
     try {
         var res = await fetch('/api/reservas/' + id, {
@@ -1017,22 +1020,24 @@ window.guardarModificacionReserva = async (id) => {
         });
 
         if (res.ok) {
-            cerrarModalModRe();
-            // Refresca la caché completa del calendario y los datos
-            if (typeof adminCalInvalidarCache === 'function') adminCalInvalidarCache();
-            // Determina la pestaña activa para refrescar la vista correcta
-            var activa = document.querySelector('.admin-tab-btn.active');
-            var tab = activa && activa.id ? activa.id.replace(/^atab-/, '') : 'reservas';
-            if (tab === 'dashboard')      loadAdminDashboard();
-            else if (tab === 'reservas')  loadAdminReservas();
-            else                          loadAdminReservas();   // por defecto, refresca calendario
-            // Recarga gráficos del dashboard si están abiertos
-            if (typeof adminChartsLoad === 'function') adminChartsLoad();
+            if (btn) { btn.textContent = '¡Guardado!'; btn.style.background = '#2ecc71'; }
+            setTimeout(() => {
+                cerrarModalModRe();
+                if (typeof adminCalInvalidarCache === 'function') adminCalInvalidarCache();
+                var activa = document.querySelector('.admin-tab-btn.active');
+                var tab = activa && activa.id ? activa.id.replace(/^atab-/, '') : 'reservas';
+                if (tab === 'dashboard')      loadAdminDashboard();
+                else if (tab === 'reservas')  loadAdminReservas();
+                else                          loadAdminReservas();
+                if (typeof adminChartsLoad === 'function') adminChartsLoad();
+            }, 700);
         } else {
             var msg = await res.text();
+            if (btn) { btn.disabled = false; btn.textContent = t('adm_mod_save') || 'Guardar cambios'; }
             alert(t('adm_mod_error') + msg);
         }
     } catch(e) {
+        if (btn) { btn.disabled = false; btn.textContent = t('adm_mod_save') || 'Guardar cambios'; }
         alert(t('adm_mod_error_conn'));
     }
 };
@@ -1611,28 +1616,26 @@ async function loadAdminUsuarios() {
         .join('');
 
     body.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-            <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
-                <div style="font-size:0.85rem; color:var(--cream);">
-                    Buscar:
-                    <input type="text" id="admin-usr-search" class="admin-form-input"
-                           placeholder="Nombre o email..."
-                           style="display:inline-block; width:200px; margin-left:10px; padding:6px 12px;"
-                           oninput="filtrarUsuarios()">
-                </div>
-                <div style="font-size:0.85rem; color:var(--cream);">
-                    Filtrar por rol:
-                    <select id="admin-usr-role-filter" class="admin-form-input"
-                            style="display:inline-block; width:auto; margin-left:10px; padding:6px 12px; cursor:pointer;"
-                            onchange="filtrarUsuarios()">
-                        <option value="ALL">Todos</option>
-                        ${optionsRoles}
-                        <option value="__SIN__">Sin rol</option>
-                    </select>
-                </div>
-                <button class="admin-btn" onclick="loadAdminUsuarios()" style="font-size:0.7rem; padding:6px 14px;">↻ Refrescar</button>
+        <div class="usr-header">
+            <div class="usr-header-search">
+                <input type="text" id="admin-usr-search" class="admin-form-input"
+                       placeholder="Buscar nombre o email..."
+                       style="padding:8px 12px; font-size:0.8rem;"
+                       oninput="filtrarUsuarios()">
             </div>
-            <button class="admin-btn admin-btn--gold" onclick="openNuevoEmpleadoModal()" style="font-size:0.75rem; padding:7px 18px; background:rgba(201,168,76,0.15); border-color:rgba(201,168,76,0.4); color:#c9a84c;">+ Nuevo Empleado</button>
+            <div class="usr-header-filter">
+                <select id="admin-usr-role-filter" class="admin-form-input"
+                        style="padding:8px 12px; font-size:0.8rem; cursor:pointer;"
+                        onchange="filtrarUsuarios()">
+                    <option value="ALL">Todos los roles</option>
+                    ${optionsRoles}
+                    <option value="__SIN__">Sin rol</option>
+                </select>
+            </div>
+            <div class="usr-header-actions">
+                <button class="admin-btn" onclick="loadAdminUsuarios()" style="font-size:0.7rem; padding:6px 14px;">↻ Refrescar</button>
+                <button class="admin-btn admin-btn--gold" onclick="openNuevoEmpleadoModal()" style="font-size:0.75rem; padding:7px 18px; background:rgba(201,168,76,0.15); border-color:rgba(201,168,76,0.4); color:#c9a84c;">+ Nuevo Empleado</button>
+            </div>
         </div>
         <div id="admin-usr-table-container"></div>
     `;
@@ -1668,8 +1671,9 @@ window.renderUsuariosTable = (usuarios) => {
         return;
     }
 
-    container.innerHTML = `
-        <table class="admin-table">
+    /* ── Vista tabla (desktop) ── */
+    var tableHtml = `
+        <table class="admin-table usr-desktop-table">
             <thead><tr><th>#</th><th>${t('adm_usr_col_name')}</th><th>${t('adm_usr_col_email')}</th><th>${t('adm_usr_col_role')}</th><th></th></tr></thead>
             <tbody>
                 ${usuarios.map(u => {
@@ -1693,6 +1697,39 @@ window.renderUsuariosTable = (usuarios) => {
                 }).join('')}
             </tbody>
         </table>`;
+
+    /* ── Vista cards (mobile) ── */
+    var cardsHtml = `
+        <div class="usr-mobile-cards">
+            ${usuarios.map(u => {
+                var roles = (u.roles && u.roles.length > 0)
+                    ? u.roles
+                    : (u.rol && u.rol !== 'SIN ROL' ? [u.rol] : []);
+                var badgesHtml = roles.length === 0
+                    ? '<span class="admin-badge admin-badge--muted">SIN ROL</span>'
+                    : roles.map(r => {
+                        var cls = 'admin-badge ' + ENUMS.rolBadgeClass(r);
+                        return `<span class="${cls}">${prettyRole(r)}</span>`;
+                      }).join(' ');
+                return `
+                    <div class="usr-card">
+                        <div class="usr-card-header">
+                            <a href="javascript:void(0)" onclick="adminAbrirDetalleUsuario(${u.id})" class="usr-card-name">${u.nombre || '—'}</a>
+                            <span class="usr-card-id">#${u.id}</span>
+                        </div>
+                        <div class="usr-card-email">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            <span>${u.email}</span>
+                        </div>
+                        <div class="usr-card-footer">
+                            <div class="usr-card-roles">${badgesHtml}</div>
+                            <button class="admin-btn admin-btn--danger" onclick="adminEliminarUsuario(${u.id})" style="font-size:0.65rem; padding:5px 12px;">${t('adm_usr_delete')}</button>
+                        </div>
+                    </div>`;
+            }).join('')}
+        </div>`;
+
+    container.innerHTML = tableHtml + cardsHtml;
 }
 
 function prettyRole(name) {

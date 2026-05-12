@@ -17,21 +17,20 @@ window.loadAdminClientes = async function () {
     }
 
     body.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
-            <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-                <div style="font-size:0.85rem; color:var(--cream);">
-                    Buscar:
-                    <input type="text" id="cli-search" class="admin-form-input"
-                           placeholder="Nombre, email o documento..."
-                           style="display:inline-block; width:220px; margin-left:10px; padding:6px 12px;"
-                           oninput="filtrarClientes()">
-                </div>
-                <button class="admin-btn" onclick="loadAdminClientes()" style="font-size:0.7rem; padding:6px 14px;">↻ Refrescar</button>
+        <div class="cli-header">
+            <div class="cli-header-search">
+                <input type="text" id="cli-search" class="admin-form-input"
+                       placeholder="Buscar nombre, email o documento..."
+                       style="padding:8px 12px; font-size:0.8rem;"
+                       oninput="filtrarClientes()">
             </div>
-            <button class="admin-btn admin-btn--gold" onclick="abrirModalNuevoCliente()"
-                    style="font-size:0.75rem; padding:7px 18px; background:rgba(201,168,76,0.15); border-color:rgba(201,168,76,0.4); color:#c9a84c;">
-                + Nuevo Cliente
-            </button>
+            <div class="cli-header-actions">
+                <button class="admin-btn" onclick="loadAdminClientes()" style="font-size:0.7rem; padding:6px 14px;">↻ Refrescar</button>
+                <button class="admin-btn admin-btn--gold" onclick="abrirModalNuevoCliente()"
+                        style="font-size:0.75rem; padding:7px 18px; background:rgba(201,168,76,0.15); border-color:rgba(201,168,76,0.4); color:#c9a84c;">
+                    + Nuevo Cliente
+                </button>
+            </div>
         </div>
         <div id="cli-table-container"></div>
     `;
@@ -56,8 +55,9 @@ window.renderClientesTable = (clientes) => {
         container.innerHTML = '<p style="color:var(--text-muted-custom); font-size:0.8rem; letter-spacing:1px; margin-top:12px;">No hay clientes que coincidan con la búsqueda.</p>';
         return;
     }
-    container.innerHTML = `
-        <table class="admin-table">
+    /* ── Vista tabla (desktop) ── */
+    var tableHtml = `
+        <table class="admin-table cli-desktop-table">
             <thead>
                 <tr>
                     <th>#</th>
@@ -85,6 +85,37 @@ window.renderClientesTable = (clientes) => {
                     </tr>`).join('')}
             </tbody>
         </table>`;
+
+    /* ── Vista cards (mobile) ── */
+    var cardsHtml = `
+        <div class="cli-mobile-cards">
+            ${clientes.map(u => `
+                <div class="cli-card">
+                    <div class="cli-card-header">
+                        <a href="javascript:void(0)" onclick="adminAbrirDetalleUsuario(${u.id})" class="cli-card-name">${u.nombre || '—'}</a>
+                        <span class="cli-card-id">#${u.id}</span>
+                    </div>
+                    <div class="cli-card-body">
+                        <div class="cli-card-row">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            <span>${u.email}</span>
+                        </div>
+                        <div class="cli-card-row">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.11 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.7 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.74.34 1.53.57 2.34.7A2 2 0 0 1 22 16.92z"/></svg>
+                            <span>${u.telefonoPrefijo ? u.telefonoPrefijo + ' ' : ''}${u.telefono || '—'}</span>
+                        </div>
+                        ${u.tipoDocumento ? `<div class="cli-card-row">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="17" y2="8"/><line x1="7" y1="12" x2="13" y2="12"/></svg>
+                            <span>${u.tipoDocumento}: ${u.numDocumento}</span>
+                        </div>` : ''}
+                    </div>
+                    <div class="cli-card-footer">
+                        <button class="admin-btn admin-btn--danger" onclick="adminEliminarCliente(${u.id})" style="font-size:0.65rem; padding:5px 12px;">Eliminar</button>
+                    </div>
+                </div>`).join('')}
+        </div>`;
+
+    container.innerHTML = tableHtml + cardsHtml;
 };
 
 window.adminEliminarCliente = async (id) => {

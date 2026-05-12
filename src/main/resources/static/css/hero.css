@@ -69,6 +69,6 @@
 
 @media (max-width: 768px) {
     .search-glass { padding: 20px 14px; width: 95%; }
-    #navCollapse { background: rgba(13,13,13,0.98) !important; border: 1px solid rgba(201,168,76,0.15); margin-top: 12px !important; }
+    #navCollapse { background: rgba(13,13,13,0.98) !important; border: none !important; border-right: 1px solid rgba(201,168,76,0.18) !important; margin-top: 0 !important; }
     .modal-dark .modal-body { padding: 24px; }
 }

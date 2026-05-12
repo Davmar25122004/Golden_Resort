@@ -466,3 +466,188 @@ a.admin-home-widget {
     margin-bottom: 14px;
 }
 
+/* ── GESTIÓN CLIENTES — header ── */
+.cli-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.cli-header-search { flex: 1; min-width: 200px; }
+.cli-header-actions { display: flex; align-items: center; gap: 8px; }
+
+/* ── GESTIÓN CLIENTES — cards mobile (ocultos en desktop) ── */
+.cli-mobile-cards { display: none; }
+
+.cli-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
+.cli-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.cli-card-name {
+    color: #c9a84c;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(201,168,76,0.4);
+}
+.cli-card-id {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 1px;
+}
+.cli-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+.cli-card-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--text-muted-custom);
+}
+.cli-card-row svg {
+    color: rgba(201,168,76,0.5);
+    flex-shrink: 0;
+}
+.cli-card-row span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.cli-card-footer {
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding-top: 10px;
+}
+
+@media (max-width: 768px) {
+    /* Ocultar tabla, mostrar cards */
+    .cli-desktop-table { display: none !important; }
+    .cli-mobile-cards { display: block !important; }
+
+    /* Header apilado */
+    .cli-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .cli-header-search { min-width: 0; }
+    .cli-header-search .admin-form-input {
+        width: 100% !important;
+        display: block !important;
+    }
+    .cli-header-actions {
+        justify-content: space-between;
+    }
+
+    /* Modal nuevo cliente más pequeño */
+    #modal-nuevo-cliente > div {
+        padding: 1.2rem !important;
+        margin: 12px !important;
+        max-height: 85vh !important;
+    }
+
+    /* Ocultar tabla usuarios, mostrar cards */
+    .usr-desktop-table { display: none !important; }
+    .usr-mobile-cards { display: block !important; }
+
+    /* Header usuarios apilado */
+    .usr-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .usr-header-search .admin-form-input,
+    .usr-header-filter .admin-form-input {
+        width: 100% !important;
+        display: block !important;
+    }
+    .usr-header-actions {
+        justify-content: space-between;
+    }
+}
+
+/* ── GESTIÓN USUARIOS — header ── */
+.usr-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.usr-header-search { flex: 1; min-width: 180px; }
+.usr-header-filter { min-width: 160px; }
+.usr-header-actions { display: flex; align-items: center; gap: 8px; }
+
+/* ── GESTIÓN USUARIOS — cards mobile (ocultos en desktop) ── */
+.usr-mobile-cards { display: none; }
+
+.usr-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+}
+.usr-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.usr-card-name {
+    color: #c9a84c;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(201,168,76,0.4);
+}
+.usr-card-id {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 1px;
+}
+.usr-card-email {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--text-muted-custom);
+    margin-bottom: 12px;
+}
+.usr-card-email svg {
+    color: rgba(201,168,76,0.5);
+    flex-shrink: 0;
+}
+.usr-card-email span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.usr-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding-top: 10px;
+}
+.usr-card-roles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+

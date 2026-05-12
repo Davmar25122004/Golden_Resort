@@ -67,6 +67,13 @@ footer {
 @media (max-width: 767px) {
     #navbar {
         padding: 10px 0;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    .navbar-toggler:focus {
+        box-shadow: none !important;
+        outline: none !important;
     }
     /* Container: toggler | brand (centro) | acc */
     #navbar .container {
@@ -122,6 +129,10 @@ footer {
         -webkit-backdrop-filter: blur(16px) !important;
         border-right: 1px solid rgba(201,168,76,0.18) !important;
         padding: 0 0 24px !important;
+        border: none !important;
+        border-right: 1px solid rgba(201,168,76,0.18) !important;
+        outline: none !important;
+        box-shadow: none !important;
         transform: translateX(-100%) !important;
         transition: transform 0.3s cubic-bezier(.4,0,.2,1) !important;
         display: flex !important;
