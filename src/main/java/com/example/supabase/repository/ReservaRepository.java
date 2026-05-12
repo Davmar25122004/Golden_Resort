@@ -18,15 +18,20 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> findByHabitacion(Habitacion habitacion);
 
     // ¿Cuántas reservas hay para una habitacion en un rango de fechas? (para disponibilidad)
-    @Query("SELECT COUNT(r) FROM Reserva r, Pago p WHERE p.reservaId = r.id AND p.estado = com.example.supabase.domain.EstadoPago.COMPLETADO " +
-           "AND r.habitacion = :habitacion AND r.fechaEntrada < :fechaSalida AND r.fechaSalida > :fechaEntrada")
+    // Cuenta reservas con pago COMPLETADO O sin ningún pago (creadas por admin)
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.habitacion = :habitacion " +
+           "AND r.fechaEntrada < :fechaSalida AND r.fechaSalida > :fechaEntrada " +
+           "AND (EXISTS (SELECT p FROM Pago p WHERE p.reservaId = r.id AND p.estado = com.example.supabase.domain.EstadoPago.COMPLETADO) " +
+           "OR NOT EXISTS (SELECT p FROM Pago p WHERE p.reservaId = r.id))")
     long contarReservasSolapadas(@Param("habitacion") Habitacion habitacion,
                                   @Param("fechaEntrada") LocalDate fechaEntrada,
                                   @Param("fechaSalida") LocalDate fechaSalida);
 
-    @Query("SELECT COUNT(r) FROM Reserva r, Pago p WHERE p.reservaId = r.id AND p.estado = com.example.supabase.domain.EstadoPago.COMPLETADO " +
-           "AND r.habitacion = :habitacion AND r.fechaEntrada < :fechaSalida AND r.fechaSalida > :fechaEntrada " +
-           "AND r.id <> :id")
+    @Query("SELECT COUNT(r) FROM Reserva r WHERE r.habitacion = :habitacion " +
+           "AND r.fechaEntrada < :fechaSalida AND r.fechaSalida > :fechaEntrada " +
+           "AND r.id <> :id " +
+           "AND (EXISTS (SELECT p FROM Pago p WHERE p.reservaId = r.id AND p.estado = com.example.supabase.domain.EstadoPago.COMPLETADO) " +
+           "OR NOT EXISTS (SELECT p FROM Pago p WHERE p.reservaId = r.id))")
     long contarReservasSolapadasExcluyendo(@Param("habitacion") Habitacion habitacion,
                                            @Param("fechaEntrada") LocalDate fechaEntrada,
                                            @Param("fechaSalida") LocalDate fechaSalida,

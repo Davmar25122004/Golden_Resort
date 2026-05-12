@@ -263,9 +263,6 @@ public class ReservaService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         if (request.fechaEntrada != null && request.fechaSalida != null) {
-            if (request.fechaEntrada.isBefore(LocalDate.now())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La reserva debe ser posterior a hoy");
-            }
             if (!request.fechaEntrada.isBefore(request.fechaSalida)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "La fecha de entrada no puede ser posterior a la de salida");
