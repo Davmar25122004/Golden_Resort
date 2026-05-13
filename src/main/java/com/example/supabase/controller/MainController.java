@@ -13,6 +13,7 @@ import com.example.supabase.service.TurnosService;
 import com.example.supabase.service.UsuarioService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -175,7 +176,14 @@ public class MainController {
     public String cookies() { return "cookies"; }
 
     @GetMapping("/verificar-email")
-    public String verificarEmail() {
+    public String verificarEmail(@RequestParam(required = false) String token, Model model) {
+        if (token != null && !token.isBlank()) {
+            boolean ok = usuarioService.confirmarVerificacionPorToken(token);
+            model.addAttribute("verificado", ok);
+            model.addAttribute("tokenProvided", true);
+        } else {
+            model.addAttribute("tokenProvided", false);
+        }
         return "verificar-email";
     }
 

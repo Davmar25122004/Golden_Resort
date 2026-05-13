@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bienvenido a Golden Resort</title>
+</head>
+<body style="margin:0; padding:0; background:#0D0D0D; font-family: 'Helvetica Neue', Arial, sans-serif; color:#F5F0E8;">
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#0D0D0D; padding:32px 16px;">
+    <tr>
+        <td align="center">
+            <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0"
+                   style="max-width:600px; width:100%; background:#1A1A1A; border:1px solid #2a2a2a;">
+
+                <!-- Header -->
+                <tr>
+                    <td style="padding:40px 40px 28px; text-align:center; border-bottom:1px solid rgba(201,168,76,0.25);">
+                        <img th:if="${logoUrl != null}" th:src="${logoUrl}" alt="Golden Resort" style="height:60px;width:auto;margin-bottom:12px;display:block;margin-left:auto;margin-right:auto;">
+                        <div style="font-family: Georgia, 'Times New Roman', serif; font-size:28px; letter-spacing:6px; color:#C9A84C;">
+                            GOLDEN RESORT
+                        </div>
+                        <div style="margin-top:6px; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#9A9A9A;">
+                            Lujo &middot; Distinci&oacute;n &middot; Confort
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Greeting -->
+                <tr>
+                    <td style="padding:36px 40px 8px;">
+                        <div style="font-family: Georgia, serif; font-size:24px; color:#F5F0E8; margin-bottom:14px;">
+                            Bienvenido/a, <span th:text="${nombreCliente}" style="color:#C9A84C;">cliente</span>.
+                        </div>
+                        <p style="font-size:14px; line-height:1.7; color:#BFBFBF; margin:0 0 16px;">
+                            Muchas gracias por confiar en <strong style="color:#C9A84C;">Golden Resort</strong>.
+                            Tu cuenta ha sido verificada correctamente y ya formas parte de nuestra familia.
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- About the hotel -->
+                <tr>
+                    <td style="padding:8px 40px 24px;">
+                        <div style="color:#C9A84C; font-family: Georgia, serif; font-size:18px; padding-bottom:10px; border-bottom:1px solid rgba(201,168,76,0.2);">
+                            Sobre nosotros
+                        </div>
+                        <p style="font-size:13px; line-height:1.7; color:#BFBFBF; margin:14px 0;">
+                            Golden Resort es un exclusivo hotel de cinco estrellas ubicado en la costa mediterr&aacute;nea,
+                            donde el lujo se encuentra con la tranquilidad del mar. Nuestras instalaciones incluyen
+                            habitaciones con vistas al mar, un spa de primer nivel, gimnasio 24h, servicio de coche privado,
+                            restaurante gourmet y room service personalizado.
+                        </p>
+                        <p style="font-size:13px; line-height:1.7; color:#BFBFBF; margin:0;">
+                            Cada detalle est&aacute; pensado para ofrecerte una experiencia &uacute;nica e inolvidable.
+                            Nuestro equipo est&aacute; a tu disposici&oacute;n para hacer de tu estancia un momento perfecto.
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Discount code -->
+                <tr>
+                    <td style="padding:0 40px 28px;">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                               style="background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.25); border-radius:8px;">
+                            <tr>
+                                <td style="padding:24px 28px; text-align:center;">
+                                    <div style="font-size:12px; letter-spacing:3px; text-transform:uppercase; color:#9A9A9A; margin-bottom:8px;">
+                                        REGALO DE BIENVENIDA
+                                    </div>
+                                    <div style="font-family: Georgia, serif; font-size:16px; color:#F5F0E8; margin-bottom:14px; line-height:1.5;">
+                                        Como agradecimiento por elegirnos, te ofrecemos un
+                                        <strong style="color:#C9A84C;">10% de descuento</strong> en tu primera reserva.
+                                    </div>
+                                    <div style="display:inline-block; background:#111; border:2px dashed #C9A84C; border-radius:8px; padding:12px 32px; margin:8px 0;">
+                                        <span style="font-family: 'Courier New', monospace; font-size:24px; font-weight:700; color:#C9A84C; letter-spacing:4px;">
+                                            BIENVENIDA10
+                                        </span>
+                                    </div>
+                                    <p style="font-size:12px; color:#9A9A9A; margin:12px 0 0;">
+                                        Intr&oacute;ducelo en el momento del pago para aplicar el descuento.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- CTA -->
+                <tr>
+                    <td style="padding:0 40px 32px; text-align:center;">
+                        <a th:href="${siteUrl}" style="display:inline-block; background:#C9A84C; color:#0D0D0D; text-decoration:none; padding:14px 40px; border-radius:6px; font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase;">
+                            EXPLORAR HABITACIONES
+                        </a>
+                    </td>
+                </tr>
+
+                <!-- Divider -->
+                <tr>
+                    <td style="padding:0 40px;">
+                        <div style="height:1px; background:rgba(201,168,76,0.2);"></div>
+                    </td>
+                </tr>
+
+                <!-- Social media -->
+                <tr>
+                    <td style="padding:28px 40px 12px; text-align:center;">
+                        <div style="font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#9A9A9A; margin-bottom:16px;">
+                            S&Iacute;GUENOS
+                        </div>
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto;">
+                            <tr>
+                                <td style="padding:0 14px;">
+                                    <a href="https://www.instagram.com/goldenresort01" style="text-decoration:none; color:#C9A84C; font-size:13px; letter-spacing:1px;">
+                                        Instagram
+                                    </a>
+                                </td>
+                                <td style="padding:0 14px;">
+                                    <a href="https://www.facebook.com/profile.php?id=61589233032212" style="text-decoration:none; color:#C9A84C; font-size:13px; letter-spacing:1px;">
+                                        Facebook
+                                    </a>
+                                </td>
+                                <td style="padding:0 14px;">
+                                    <a href="https://x.com/goldenresort01" style="text-decoration:none; color:#C9A84C; font-size:13px; letter-spacing:1px;">
+                                        X
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                    <td style="padding:20px 40px 32px; text-align:center;">
+                        <p style="font-size:11px; color:#666; margin:0; line-height:1.6;">
+                            &copy; 2026 Golden Resort &middot; Todos los derechos reservados<br>
+                            Avda. del Mediterr&aacute;neo, Cullera &middot; Valencia, Espa&ntilde;a
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

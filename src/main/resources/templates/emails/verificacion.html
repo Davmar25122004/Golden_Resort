@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Verifica tu cuenta &middot; Golden Resort</title>
+</head>
+<body style="margin:0; padding:0; background:#0D0D0D; font-family: 'Helvetica Neue', Arial, sans-serif; color:#F5F0E8;">
+
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#0D0D0D; padding:40px 16px;">
+    <tr>
+        <td align="center">
+
+            <!-- Header -->
+            <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
+                <tr>
+                    <td style="text-align:center; padding-bottom:28px;">
+                        <div style="font-size:11px; letter-spacing:4px; text-transform:uppercase; color:#9A9A9A; margin-bottom:16px;">
+                            &mdash; B I E N V E N I D O &nbsp; A &mdash;
+                        </div>
+                        <img th:if="${logoUrl != null}" th:src="${logoUrl}" alt="Golden Resort" style="height:48px;width:auto;margin-bottom:14px;display:block;margin-left:auto;margin-right:auto;">
+                        <div style="font-family: Georgia, 'Times New Roman', serif; font-size:32px; letter-spacing:8px; color:#C9A84C;">
+                            GOLDEN RESORT
+                        </div>
+                        <div style="margin-top:8px; font-size:11px; letter-spacing:4px; text-transform:uppercase; color:#9A9A9A;">
+                            LUJO &amp; DISTINCI&Oacute;N
+                        </div>
+                        <!-- Decorative line -->
+                        <div style="margin:24px auto 0; width:200px; height:1px; background:linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent);"></div>
+                        <div style="width:8px; height:8px; background:#C9A84C; transform:rotate(45deg); margin:-4px auto 0;"></div>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Card -->
+            <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0"
+                   style="max-width:600px; width:100%; background:#1A1A1A; border:1px solid #2a2a2a; border-radius:4px; margin-top:20px;">
+
+                <tr>
+                    <td style="padding:40px 44px 12px;">
+                        <div style="font-size:11px; letter-spacing:3px; text-transform:uppercase; color:#C9A84C; margin-bottom:14px; font-weight:600;">
+                            VERIFICACI&Oacute;N DE CUENTA
+                        </div>
+                        <div style="font-family: Georgia, serif; font-size:24px; color:#F5F0E8; line-height:1.3; margin-bottom:18px;">
+                            Un paso para acceder<br>a la experiencia completa
+                        </div>
+                        <p style="font-size:14px; line-height:1.7; color:#BFBFBF; margin:0 0 28px;">
+                            Gracias por registrarte en <strong style="color:#F5F0E8;">Golden Resort</strong>.
+                            Para activar tu cuenta y comenzar a disfrutar de nuestros servicios exclusivos,
+                            confirma tu direcci&oacute;n de correo electr&oacute;nico.
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- CTA Button -->
+                <tr>
+                    <td style="padding:0 44px 24px;" align="center">
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                                <td style="background:#C9A84C; border-radius:4px;">
+                                    <a th:href="${verificarUrl}" style="display:block; padding:16px 48px; color:#0D0D0D; text-decoration:none; font-size:13px; font-weight:700; letter-spacing:3px; text-transform:uppercase; font-family: 'Helvetica Neue', Arial, sans-serif;">
+                                        VERIFICAR MI CUENTA
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <!-- Disclaimer -->
+                <tr>
+                    <td style="padding:0 44px 32px; text-align:center;">
+                        <p style="font-size:12px; color:#888; margin:0; line-height:1.6;">
+                            Si no solicitaste esta cuenta, puedes ignorar este mensaje.<br>
+                            El enlace expirar&aacute; en <strong style="color:#BFBFBF;">24 horas</strong>.
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- Divider -->
+                <tr>
+                    <td style="padding:0 44px;">
+                        <div style="height:1px; background:rgba(201,168,76,0.15);"></div>
+                    </td>
+                </tr>
+
+                <!-- Fallback link -->
+                <tr>
+                    <td style="padding:20px 44px 28px;">
+                        <div style="font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#666; margin-bottom:8px;">
+                            &iquest;EL BOT&Oacute;N NO FUNCIONA?
+                        </div>
+                        <a th:href="${verificarUrl}" th:text="${verificarUrl}" style="font-size:11px; color:#C9A84C; word-break:break-all; text-decoration:underline;">
+                            https://...
+                        </a>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Footer -->
+            <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px; width:100%;">
+                <tr>
+                    <td style="padding:28px 40px 16px; text-align:center;">
+                        <p style="font-size:11px; color:#555; margin:0; line-height:1.6;">
+                            &copy; 2026 Golden Resort &middot; Todos los derechos reservados
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

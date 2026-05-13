@@ -237,9 +237,11 @@ public class PagoService {
                 .ifPresent(p -> { throw new RuntimeException("Esta reserva ya está pagada."); });
 
         BigDecimal subtotal = reservaService.calcularTotal(r);
-        CodigoDescuentoService.ResultadoDescuento rd = codigoDescuentoService.aplicar(codigoDescuento, subtotal);
+        CodigoDescuentoService.ResultadoDescuento rd = codigoDescuentoService.aplicar(codigoDescuento, subtotal, usuarioId);
         BigDecimal descuento = rd.valido() ? rd.descuento() : BigDecimal.ZERO;
         BigDecimal total     = subtotal.subtract(descuento);
+
+        long noches = java.time.temporal.ChronoUnit.DAYS.between(r.getFechaEntrada(), r.getFechaSalida());
 
         Map<String, Object> res = new HashMap<>();
         res.put("reservaId",     r.getId());
@@ -247,6 +249,9 @@ public class PagoService {
         res.put("habitacionNumero", r.getHabitacion().getNumero());
         res.put("fechaEntrada",  r.getFechaEntrada());
         res.put("fechaSalida",   r.getFechaSalida());
+        res.put("precioNoche",   r.getHabitacion().getPrecioNoche());
+        res.put("noches",        noches);
+        res.put("subtotalHab",   r.getHabitacion().getPrecioNoche().multiply(java.math.BigDecimal.valueOf(noches)));
         res.put("subtotal",      subtotal);
         res.put("descuento",     descuento);
         res.put("total",         total);
@@ -301,7 +306,7 @@ public class PagoService {
             throw new RuntimeException("Método de pago no válido.");
 
         BigDecimal subtotal = reservaService.calcularTotal(r);
-        CodigoDescuentoService.ResultadoDescuento rd = codigoDescuentoService.aplicar(codigoDescuento, subtotal);
+        CodigoDescuentoService.ResultadoDescuento rd = codigoDescuentoService.aplicar(codigoDescuento, subtotal, usuarioId);
         BigDecimal descuento = rd.valido() ? rd.descuento() : BigDecimal.ZERO;
         BigDecimal total     = subtotal.subtract(descuento);
 
@@ -331,8 +336,8 @@ public class PagoService {
     }
 
     /** Valida un código de descuento sin crear ninguna entidad. */
-    public Map<String, Object> validarDescuento(BigDecimal subtotal, String codigoDescuento) {
-        CodigoDescuentoService.ResultadoDescuento rd = codigoDescuentoService.aplicar(codigoDescuento, subtotal);
+    public Map<String, Object> validarDescuento(BigDecimal subtotal, String codigoDescuento, Long usuarioId) {
+        CodigoDescuentoService.ResultadoDescuento rd = codigoDescuentoService.aplicar(codigoDescuento, subtotal, usuarioId);
         BigDecimal descuento = rd.valido() ? rd.descuento() : BigDecimal.ZERO;
         Map<String, Object> res = new HashMap<>();
         res.put("valido",    rd.valido());

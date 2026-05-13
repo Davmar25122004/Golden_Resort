@@ -14,7 +14,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 @Service
 public class UsuarioService {
@@ -25,19 +27,25 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
     private final SupabaseAuthService supabaseAuthService;
     private final MensajeriaService mensajeriaService;
+    private final EmailService emailService;
+
+    @org.springframework.beans.factory.annotation.Value("${app.public-url:http://localhost:8080}")
+    private String publicUrl;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
                           PendingRegistrationRepository pendingRepository,
                           RoleRepository roleRepository,
                           PasswordEncoder passwordEncoder,
                           SupabaseAuthService supabaseAuthService,
-                          MensajeriaService mensajeriaService) {
+                          MensajeriaService mensajeriaService,
+                          EmailService emailService) {
         this.usuarioRepository  = usuarioRepository;
         this.pendingRepository  = pendingRepository;
         this.roleRepository     = roleRepository;
         this.passwordEncoder    = passwordEncoder;
         this.supabaseAuthService = supabaseAuthService;
         this.mensajeriaService  = mensajeriaService;
+        this.emailService       = emailService;
     }
 
     public void registrar(String nombre, String email, String password,
@@ -78,7 +86,14 @@ public class UsuarioService {
             telefono = telNorm;
         }
 
-        String supabaseUid = supabaseAuthService.signUp(email, password, previousUid);
+        String supabaseUid = null;
+        try {
+            supabaseUid = supabaseAuthService.signUp(email, password, previousUid);
+        } catch (Exception ignored) {
+            // Supabase puede fallar; no bloqueamos el registro por eso
+        }
+
+        String token = java.util.UUID.randomUUID().toString();
 
         PendingRegistration pending = new PendingRegistration();
         pending.setEmail(email);
@@ -91,7 +106,29 @@ public class UsuarioService {
         pending.setFechaNacimiento(fechaNacimiento);
         pending.setTelefonoPrefijo(telefonoPrefijo);
         pending.setTelefono(telefono);
+        pending.setVerificationToken(token);
         pendingRepository.save(pending);
+
+        // Enviar email de verificación por Brevo
+        final String nombreFinal = nombre;
+        final String emailFinal = email;
+        final String tokenFinal = token;
+        java.util.concurrent.CompletableFuture.runAsync(() -> enviarEmailVerificacion(nombreFinal, emailFinal, tokenFinal));
+    }
+
+    private void enviarEmailVerificacion(String nombre, String email, String token) {
+        try {
+            String verificarUrl = publicUrl + "/verificar-email?token=" + token;
+            Map<String, Object> vars = new HashMap<>();
+            vars.put("nombreCliente", nombre != null ? nombre : email);
+            vars.put("verificarUrl", verificarUrl);
+            vars.put("logoUrl", publicUrl + "/images/logo.png");
+            emailService.enviarConPlantilla(
+                    email,
+                    "Verifica tu cuenta · Golden Resort",
+                    "emails/verificacion",
+                    vars);
+        } catch (Exception ignored) {}
     }
 
     @Transactional
@@ -115,10 +152,27 @@ public class UsuarioService {
     public void reenviarVerificacion(String email) {
         if (email == null || email.isBlank())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email no proporcionado.");
-        if (pendingRepository.findByEmail(email).isEmpty())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "No existe un registro pendiente para este email.");
-        supabaseAuthService.resendVerificationEmail(email);
+        PendingRegistration pending = pendingRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "No existe un registro pendiente para este email."));
+        // Regenerar token si no tiene
+        if (pending.getVerificationToken() == null || pending.getVerificationToken().isBlank()) {
+            pending.setVerificationToken(java.util.UUID.randomUUID().toString());
+            pendingRepository.save(pending);
+        }
+        enviarEmailVerificacion(pending.getNombre(), email, pending.getVerificationToken());
+    }
+
+    @Transactional
+    public boolean confirmarVerificacionPorToken(String token) {
+        PendingRegistration pending = pendingRepository.findByVerificationToken(token).orElse(null);
+        if (pending == null) return false;
+        // Expiración: 24 horas
+        if (pending.getCreatedAt() != null && pending.getCreatedAt().plusHours(24).isBefore(LocalDateTime.now())) {
+            pendingRepository.delete(pending);
+            return false;
+        }
+        return confirmarVerificacion(pending.getEmail());
     }
 
     @Transactional
@@ -149,6 +203,24 @@ public class UsuarioService {
             mensajeriaService.obtenerOCrearConversacion(guardado);
         } catch (Exception ignored) {}
 
+        // Email de bienvenida (asíncrono)
+        final Usuario u = guardado;
+        java.util.concurrent.CompletableFuture.runAsync(() -> enviarEmailBienvenida(u));
+
         return true;
+    }
+
+    private void enviarEmailBienvenida(Usuario u) {
+        try {
+            Map<String, Object> vars = new HashMap<>();
+            vars.put("nombreCliente", u.getNombre() != null ? u.getNombre() : u.getEmail());
+            vars.put("logoUrl", publicUrl + "/images/logo.png");
+            vars.put("siteUrl", publicUrl);
+            emailService.enviarConPlantilla(
+                    u.getEmail(),
+                    "Bienvenido/a a Golden Resort",
+                    "emails/bienvenida",
+                    vars);
+        } catch (Exception ignored) {}
     }
 }

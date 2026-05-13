@@ -25,4 +25,7 @@ public class PendingRegistration {
     private LocalDate fechaNacimiento;
     private String telefonoPrefijo;
     private String telefono;
+
+    @Column(unique = true)
+    private String verificationToken;
 }

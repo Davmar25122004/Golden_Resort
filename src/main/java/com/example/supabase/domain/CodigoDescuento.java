@@ -41,6 +41,13 @@ public class CodigoDescuento {
     @Column(nullable = false)
     private boolean activo = true;
 
+    /** Si no es null, solo este usuario puede usar el código. */
+    private Long usuarioAsignadoId;
+
+    /** Nombre del usuario asignado (solo para mostrar en admin, no para lógica). */
+    @Transient
+    private String usuarioAsignadoNombre;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 }

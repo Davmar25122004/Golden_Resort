@@ -129,7 +129,15 @@ public class AdminController {
 
     @GetMapping("/codigos-descuento")
     public List<CodigoDescuento> listarCodigosDescuento() {
-        return codigoDescuentoRepository.findAll();
+        List<CodigoDescuento> codigos = codigoDescuentoRepository.findAllByOrderByCreatedAtDesc();
+        for (CodigoDescuento c : codigos) {
+            if (c.getUsuarioAsignadoId() != null) {
+                usuarioRepository.findById(c.getUsuarioAsignadoId())
+                    .ifPresent(u -> c.setUsuarioAsignadoNombre(
+                        u.getNombre() != null ? u.getNombre() + " (" + u.getEmail() + ")" : u.getEmail()));
+            }
+        }
+        return codigos;
     }
 
     @PostMapping("/codigos-descuento")
@@ -218,6 +226,27 @@ public class AdminController {
     public ResponseEntity<?> eliminarCodigoDescuento(@PathVariable Long id) {
         codigoDescuentoRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/codigos-descuento/{id}/asignar")
+    public ResponseEntity<?> asignarCodigoDescuento(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        return codigoDescuentoRepository.findById(id).map(c -> {
+            Object uid = body.get("usuarioId");
+            if (uid == null) {
+                // Desasignar
+                c.setUsuarioAsignadoId(null);
+                codigoDescuentoRepository.save(c);
+                return ResponseEntity.ok(Map.of("ok", true, "mensaje", "Código disponible para todos."));
+            }
+            Long usuarioId = Long.valueOf(uid.toString());
+            var usuario = usuarioRepository.findById(usuarioId);
+            if (usuario.isEmpty())
+                return ResponseEntity.badRequest().body(Map.of("ok", false, "mensaje", "Usuario no encontrado."));
+            c.setUsuarioAsignadoId(usuarioId);
+            codigoDescuentoRepository.save(c);
+            String nombre = usuario.get().getNombre() != null ? usuario.get().getNombre() : usuario.get().getEmail();
+            return ResponseEntity.ok(Map.of("ok", true, "mensaje", "Código asignado a " + nombre + "."));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     // ── ROLES STAFF ──────────────────────────────────────────────────────────

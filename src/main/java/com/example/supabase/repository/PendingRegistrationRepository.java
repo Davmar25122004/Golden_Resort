@@ -9,4 +9,5 @@ public interface PendingRegistrationRepository extends JpaRepository<PendingRegi
     Optional<PendingRegistration> findByEmail(String email);
     Optional<PendingRegistration> findFirstByNumDocumento(String numDocumento);
     Optional<PendingRegistration> findFirstByTelefono(String telefono);
+    Optional<PendingRegistration> findByVerificationToken(String token);
 }

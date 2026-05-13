@@ -203,7 +203,7 @@ public class PagoController {
                 ? new java.math.BigDecimal(n.toString()) : java.math.BigDecimal.ZERO;
         String codigo = (String) body.get("codigoDescuento");
         try {
-            return ResponseEntity.ok(pagoService.validarDescuento(subtotal, codigo));
+            return ResponseEntity.ok(pagoService.validarDescuento(subtotal, codigo, u.getId()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

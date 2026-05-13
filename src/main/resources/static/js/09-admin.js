@@ -939,6 +939,13 @@ window.adminCancelarReserva = async (id) => {
 };
 
 window.adminModificarReserva = async (r) => {
+    // Limpiar modal anterior y residuos de backdrop
+    var old = document.getElementById('modal-mod-reserva');
+    if (old) old.remove();
+    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+
     var todosServicios = await fetchServicios();
     var dIn = r.fechaEntrada;
     var dOut = r.fechaSalida;
@@ -998,6 +1005,9 @@ window.adminModificarReserva = async (r) => {
 window.cerrarModalModRe = () => {
     var el = document.getElementById('modal-mod-reserva');
     if (el) el.remove();
+    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
 };
 
 window.guardarModificacionReserva = async (id) => {
@@ -1807,7 +1817,7 @@ window.mostrarFormDescuento = function() {
                     <input id="desc-hasta" type="date" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border-color-custom,#333);background:var(--input-bg-custom,#111);color:var(--text-color-custom,#eee);font-size:.9rem;" />
                 </div>
                 <div>
-                    <label style="font-size:.75rem;color:var(--text-muted-custom,#a09880);display:block;margin-bottom:4px;">Usos máximos</label>
+                    <label style="font-size:.75rem;color:var(--text-muted-custom,#a09880);display:block;margin-bottom:4px;">Usos máx. por usuario</label>
                     <div style="display:flex;align-items:center;gap:8px;">
                         <input id="desc-usos" type="number" min="1" placeholder="Ej: 50" style="flex:1;padding:8px 12px;border-radius:6px;border:1px solid var(--border-color-custom,#333);background:var(--input-bg-custom,#111);color:var(--text-color-custom,#eee);font-size:.9rem;" />
                         <label style="display:flex;align-items:center;gap:4px;font-size:.8rem;color:var(--text-muted-custom,#a09880);white-space:nowrap;cursor:pointer;">
@@ -1878,20 +1888,18 @@ async function cargarListaDescuentos() {
 
         var html = '<div style="display:grid;gap:12px;">';
         codigos.forEach(function(c) {
-            var agotado = c.usoMaximo !== null && c.usos >= c.usoMaximo;
             var caducado = c.validoHasta && new Date(c.validoHasta) < new Date();
-            var activo = c.activo && !agotado && !caducado;
+            var activo = c.activo && !caducado;
 
             var estadoLabel, estadoColor;
-            if (agotado) { estadoLabel = 'Agotado'; estadoColor = '#e74c3c'; }
-            else if (caducado) { estadoLabel = 'Caducado'; estadoColor = '#e67e22'; }
+            if (caducado) { estadoLabel = 'Caducado'; estadoColor = '#e67e22'; }
             else if (!c.activo) { estadoLabel = 'Desactivado'; estadoColor = '#95a5a6'; }
             else { estadoLabel = 'Activo'; estadoColor = '#27ae60'; }
 
             var valorTxt = c.tipo === 'PORCENTAJE' ? c.valor + '%' : c.valor.toFixed(2) + ' €';
             var usosTxt = c.usoMaximo !== null
-                ? c.usos + ' / ' + c.usoMaximo
-                : c.usos + ' / ∞';
+                ? c.usoMaximo + ' por usuario'
+                : 'Ilimitado';
 
             html += '<div style="background:var(--card-bg-custom,#1a1a1a);border:1px solid var(--border-color-custom,#333);border-radius:10px;padding:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;' + (!activo ? 'opacity:.6;' : '') + '">';
 
@@ -1902,16 +1910,23 @@ async function cargarListaDescuentos() {
 
             html += '<div style="display:flex;gap:24px;flex-wrap:wrap;font-size:.8rem;color:var(--text-muted-custom,#a09880);">' +
                 '<div><span style="opacity:.6;">Descuento</span><br><strong style="color:var(--text-color-custom,#eee);font-size:.95rem;">' + valorTxt + '</strong></div>' +
-                '<div><span style="opacity:.6;">Usos</span><br><strong style="color:var(--text-color-custom,#eee);font-size:.95rem;">' + usosTxt + '</strong></div>';
+                '<div><span style="opacity:.6;">Usos</span><br><strong style="color:var(--text-color-custom,#eee);font-size:.95rem;">' + usosTxt + '</strong></div>' +
+                '<div><span style="opacity:.6;">Usos totales</span><br><strong style="color:var(--text-color-custom,#eee);font-size:.95rem;">' + c.usos + '</strong></div>';
             if (c.montoMinimo) html += '<div><span style="opacity:.6;">Mín.</span><br><strong style="color:var(--text-color-custom,#eee);">' + c.montoMinimo.toFixed(2) + ' €</strong></div>';
             if (c.validoHasta) html += '<div><span style="opacity:.6;">Caduca</span><br><strong style="color:var(--text-color-custom,#eee);">' + c.validoHasta + '</strong></div>';
+            html += '<div><span style="opacity:.6;">Asignado a</span><br><strong style="color:var(--text-color-custom,#eee);font-size:.85rem;">' +
+                (c.usuarioAsignadoNombre ? c.usuarioAsignadoNombre : 'Todos') + '</strong></div>';
             html += '</div>';
 
-            html += '<div style="display:flex;gap:8px;">';
+            html += '<div style="display:flex;gap:8px;flex-wrap:wrap;">';
             if (activo) {
                 html += '<button onclick="toggleDescuento(' + c.id + ',false)" title="Desactivar" style="padding:6px 12px;border-radius:6px;font-size:.75rem;cursor:pointer;border:1px solid #e74c3c;background:transparent;color:#e74c3c;">Desactivar</button>';
-            } else if (!agotado && !caducado) {
+            } else if (!caducado) {
                 html += '<button onclick="toggleDescuento(' + c.id + ',true)" title="Activar" style="padding:6px 12px;border-radius:6px;font-size:.75rem;cursor:pointer;border:1px solid #27ae60;background:transparent;color:#27ae60;">Activar</button>';
+            }
+            html += '<button onclick="abrirModalAsignarDescuento(' + c.id + ')" title="Asignar a cliente" style="padding:6px 12px;border-radius:6px;font-size:.75rem;cursor:pointer;border:1px solid var(--accent-color-custom,#c9a84c);background:transparent;color:var(--accent-color-custom,#c9a84c);">' + (c.usuarioAsignadoId ? 'Reasignar' : 'Asignar') + '</button>';
+            if (c.usuarioAsignadoId) {
+                html += '<button onclick="desasignarDescuento(' + c.id + ')" title="Quitar asignación" style="padding:6px 12px;border-radius:6px;font-size:.75rem;cursor:pointer;border:1px solid #e67e22;background:transparent;color:#e67e22;">Quitar asignación</button>';
             }
             html += '<button onclick="eliminarDescuento(' + c.id + ',\'' + c.codigo + '\')" title="Eliminar" style="padding:6px 12px;border-radius:6px;font-size:.75rem;cursor:pointer;border:1px solid #666;background:transparent;color:#999;">✕</button>';
             html += '</div></div>';
@@ -1938,6 +1953,119 @@ window.eliminarDescuento = async function(id, codigo) {
     try {
         await fetch('/api/admin/codigos-descuento/' + id, { method: 'DELETE' });
         cargarListaDescuentos();
+    } catch (_) { alert('Error de conexión.'); }
+};
+
+// ── Asignar descuento a cliente ──────────────────────────────────────────────
+
+window._descAsignarId = null;
+window._descClientesCache = null;
+
+window.abrirModalAsignarDescuento = async function(codigoId) {
+    // Cerrar card anterior si existe
+    var old = document.getElementById('desc-asignar-card');
+    if (old) { old.remove(); window._descAsignarId = null; return; }
+
+    window._descAsignarId = codigoId;
+
+    // Insertar card justo después del código correspondiente
+    var cards = document.querySelectorAll('#descuentos-lista > div > div');
+    var target = null;
+    cards.forEach(function(card) {
+        var btn = card.querySelector('[onclick*="abrirModalAsignarDescuento(' + codigoId + ')"]');
+        if (btn) target = card;
+    });
+    if (!target) return;
+
+    var card = document.createElement('div');
+    card.id = 'desc-asignar-card';
+    card.style.cssText = 'background:var(--card-bg-custom,#1a1a1a);border:1px solid rgba(201,168,76,0.3);border-radius:10px;padding:16px;margin-top:8px;margin-bottom:8px;';
+    card.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+            <h4 style="font-size:.95rem;color:var(--text-color-custom,#e8e0d0);margin:0;">Asignar a cliente</h4>
+            <button onclick="document.getElementById('desc-asignar-card').remove()" style="background:none;border:none;color:var(--text-muted-custom,#888);cursor:pointer;font-size:1.2rem;padding:0 4px;">&times;</button>
+        </div>
+        <input id="desc-buscar-cliente" type="text" placeholder="Buscar por nombre o email..."
+            style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border-color-custom,#333);
+                   background:var(--input-bg-custom,#111);color:var(--text-color-custom,#eee);font-size:.85rem;box-sizing:border-box;margin-bottom:10px;"
+            oninput="filtrarClientesDescuento(this.value)" />
+        <div id="desc-clientes-lista" style="max-height:260px;overflow-y:auto;">
+            <p style="color:var(--text-muted-custom,#888);font-size:.8rem;text-align:center;padding:12px 0;">Cargando...</p>
+        </div>`;
+    target.after(card);
+
+    // Cargar clientes
+    try {
+        if (!window._descClientesCache) {
+            var r = await fetch('/api/admin/usuarios');
+            if (!r.ok) throw new Error();
+            var usuarios = await r.json();
+            window._descClientesCache = usuarios.filter(function(u) {
+                return u.roles && u.roles.some(function(rol) {
+                    return (typeof rol === 'string' ? rol : rol.name || '').includes('CLIENTE');
+                });
+            });
+        }
+        filtrarClientesDescuento('');
+    } catch (_) {
+        document.getElementById('desc-clientes-lista').innerHTML =
+            '<p style="color:#e74c3c;font-size:.8rem;text-align:center;">Error al cargar clientes.</p>';
+    }
+};
+
+window.filtrarClientesDescuento = function(query) {
+    var lista = document.getElementById('desc-clientes-lista');
+    if (!lista || !window._descClientesCache) return;
+    var q = (query || '').toLowerCase().trim();
+    var filtrados = window._descClientesCache.filter(function(u) {
+        if (!q) return true;
+        return (u.nombre || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+    });
+
+    if (!filtrados.length) {
+        lista.innerHTML = '<p style="color:var(--text-muted-custom,#888);font-size:.8rem;text-align:center;padding:12px 0;">Sin resultados.</p>';
+        return;
+    }
+
+    lista.innerHTML = filtrados.slice(0, 50).map(function(u) {
+        return '<div onclick="confirmarAsignarDescuento(' + u.id + ')" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;cursor:pointer;border-radius:6px;border-bottom:1px solid rgba(255,255,255,0.04);" onmouseover="this.style.background=\'rgba(201,168,76,0.08)\'" onmouseout="this.style.background=\'transparent\'">' +
+            '<div style="min-width:0;">' +
+            '<div style="color:var(--text-color-custom,#eee);font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (u.nombre || 'Sin nombre') + '</div>' +
+            '<div style="color:var(--text-muted-custom,#888);font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (u.email || '') + '</div>' +
+            '</div>' +
+            '<span style="color:var(--accent-color-custom,#c9a84c);font-size:.7rem;letter-spacing:1px;flex-shrink:0;font-weight:600;">ASIGNAR</span>' +
+            '</div>';
+    }).join('');
+};
+
+window.confirmarAsignarDescuento = async function(usuarioId) {
+    try {
+        var r = await fetch('/api/admin/codigos-descuento/' + window._descAsignarId + '/asignar', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usuarioId: usuarioId })
+        });
+        var data = await r.json();
+        if (data.ok) {
+            var card = document.getElementById('desc-asignar-card');
+            if (card) card.remove();
+            cargarListaDescuentos();
+        } else {
+            alert(data.mensaje || 'Error al asignar.');
+        }
+    } catch (_) { alert('Error de conexión.'); }
+};
+
+window.desasignarDescuento = async function(codigoId) {
+    try {
+        var r = await fetch('/api/admin/codigos-descuento/' + codigoId + '/asignar', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usuarioId: null })
+        });
+        var data = await r.json();
+        if (data.ok) cargarListaDescuentos();
+        else alert(data.mensaje || 'Error.');
     } catch (_) { alert('Error de conexión.'); }
 };
 

@@ -207,6 +207,18 @@ function renderPago() {
             </div>`;
     }
 
+    var habPrecio = s.precioNoche ? parseFloat(s.precioNoche) : 0;
+    var habNoches = s.noches ? parseInt(s.noches) : 0;
+    var habSubtotal = s.subtotalHab ? parseFloat(s.subtotalHab) : (habPrecio * habNoches);
+    var habRow = habPrecio > 0 ? `
+            <div class="pago-row pago-row--servicio">
+                <span class="pago-servicio-nombre">Habitación ${s.habitacionTipo} <span class="pago-servicio-cant">× ${habNoches} noche${habNoches !== 1 ? 's' : ''}</span></span>
+                <span class="pago-servicio-precio">
+                    <span class="pago-servicio-unit">${habPrecio.toFixed(2)} €/noche</span>
+                    ${habSubtotal.toFixed(2)} €
+                </span>
+            </div>` : '';
+
     body.innerHTML = `
         <div class="pago-section">
             <div class="pago-section-title">Resumen</div>
@@ -220,6 +232,7 @@ function renderPago() {
             <div class="pago-row pago-row--muted" style="font-size:0.78rem;">
                 <span>Check-out</span><span>${s.fechaSalida} · ${s.horaCheckout || '11:00'} h</span>
             </div>
+            ${habRow}
             ${serviciosBlock}
             <div class="pago-row">
                 <span>Subtotal</span>
