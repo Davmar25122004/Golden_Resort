@@ -9,4 +9,5 @@ public class ReservaPorTipoRequest {
     public LocalDate fechaSalida;
     public List<ServicioRequest> servicios;
     public String peticionEspecial;
+    public Long habitacionId; // optional: specific room, null = auto-assign
 }

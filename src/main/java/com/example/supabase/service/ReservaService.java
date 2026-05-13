@@ -171,11 +171,27 @@ public class ReservaService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no encontrado"));
 
-        List<Habitacion> disponibles = habitacionRepository.findAvailableByTipo(
-                tipo, request.fechaEntrada, request.fechaSalida, PageRequest.of(0, 1));
-        if (disponibles.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Sin disponibilidad para ese tipo de habitación en las fechas indicadas");
+        Habitacion habitacionAsignada;
+        if (request.habitacionId != null) {
+            habitacionAsignada = habitacionRepository.findById(request.habitacionId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Habitación no encontrada"));
+            if (habitacionAsignada.getTipo() != tipo) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El tipo de habitación no coincide");
+            }
+            long solapadas = reservaRepository.contarReservasSolapadas(
+                    habitacionAsignada, request.fechaEntrada, request.fechaSalida);
+            if (solapadas > 0) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Esta habitación ya no está disponible para esas fechas");
+            }
+        } else {
+            List<Habitacion> disponibles = habitacionRepository.findAvailableByTipo(
+                    tipo, request.fechaEntrada, request.fechaSalida, PageRequest.of(0, 1));
+            if (disponibles.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT,
+                        "Sin disponibilidad para ese tipo de habitación en las fechas indicadas");
+            }
+            habitacionAsignada = disponibles.get(0);
         }
 
         List<ReservaServicio> serviciosReserva = new ArrayList<>();
@@ -202,7 +218,7 @@ public class ReservaService {
 
         Reserva reserva = new Reserva();
         reserva.setUsuario(usuario);
-        reserva.setHabitacion(disponibles.get(0));
+        reserva.setHabitacion(habitacionAsignada);
         reserva.setFechaEntrada(request.fechaEntrada);
         reserva.setFechaSalida(request.fechaSalida);
         reserva.setPeticionEspecial(request.peticionEspecial);
@@ -278,8 +294,8 @@ public class ReservaService {
         }
 
         if (request.servicios != null) {
-            reservaServicioRepository.deleteByReservaId(id);
-            reserva.getServicios().clear();
+            if (reserva.getServicios() != null) reserva.getServicios().clear();
+            else reserva.setServicios(new ArrayList<>());
             List<ReservaServicio> nuevosServicios = new ArrayList<>();
             for (ServicioRequest sr : request.servicios) {
                 if (sr.cantidad > 0) {

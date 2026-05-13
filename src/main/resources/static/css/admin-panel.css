@@ -358,6 +358,24 @@ a.admin-home-widget {
 }
 .admin-table tr:hover td { background: rgba(255,255,255,0.02); }
 
+/* Service / RS cards (mobile-first) */
+.admin-svc-list { display:flex; flex-direction:column; gap:8px; }
+.admin-svc-card {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:12px 14px; background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.06); border-radius:8px;
+}
+.admin-svc-card-info { flex:1; min-width:0; }
+.admin-svc-card-name { color:var(--cream); font-size:0.85rem; font-weight:600; }
+.admin-svc-card-meta { display:flex; align-items:center; gap:10px; margin-top:3px; }
+.admin-svc-card-price { color:var(--gold); font-size:0.8rem; }
+.admin-svc-card-actions { display:flex; gap:6px; flex-shrink:0; }
+@media (max-width:480px) {
+    .admin-svc-card { flex-wrap:wrap; }
+    .admin-svc-card-actions { width:100%; }
+    .admin-svc-card-actions .admin-btn { flex:1; text-align:center; }
+}
+
 /* Badge */
 .admin-badge {
     display: inline-block;

@@ -39,6 +39,7 @@ window.switchAdminTab = (tab) => {
     if (tab === 'mensajes-staff')    loadAdminMensajesStaff();
     if (tab === 'clientes')          loadAdminClientes();
     if (tab === 'reservas-manuales') loadAdminReservasManuales();
+    if (tab === 'descuentos')       loadAdminDescuentos();
 };
 
 // ── ADMIN: HOME ──────────────────────────────────────────────────────────────
@@ -60,6 +61,7 @@ function loadAdminHome() {
         { section: 'CLIENTES' },
         { tab: 'clientes',          icon: _ico('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'), title: 'Gestión de clientes', desc: 'Clientes registrados' },
         { tab: 'reservas-manuales', icon: _ico('<path d="M19 4H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/>'), title: 'Reservas manuales', desc: 'Crear reservas para clientes' },
+        { tab: 'descuentos',        icon: _ico('<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>'), title: 'Códigos de descuento', desc: 'Crear y gestionar descuentos' },
         // ── PERSONAL ──
         { section: 'PERSONAL' },
         { tab: 'personal',          icon: _ico('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'), title: 'Horarios', desc: 'Gestión de horarios del equipo', subtab: 'horarios' },
@@ -1252,21 +1254,19 @@ async function loadAdminServicios() {
         <div class="mb-3">
             <button class="admin-btn" onclick="abrirModalServicio(null)">${t('adm_svc_new')}</button>
         </div>
-        <table class="admin-table">
-            <thead><tr><th>#</th><th>${t('adm_svc_col_name')}</th><th>${t('adm_svc_col_price')}</th><th></th></tr></thead>
-            <tbody>
-                ${servicios.map(s => `
-                    <tr>
-                        <td>${s.id}</td>
-                        <td style="color:var(--cream);">${s.nombre}</td>
-                        <td style="color:var(--gold);">${parseFloat(s.precio).toFixed(2)} €</td>
-                        <td style="white-space:nowrap;">
-                            <button class="admin-btn" onclick='abrirModalServicio(${JSON.stringify(s)})'>${t('adm_svc_edit')}</button>
-                            <button class="admin-btn admin-btn--danger" onclick="adminEliminarServicio(${s.id})">${t('adm_svc_delete')}</button>
-                        </td>
-                    </tr>`).join('')}
-            </tbody>
-        </table>
+        <div class="admin-svc-list">
+            ${servicios.map(s => `
+                <div class="admin-svc-card">
+                    <div class="admin-svc-card-info">
+                        <div class="admin-svc-card-name">${s.nombre}</div>
+                        <div class="admin-svc-card-price">${parseFloat(s.precio).toFixed(2)} €</div>
+                    </div>
+                    <div class="admin-svc-card-actions">
+                        <button class="admin-btn" onclick='abrirModalServicio(${JSON.stringify(s)})'>${t('adm_svc_edit')}</button>
+                        <button class="admin-btn admin-btn--danger" onclick="adminEliminarServicio(${s.id})">${t('adm_svc_delete')}</button>
+                    </div>
+                </div>`).join('')}
+        </div>
 
         <!-- Modal servicio -->
         <div id="modal-servicio" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
@@ -1438,23 +1438,24 @@ async function loadAdminRoomService() {
         if (catItems.length === 0) return '';
         return `
             <p style="font-size:0.7rem;letter-spacing:2px;color:var(--text-muted-custom);margin:18px 0 6px;text-transform:uppercase;">${catLabels[cat]}</p>
-            <table class="admin-table">
-                <thead><tr><th>#</th><th>${t('adm_rs_col_name')}</th><th>${t('adm_rs_col_price')}</th><th>${t('adm_rs_col_avail')}</th><th></th></tr></thead>
-                <tbody>
-                    ${catItems.map(item => `
-                        <tr>
-                            <td>${item.id}</td>
-                            <td style="color:var(--cream);">${item.nombre}</td>
-
-                            <td style="color:var(--gold);">${parseFloat(item.precio).toFixed(2)} €</td>
-                            <td>${item.disponible ? '<span class="admin-badge" style="color:#27ae60;">' + t('adm_rs_yes') + '</span>' : '<span class="admin-badge" style="color:#c0392b;">' + t('adm_rs_no') + '</span>'}</td>
-                            <td style="white-space:nowrap;">
-                                <button class="admin-btn" onclick='abrirModalRSItem(${JSON.stringify(item)})'>${t('adm_rs_edit')}</button>
-                                <button class="admin-btn admin-btn--danger" onclick="adminEliminarRSItem(${item.id})">${t('adm_rs_delete')}</button>
-                            </td>
-                        </tr>`).join('')}
-                </tbody>
-            </table>`;
+            <div class="admin-svc-list">
+                ${catItems.map(item => `
+                    <div class="admin-svc-card">
+                        <div class="admin-svc-card-info">
+                            <div class="admin-svc-card-name">${item.nombre}</div>
+                            <div class="admin-svc-card-meta">
+                                <span class="admin-svc-card-price">${parseFloat(item.precio).toFixed(2)} €</span>
+                                ${item.disponible
+                                    ? '<span class="admin-badge" style="color:#27ae60;">' + t('adm_rs_yes') + '</span>'
+                                    : '<span class="admin-badge" style="color:#c0392b;">' + t('adm_rs_no') + '</span>'}
+                            </div>
+                        </div>
+                        <div class="admin-svc-card-actions">
+                            <button class="admin-btn" onclick='abrirModalRSItem(${JSON.stringify(item)})'>${t('adm_rs_edit')}</button>
+                            <button class="admin-btn admin-btn--danger" onclick="adminEliminarRSItem(${item.id})">${t('adm_rs_delete')}</button>
+                        </div>
+                    </div>`).join('')}
+            </div>`;
     }).join('');
 
     body.innerHTML = `
@@ -1749,5 +1750,194 @@ window.adminEliminarUsuario = async (id) => {
             alert(t('adm_usr_del_error'));
         }
     } catch (_) { alert(t('adm_error_conn')); }
+};
+
+// ── ADMIN: CÓDIGOS DE DESCUENTO ──────────────────────────────────────────────
+
+async function loadAdminDescuentos() {
+    var body = document.getElementById('admin-tab-body');
+    if (!body) return;
+
+    body.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
+            <div>
+                <h2 style="font-size:1.3rem;font-weight:600;color:var(--text-color-custom,#e8e0d0);">Códigos de descuento</h2>
+                <p style="color:var(--text-muted-custom,#a09880);font-size:.85rem;">Crea y gestiona códigos promocionales</p>
+            </div>
+            <button onclick="mostrarFormDescuento()" class="btn-gold" style="padding:8px 20px;border-radius:8px;font-size:.85rem;cursor:pointer;border:none;">
+                + Nuevo código
+            </button>
+        </div>
+        <div id="descuento-form-container"></div>
+        <div id="descuentos-lista" style="margin-top:16px;">
+            <p style="color:var(--text-muted-custom);font-size:.8rem;">Cargando...</p>
+        </div>`;
+
+    cargarListaDescuentos();
+}
+
+window.mostrarFormDescuento = function() {
+    var c = document.getElementById('descuento-form-container');
+    if (!c) return;
+    c.innerHTML = `
+        <div style="background:var(--card-bg-custom,#1a1a1a);border:1px solid var(--border-color-custom,#333);border-radius:12px;padding:20px;margin-bottom:20px;">
+            <h3 style="font-size:1rem;margin-bottom:16px;color:var(--text-color-custom,#e8e0d0);">Crear código de descuento</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+                <div>
+                    <label style="font-size:.75rem;color:var(--text-muted-custom,#a09880);display:block;margin-bottom:4px;">Código</label>
+                    <input id="desc-codigo" type="text" placeholder="Ej: VERANO25" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border-color-custom,#333);background:var(--input-bg-custom,#111);color:var(--text-color-custom,#eee);font-size:.9rem;text-transform:uppercase;" />
+                </div>
+                <div>
+                    <label style="font-size:.75rem;color:var(--text-muted-custom,#a09880);display:block;margin-bottom:4px;">Tipo</label>
+                    <select id="desc-tipo" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border-color-custom,#333);background:var(--input-bg-custom,#111);color:var(--text-color-custom,#eee);font-size:.9rem;">
+                        <option value="PORCENTAJE">Porcentaje (%)</option>
+                        <option value="FIJO">Cantidad fija (€)</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size:.75rem;color:var(--text-muted-custom,#a09880);display:block;margin-bottom:4px;">Valor</label>
+                    <input id="desc-valor" type="number" min="0" step="0.01" placeholder="Ej: 15" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border-color-custom,#333);background:var(--input-bg-custom,#111);color:var(--text-color-custom,#eee);font-size:.9rem;" />
+                </div>
+                <div>
+                    <label style="font-size:.75rem;color:var(--text-muted-custom,#a09880);display:block;margin-bottom:4px;">Pedido mínimo (€) <span style="opacity:.6;">opcional</span></label>
+                    <input id="desc-minimo" type="number" min="0" step="0.01" placeholder="Sin mínimo" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border-color-custom,#333);background:var(--input-bg-custom,#111);color:var(--text-color-custom,#eee);font-size:.9rem;" />
+                </div>
+                <div>
+                    <label style="font-size:.75rem;color:var(--text-muted-custom,#a09880);display:block;margin-bottom:4px;">Válido hasta <span style="opacity:.6;">opcional</span></label>
+                    <input id="desc-hasta" type="date" style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid var(--border-color-custom,#333);background:var(--input-bg-custom,#111);color:var(--text-color-custom,#eee);font-size:.9rem;" />
+                </div>
+                <div>
+                    <label style="font-size:.75rem;color:var(--text-muted-custom,#a09880);display:block;margin-bottom:4px;">Usos máximos</label>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <input id="desc-usos" type="number" min="1" placeholder="Ej: 50" style="flex:1;padding:8px 12px;border-radius:6px;border:1px solid var(--border-color-custom,#333);background:var(--input-bg-custom,#111);color:var(--text-color-custom,#eee);font-size:.9rem;" />
+                        <label style="display:flex;align-items:center;gap:4px;font-size:.8rem;color:var(--text-muted-custom,#a09880);white-space:nowrap;cursor:pointer;">
+                            <input id="desc-ilimitado" type="checkbox" onchange="document.getElementById('desc-usos').disabled=this.checked;if(this.checked)document.getElementById('desc-usos').value='';" />
+                            Ilimitado
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:16px;">
+                <button onclick="crearDescuento()" class="btn-gold" style="padding:8px 24px;border-radius:8px;font-size:.85rem;cursor:pointer;border:none;">Crear</button>
+                <button onclick="document.getElementById('descuento-form-container').innerHTML=''" style="padding:8px 24px;border-radius:8px;font-size:.85rem;cursor:pointer;border:1px solid var(--border-color-custom,#444);background:transparent;color:var(--text-muted-custom,#aaa);">Cancelar</button>
+            </div>
+        </div>`;
+};
+
+window.crearDescuento = async function() {
+    var codigo = (document.getElementById('desc-codigo').value || '').trim().toUpperCase();
+    var tipo   = document.getElementById('desc-tipo').value;
+    var valor  = parseFloat(document.getElementById('desc-valor').value);
+    var minimo = document.getElementById('desc-minimo').value;
+    var hasta  = document.getElementById('desc-hasta').value;
+    var ilimitado = document.getElementById('desc-ilimitado').checked;
+    var usos   = document.getElementById('desc-usos').value;
+
+    if (!codigo) return alert('Introduce un código.');
+    if (!valor || valor <= 0) return alert('Introduce un valor válido.');
+    if (tipo === 'PORCENTAJE' && valor > 100) return alert('El porcentaje no puede superar 100.');
+    if (!ilimitado && (!usos || parseInt(usos) < 1)) return alert('Indica el número de usos o marca "Ilimitado".');
+
+    var payload = { codigo: codigo, tipo: tipo, valor: valor, activo: true };
+    if (minimo) payload.montoMinimo = parseFloat(minimo);
+    if (hasta) payload.validoHasta = hasta;
+    if (!ilimitado) payload.usoMaximo = parseInt(usos);
+
+    try {
+        var res = await fetch('/api/admin/codigos-descuento', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            document.getElementById('descuento-form-container').innerHTML = '';
+            cargarListaDescuentos();
+        } else {
+            var err = await res.text();
+            alert(err || 'Error al crear el código.');
+        }
+    } catch (_) { alert('Error de conexión.'); }
+};
+
+async function cargarListaDescuentos() {
+    var lista = document.getElementById('descuentos-lista');
+    if (!lista) return;
+
+    try {
+        var res = await fetch('/api/admin/codigos-descuento');
+        if (!res.ok) { lista.innerHTML = '<p style="color:#c0392b;">Error al cargar.</p>'; return; }
+        var codigos = await res.json();
+
+        if (!codigos.length) {
+            lista.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--text-muted-custom,#888);">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity:.4;margin-bottom:12px;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>' +
+                '<p style="font-size:.9rem;">No hay códigos de descuento</p>' +
+                '<p style="font-size:.8rem;opacity:.6;">Pulsa "Nuevo código" para crear uno</p></div>';
+            return;
+        }
+
+        var html = '<div style="display:grid;gap:12px;">';
+        codigos.forEach(function(c) {
+            var agotado = c.usoMaximo !== null && c.usos >= c.usoMaximo;
+            var caducado = c.validoHasta && new Date(c.validoHasta) < new Date();
+            var activo = c.activo && !agotado && !caducado;
+
+            var estadoLabel, estadoColor;
+            if (agotado) { estadoLabel = 'Agotado'; estadoColor = '#e74c3c'; }
+            else if (caducado) { estadoLabel = 'Caducado'; estadoColor = '#e67e22'; }
+            else if (!c.activo) { estadoLabel = 'Desactivado'; estadoColor = '#95a5a6'; }
+            else { estadoLabel = 'Activo'; estadoColor = '#27ae60'; }
+
+            var valorTxt = c.tipo === 'PORCENTAJE' ? c.valor + '%' : c.valor.toFixed(2) + ' €';
+            var usosTxt = c.usoMaximo !== null
+                ? c.usos + ' / ' + c.usoMaximo
+                : c.usos + ' / ∞';
+
+            html += '<div style="background:var(--card-bg-custom,#1a1a1a);border:1px solid var(--border-color-custom,#333);border-radius:10px;padding:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;' + (!activo ? 'opacity:.6;' : '') + '">';
+
+            html += '<div style="display:flex;align-items:center;gap:14px;flex:1;min-width:200px;">' +
+                '<div style="background:var(--input-bg-custom,#111);border:1px dashed var(--border-color-custom,#444);border-radius:8px;padding:8px 16px;font-family:monospace;font-size:1.1rem;font-weight:700;color:var(--accent-color-custom,#c9a84c);letter-spacing:2px;">' + c.codigo + '</div>' +
+                '<span style="background:' + estadoColor + ';color:#fff;font-size:.7rem;padding:3px 10px;border-radius:20px;font-weight:600;">' + estadoLabel + '</span>' +
+                '</div>';
+
+            html += '<div style="display:flex;gap:24px;flex-wrap:wrap;font-size:.8rem;color:var(--text-muted-custom,#a09880);">' +
+                '<div><span style="opacity:.6;">Descuento</span><br><strong style="color:var(--text-color-custom,#eee);font-size:.95rem;">' + valorTxt + '</strong></div>' +
+                '<div><span style="opacity:.6;">Usos</span><br><strong style="color:var(--text-color-custom,#eee);font-size:.95rem;">' + usosTxt + '</strong></div>';
+            if (c.montoMinimo) html += '<div><span style="opacity:.6;">Mín.</span><br><strong style="color:var(--text-color-custom,#eee);">' + c.montoMinimo.toFixed(2) + ' €</strong></div>';
+            if (c.validoHasta) html += '<div><span style="opacity:.6;">Caduca</span><br><strong style="color:var(--text-color-custom,#eee);">' + c.validoHasta + '</strong></div>';
+            html += '</div>';
+
+            html += '<div style="display:flex;gap:8px;">';
+            if (activo) {
+                html += '<button onclick="toggleDescuento(' + c.id + ',false)" title="Desactivar" style="padding:6px 12px;border-radius:6px;font-size:.75rem;cursor:pointer;border:1px solid #e74c3c;background:transparent;color:#e74c3c;">Desactivar</button>';
+            } else if (!agotado && !caducado) {
+                html += '<button onclick="toggleDescuento(' + c.id + ',true)" title="Activar" style="padding:6px 12px;border-radius:6px;font-size:.75rem;cursor:pointer;border:1px solid #27ae60;background:transparent;color:#27ae60;">Activar</button>';
+            }
+            html += '<button onclick="eliminarDescuento(' + c.id + ',\'' + c.codigo + '\')" title="Eliminar" style="padding:6px 12px;border-radius:6px;font-size:.75rem;cursor:pointer;border:1px solid #666;background:transparent;color:#999;">✕</button>';
+            html += '</div></div>';
+        });
+        html += '</div>';
+        lista.innerHTML = html;
+
+    } catch (_) { lista.innerHTML = '<p style="color:#c0392b;">Error de conexión.</p>'; }
+}
+
+window.toggleDescuento = async function(id, activo) {
+    try {
+        await fetch('/api/admin/codigos-descuento/' + id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ activo: activo })
+        });
+        cargarListaDescuentos();
+    } catch (_) { alert('Error de conexión.'); }
+};
+
+window.eliminarDescuento = async function(id, codigo) {
+    if (!confirm('¿Eliminar el código "' + codigo + '"?')) return;
+    try {
+        await fetch('/api/admin/codigos-descuento/' + id, { method: 'DELETE' });
+        cargarListaDescuentos();
+    } catch (_) { alert('Error de conexión.'); }
 };
 

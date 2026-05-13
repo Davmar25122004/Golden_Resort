@@ -1,7 +1,48 @@
+// ── SVGs de marcas de tarjeta (global, usado por pago y perfil) ──────────────
+window.cardBrandSVG = function(marca, size) {
+    var s = size || 40;
+    if (marca === 'Visa') {
+        return '<svg viewBox="0 0 780 500" width="' + s + '" height="' + Math.round(s*500/780) + '" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M293.2 348.7l33.4-195.8h53.4l-33.4 195.8zM538.3 156.2c-10.6-4-27.2-8.3-47.9-8.3-52.8 0-90 26.6-90.2 64.7-.3 28.2 26.5 43.9 46.8 53.3 20.8 9.6 27.8 15.8 27.7 24.4-.1 13.2-16.6 19.2-32 19.2-21.4 0-32.7-3-50.3-10.2l-6.9-3.1-7.5 44c12.5 5.5 35.6 10.2 59.6 10.5 56.2 0 92.6-26.3 93-66.7.2-22.2-14-39.1-44.6-53.1-18.6-9-30-15-29.9-24.2 0-8.1 9.6-16.8 30.4-16.8 17.4-.3 30 3.5 39.7 7.5l4.8 2.2 7.3-43.4zM676.3 152.9h-41.3c-12.8 0-22.4 3.5-28 16.3l-79.3 179.5h56.1s9.2-24.1 11.2-29.4c6.1 0 60.7.1 68.5.1 1.6 6.9 6.5 29.3 6.5 29.3h49.6l-43.3-195.8zm-65.9 126.3c4.4-11.3 21.4-54.8 21.4-54.8-.3.5 4.4-11.4 7.1-18.8l3.6 17s10.3 47 12.5 56.6h-44.6zM250.4 152.9l-52.3 133.5-5.6-27.1c-9.7-31.3-40-65.2-73.9-82.2l47.8 171.4 56.6-.1 84.2-195.5h-56.8z" fill="#1a1f71"/>' +
+            '<path d="M146.9 152.9H60.8l-.7 3.8c67.1 16.3 111.5 55.5 129.9 102.7L171.8 169c-3.2-12.4-12.7-15.7-24.9-16.1z" fill="#f9a533"/>' +
+            '</svg>';
+    }
+    if (marca === 'Mastercard') {
+        return '<svg viewBox="0 0 780 500" width="' + s + '" height="' + Math.round(s*500/780) + '" xmlns="http://www.w3.org/2000/svg">' +
+            '<circle cx="312" cy="250" r="170" fill="#eb001b"/>' +
+            '<circle cx="468" cy="250" r="170" fill="#f79e1b"/>' +
+            '<path d="M390 120.8a169.7 169.7 0 0 0-62.4 129.2A169.7 169.7 0 0 0 390 379.2a169.7 169.7 0 0 0 62.4-129.2A169.7 169.7 0 0 0 390 120.8z" fill="#ff5f00"/>' +
+            '</svg>';
+    }
+    if (marca === 'American Express') {
+        return '<svg viewBox="0 0 780 500" width="' + s + '" height="' + Math.round(s*500/780) + '" xmlns="http://www.w3.org/2000/svg">' +
+            '<rect width="780" height="500" rx="40" fill="#2e77bc"/>' +
+            '<text x="390" y="280" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="120" fill="#fff" letter-spacing="4">AMEX</text>' +
+            '</svg>';
+    }
+    return '<svg width="' + s + '" height="' + Math.round(s*0.65) + '" viewBox="0 0 24 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+        '<rect x="1" y="1" width="22" height="14" rx="2"/><line x1="1" y1="5" x2="23" y2="5"/>' +
+        '</svg>';
+};
+window.bizumSVG = function(size) {
+    var s = size || 40;
+    return '<svg viewBox="0 0 200 200" width="' + s + '" height="' + s + '" xmlns="http://www.w3.org/2000/svg">' +
+        '<rect width="200" height="200" rx="40" fill="#05c0b8"/>' +
+        '<text x="100" y="130" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="72" fill="#fff">B</text>' +
+        '</svg>';
+};
+window.bankSVG = function(size) {
+    var s = size || 40;
+    return '<svg width="' + s + '" height="' + Math.round(s*0.8) + '" viewBox="0 0 24 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+        '<path d="M3 10l9-6 9 6"/><path d="M5 10v8M12 10v8M19 10v8M3 20h18"/>' +
+        '</svg>';
+};
+
 // ── PAGO ──────────────────────────────────────────────────────────────────────
 
 window._pagoState = {
     reservaId: null,
+    reservaDatos: null,
     metodoSeleccionadoId: null,
     codigoDescuento: '',
     descuentoValidado: false,
@@ -12,6 +53,7 @@ window._pagoState = {
 window.abrirPago = async (reservaId) => {
     window._pagoState = {
         reservaId,
+        reservaDatos: null,
         metodoSeleccionadoId: null,
         codigoDescuento: '',
         descuentoValidado: false,
@@ -20,8 +62,23 @@ window.abrirPago = async (reservaId) => {
     };
     if (!document.getElementById('pago-overlay')) crearModalPago();
     document.getElementById('pago-overlay').classList.add('is-open');
-
     await cargarDatosPago();
+};
+
+// Flujo nuevo: reserva + pago atómico (sin crear la reserva antes del pago)
+window.abrirPagoNuevo = (reservaDatos) => {
+    window._pagoState = {
+        reservaId: null,
+        reservaDatos,
+        metodoSeleccionadoId: null,
+        codigoDescuento: '',
+        descuentoValidado: false,
+        resumen: reservaDatos.resumenPreview,
+        metodos: []
+    };
+    if (!document.getElementById('pago-overlay')) crearModalPago();
+    document.getElementById('pago-overlay').classList.add('is-open');
+    cargarDatosPago();
 };
 
 function crearModalPago() {
@@ -59,24 +116,27 @@ window.cerrarPago = () => {
 
 async function cargarDatosPago() {
     try {
-        var [rResumen, rMetodos] = await Promise.all([
-            fetch('/api/pagos/resumen', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reservaId: window._pagoState.reservaId, codigoDescuento: '' })
-            }),
-            fetch('/api/perfil/metodos-pago')
-        ]);
-        if (!rResumen.ok) {
-            var msg = await rResumen.text();
-            document.getElementById('pago-body').innerHTML = `<div class="pago-alert pago-alert--err" style="display:block;">${msg || 'Error al cargar.'}</div>`;
-            return;
-        }
-        window._pagoState.resumen = await rResumen.json();
+        var rMetodos = await fetch('/api/perfil/metodos-pago');
         window._pagoState.metodos = rMetodos.ok ? await rMetodos.json() : [];
         var def = window._pagoState.metodos.find(m => m.esDefault);
         if (def) window._pagoState.metodoSeleccionadoId = def.id;
         else if (window._pagoState.metodos.length > 0) window._pagoState.metodoSeleccionadoId = window._pagoState.metodos[0].id;
+
+        if (window._pagoState.reservaId !== null) {
+            // Flujo existente: obtener resumen del servidor
+            var rResumen = await fetch('/api/pagos/resumen', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reservaId: window._pagoState.reservaId, codigoDescuento: '' })
+            });
+            if (!rResumen.ok) {
+                var errMsg = await rResumen.text();
+                document.getElementById('pago-body').innerHTML = `<div class="pago-alert pago-alert--err" style="display:block;">${errMsg || 'Error al cargar.'}</div>`;
+                return;
+            }
+            window._pagoState.resumen = await rResumen.json();
+        }
+        // Flujo nuevo: resumen ya establecido desde el cliente (resumenPreview)
         renderPago();
     } catch (_) {
         document.getElementById('pago-body').innerHTML = `<div class="pago-alert pago-alert--err" style="display:block;">Error de conexión.</div>`;
@@ -106,7 +166,7 @@ function renderPago() {
             return `
                 <div class="pago-metodo ${sel}" onclick="seleccionarMetodoPago(${m.id})">
                     <div class="pago-metodo-radio"></div>
-                    <div class="pago-metodo-icon">${m.tipo === 'BIZUM' ? 'B' : (m.tipo === 'CUENTA_BANCARIA' ? '🏦' : '💳')}</div>
+                    <div class="pago-metodo-icon">${m.tipo === 'BIZUM' ? bizumSVG(28) : (m.tipo === 'CUENTA_BANCARIA' ? bankSVG(28) : cardBrandSVG(m.marca, 36))}</div>
                     <div class="pago-metodo-body">
                         <div class="pago-metodo-title">${titulo}</div>
                         <div class="pago-metodo-sub">${sub}</div>
@@ -220,17 +280,16 @@ async function comprobarDisponibilidadPago() {
         var disp = await r.json();
         var tipo = s.habitacionTipo;
         var libres = disp[tipo] !== undefined ? parseInt(disp[tipo]) : 0;
-        if (dispMsg) {
-            dispMsg.style.display = 'block';
-            if (libres > 0) {
-                dispMsg.style.color = 'var(--gold)';
-                dispMsg.textContent = '🏨 ' + libres + (libres === 1 ? ' habitación disponible' : ' habitaciones disponibles') + ' para estas fechas';
-                if (btn && btn.dataset.metodoOk !== 'false') { btn.disabled = false; btn.style.opacity = '1'; }
-            } else {
+        if (libres > 0) {
+            if (dispMsg) dispMsg.style.display = 'none';
+            if (btn && btn.dataset.metodoOk !== 'false') { btn.disabled = false; btn.style.opacity = '1'; }
+        } else {
+            if (dispMsg) {
+                dispMsg.style.display = 'block';
                 dispMsg.style.color = '#e74c3c';
-                dispMsg.textContent = '❌ Habitación ya no disponible. Otro usuario acaba de confirmar el pago.';
-                if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; }
+                dispMsg.textContent = 'Habitación ya no disponible. Otro usuario acaba de confirmar el pago.';
             }
+            if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; }
         }
     } catch (_) {}
 }
@@ -242,16 +301,38 @@ window.aplicarCodigoDescuento = async () => {
     window._pagoState.codigoDescuento = codigo;
 
     try {
-        var r = await fetch('/api/pagos/resumen', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reservaId: window._pagoState.reservaId, codigoDescuento: codigo })
-        });
-        if (!r.ok) {
-            if (msg) { msg.textContent = 'Error al aplicar código.'; msg.className = 'pago-desc-msg pago-desc-msg--err'; }
-            return;
+        if (window._pagoState.reservaId !== null) {
+            // Flujo existente
+            var r = await fetch('/api/pagos/resumen', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reservaId: window._pagoState.reservaId, codigoDescuento: codigo })
+            });
+            if (!r.ok) {
+                if (msg) { msg.textContent = 'Error al aplicar código.'; msg.className = 'pago-desc-msg pago-desc-msg--err'; }
+                return;
+            }
+            window._pagoState.resumen = await r.json();
+        } else {
+            // Flujo nuevo: validar descuento sobre subtotal del preview
+            var subtotal = window._pagoState.reservaDatos.resumenPreview.subtotal;
+            var r = await fetch('/api/pagos/validar-descuento', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subtotal, codigoDescuento: codigo })
+            });
+            if (!r.ok) {
+                if (msg) { msg.textContent = 'Error al aplicar código.'; msg.className = 'pago-desc-msg pago-desc-msg--err'; }
+                return;
+            }
+            var data = await r.json();
+            var resumen = Object.assign({}, window._pagoState.reservaDatos.resumenPreview);
+            resumen.descuento    = parseFloat(data.descuento) || 0;
+            resumen.total        = parseFloat(data.total);
+            resumen.codigoValido  = data.valido;
+            resumen.codigoMensaje = data.mensaje;
+            window._pagoState.resumen = resumen;
         }
-        window._pagoState.resumen = await r.json();
         renderPago();
     } catch (_) {
         if (msg) { msg.textContent = 'Error de conexión.'; msg.className = 'pago-desc-msg pago-desc-msg--err'; }
@@ -266,25 +347,51 @@ window.confirmarPago = async () => {
     }
     mostrarProcesandoPago();
     try {
-        var r = await fetch('/api/pagos/confirmar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                reservaId:       window._pagoState.reservaId,
-                metodoPagoId:    window._pagoState.metodoSeleccionadoId,
-                codigoDescuento: window._pagoState.codigoDescuento
-            })
-        });
+        var r;
+        if (window._pagoState.reservaId !== null) {
+            // Flujo existente (ej. pagar desde Mis Reservas)
+            r = await fetch('/api/pagos/confirmar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    reservaId:       window._pagoState.reservaId,
+                    metodoPagoId:    window._pagoState.metodoSeleccionadoId,
+                    codigoDescuento: window._pagoState.codigoDescuento
+                })
+            });
+        } else {
+            // Flujo nuevo: crear reserva + pago en un solo paso atómico
+            var datos = window._pagoState.reservaDatos;
+            r = await fetch('/api/pagos/reservar-y-pagar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tipo:             datos.tipo,
+                    fechaEntrada:     datos.fechaEntrada,
+                    fechaSalida:      datos.fechaSalida,
+                    servicios:        datos.servicios,
+                    peticionEspecial: datos.peticionEspecial,
+                    roomServiceItems: datos.roomServiceItems,
+                    metodoPagoId:     window._pagoState.metodoSeleccionadoId,
+                    codigoDescuento:  window._pagoState.codigoDescuento
+                })
+            });
+        }
         if (!r.ok) {
-            var t = await r.text();
+            var errText = await r.text();
             ocultarProcesandoPago();
-            if (alertEl) { alertEl.textContent = t || 'No se pudo procesar el pago.'; alertEl.className = 'pago-alert pago-alert--err'; alertEl.style.display = 'block'; }
+            if (alertEl) { alertEl.textContent = errText || 'No se pudo procesar el pago.'; alertEl.className = 'pago-alert pago-alert--err'; alertEl.style.display = 'block'; }
+            // Si no hay disponibilidad, volver a habilitar el botón de reserva
+            if (r.status === 409) {
+                var btnConf = document.getElementById('btn-confirmar-reserva');
+                if (btnConf) { btnConf.disabled = false; btnConf.textContent = typeof t === 'function' ? t('detail_confirm') : 'Confirmar Reserva'; }
+            }
             return;
         }
         var data = await r.json();
         ocultarProcesandoPago();
         renderExito(data);
-        // Refrescar habitaciones guardadas en el perfil si está abierto
+        if (typeof loadRooms === 'function') loadRooms();
         if (typeof cargarHabitacionesGuardadas === 'function') {
             setTimeout(() => cargarHabitacionesGuardadas(), 500);
         }

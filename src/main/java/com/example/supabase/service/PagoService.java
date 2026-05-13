@@ -1,11 +1,14 @@
 package com.example.supabase.service;
 
 import com.example.supabase.domain.*;
+import com.example.supabase.dto.ReservarYPagarRequest;
+import com.example.supabase.dto.ReservaPorTipoRequest;
 import com.example.supabase.repository.HabitacionRepository;
 import com.example.supabase.repository.MetodoPagoRepository;
 import com.example.supabase.repository.PagoRepository;
 import com.example.supabase.repository.PedidoRoomServiceRepository;
 import com.example.supabase.repository.ReservaRepository;
+import com.example.supabase.repository.RoomServiceItemRepository;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +65,7 @@ public class PagoService {
     private final QrGenerator qrGenerator;
     private final TemplateEngine templateEngine;
     private final PedidoRoomServiceRepository pedidoRoomServiceRepository;
+    private final RoomServiceItemRepository roomServiceItemRepository;
 
     public PagoService(PagoRepository pagoRepository,
                        ReservaRepository reservaRepository,
@@ -72,17 +76,19 @@ public class PagoService {
                        EmailService emailService,
                        QrGenerator qrGenerator,
                        TemplateEngine templateEngine,
-                       PedidoRoomServiceRepository pedidoRoomServiceRepository) {
-        this.pagoRepository         = pagoRepository;
-        this.reservaRepository      = reservaRepository;
-        this.habitacionRepository   = habitacionRepository;
-        this.metodoPagoRepository   = metodoPagoRepository;
-        this.reservaService         = reservaService;
-        this.codigoDescuentoService = codigoDescuentoService;
-        this.emailService           = emailService;
-        this.qrGenerator            = qrGenerator;
-        this.templateEngine         = templateEngine;
+                       PedidoRoomServiceRepository pedidoRoomServiceRepository,
+                       RoomServiceItemRepository roomServiceItemRepository) {
+        this.pagoRepository              = pagoRepository;
+        this.reservaRepository           = reservaRepository;
+        this.habitacionRepository        = habitacionRepository;
+        this.metodoPagoRepository        = metodoPagoRepository;
+        this.reservaService              = reservaService;
+        this.codigoDescuentoService      = codigoDescuentoService;
+        this.emailService                = emailService;
+        this.qrGenerator                 = qrGenerator;
+        this.templateEngine              = templateEngine;
         this.pedidoRoomServiceRepository = pedidoRoomServiceRepository;
+        this.roomServiceItemRepository   = roomServiceItemRepository;
     }
 
     /** Genera el PDF de la factura para un pago del usuario autenticado. */
@@ -322,6 +328,49 @@ public class PagoService {
         java.util.concurrent.CompletableFuture.runAsync(() -> enviarEmailFactura(rr, pg, emailUsuario));
 
         return guardado;
+    }
+
+    /** Valida un código de descuento sin crear ninguna entidad. */
+    public Map<String, Object> validarDescuento(BigDecimal subtotal, String codigoDescuento) {
+        CodigoDescuentoService.ResultadoDescuento rd = codigoDescuentoService.aplicar(codigoDescuento, subtotal);
+        BigDecimal descuento = rd.valido() ? rd.descuento() : BigDecimal.ZERO;
+        Map<String, Object> res = new HashMap<>();
+        res.put("valido",    rd.valido());
+        res.put("descuento", descuento);
+        res.put("mensaje",   rd.mensaje());
+        res.put("total",     subtotal.subtract(descuento));
+        return res;
+    }
+
+    /** Crea la reserva y procesa el pago en una única transacción atómica. */
+    @Transactional
+    public Pago procesarConReserva(ReservarYPagarRequest req, Long usuarioId, String email) {
+        // 1. Crear la reserva
+        ReservaPorTipoRequest reservaReq = new ReservaPorTipoRequest();
+        reservaReq.tipo             = req.tipo;
+        reservaReq.fechaEntrada     = req.fechaEntrada;
+        reservaReq.fechaSalida      = req.fechaSalida;
+        reservaReq.servicios        = req.servicios;
+        reservaReq.peticionEspecial = req.peticionEspecial;
+        reservaReq.habitacionId     = req.habitacionId;
+        Reserva reserva = reservaService.crearPorTipo(reservaReq, email);
+
+        // 2. Añadir pedidos de room service si los hay
+        if (req.roomServiceItems != null && !req.roomServiceItems.isEmpty()) {
+            for (ReservarYPagarRequest.ItemPedidoRequest item : req.roomServiceItems) {
+                if (item.itemId == null || item.cantidad == null || item.cantidad <= 0) continue;
+                RoomServiceItem rsItem = roomServiceItemRepository.findById(item.itemId).orElse(null);
+                if (rsItem == null) continue;
+                PedidoRoomService pedido = new PedidoRoomService();
+                pedido.setReserva(reserva);
+                pedido.setItem(rsItem);
+                pedido.setCantidad(item.cantidad);
+                pedidoRoomServiceRepository.save(pedido);
+            }
+        }
+
+        // 3. Procesar el pago en la misma transacción
+        return procesar(reserva.getId(), usuarioId, req.metodoPagoId, req.codigoDescuento, email);
     }
 
     private void enviarEmailFactura(Reserva r, Pago pago, String emailUsuario) {

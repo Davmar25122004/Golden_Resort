@@ -116,7 +116,8 @@ public class ReservaController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> modificar(@PathVariable Long id,
                                        @RequestBody ReservaRequest request) {
-        return ResponseEntity.ok(reservaService.modificar(id, request));
+        reservaService.modificar(id, request);
+        return ResponseEntity.ok(Map.of("ok", true));
     }
 
     @PatchMapping("/{id}/peticion")

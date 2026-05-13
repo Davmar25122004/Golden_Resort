@@ -719,10 +719,15 @@
     .pers-asig-layout { grid-template-columns: 1fr; }
     .pers-asig-sidebar { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.18); }
     .pers-asig-plan-list { flex-direction: row; flex-wrap: wrap; }
-    .pers-asig-table-hdr,
-    .pers-asig-row { grid-template-columns: 1fr 1fr; }
-    .pers-asig-table-hdr span:nth-child(n+3),
-    .pers-asig-row .pers-asig-cell:nth-child(n+3) { display: none; }
+    .pers-asig-table-hdr { display: none; }
+    .pers-asig-row {
+        display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+        padding: 12px 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .pers-asig-row .pers-asig-user { width: 100%; }
+    .pers-asig-row .pers-asig-cell { font-size: 0.75rem; }
+    .pers-asig-row .pers-asig-actions { margin-left: auto; }
 }
 
 /* ── Modal de creación limpio (Nuevo cuadrante) ────────────────────── */

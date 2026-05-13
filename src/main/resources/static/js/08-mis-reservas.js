@@ -19,16 +19,23 @@ window.showMisReservas = async () => {
         </div>
     `;
 
-    await fetchRoomServiceItems();
-
-    var res;
+    // Lanzar los 3 fetches en paralelo para reducir tiempo de espera
+    var res, rPagos, _rsItemsPre;
     try {
-        res = await fetch('/api/reservas/mis-reservas');
+        [_rsItemsPre, res, rPagos] = await Promise.all([
+            fetchRoomServiceItems(),
+            fetch('/api/reservas/mis-reservas').catch(() => null),
+            fetch('/api/pagos/estados').catch(() => null)
+        ]);
     } catch (_) {
         document.getElementById('reservas-container').textContent = t('mr_error_conn');
         return;
     }
 
+    if (!res) {
+        document.getElementById('reservas-container').textContent = t('mr_error_conn');
+        return;
+    }
     if (res.status === 401) { abrirModalAuth(); return; }
     if (!res.ok) {
         document.getElementById('reservas-container').textContent = t('mr_error_load');
@@ -38,11 +45,10 @@ window.showMisReservas = async () => {
     var reservas = await res.json();
     var container = document.getElementById('reservas-container');
 
-    // Obtener qué reservas ya están pagadas
+    // Obtener qué reservas ya están pagadas (ya tenemos la respuesta del fetch paralelo)
     var reservasPagadas = new Set();
     try {
-        var rPagos = await fetch('/api/pagos/estados');
-        if (rPagos.ok) {
+        if (rPagos && rPagos.ok) {
             var dp = await rPagos.json();
             (dp.pagadas || []).forEach(id => reservasPagadas.add(id));
         }
@@ -84,25 +90,11 @@ window.showMisReservas = async () => {
 
         var tipoLabels = { NORMAL: t('tipo_normal'), DOBLE: t('tipo_doble'), SUITE: t('tipo_suite'), LUJO: t('tipo_lujo') };
 
-    var ocultarPasadas = localStorage.getItem('ocultar_reservas_pasadas') === '1';
-    var hayPasadas = reservas.some(r => calcularEstado(r.fechaEntrada, r.fechaSalida) === 'PASADA');
+    // Pasadas ocultas por defecto; '0' significa que el usuario las expandió
+    var ocultarPasadas = localStorage.getItem('ocultar_reservas_pasadas') !== '0';
+    var numPasadas = reservas.filter(r => calcularEstado(r.fechaEntrada, r.fechaSalida) === 'PASADA').length;
 
-    var html = '';
-    if (hayPasadas && !ocultarPasadas) {
-        html += `
-            <div id="btn-limpiar-wrap" style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
-                <button onclick="limpiarReservasPasadas()"
-                    style="background:none;border:1px solid rgba(154,154,154,0.3);color:var(--text-muted-custom);
-                           font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;
-                           border-radius:20px;cursor:pointer;transition:all .2s;"
-                    onmouseover="this.style.borderColor='rgba(201,168,76,0.5)';this.style.color='var(--gold)'"
-                    onmouseout="this.style.borderColor='rgba(154,154,154,0.3)';this.style.color='var(--text-muted-custom)'">
-                    ✕ Limpiar reservas pasadas
-                </button>
-            </div>`;
-    }
-
-    html += '<div class="reservas-list">';
+    var html = '<div class="reservas-list">';
     reservas.forEach(r => {
         var estado  = calcularEstado(r.fechaEntrada, r.fechaSalida);
         if (ocultarPasadas && estado === 'PASADA') return;
@@ -296,6 +288,21 @@ window.showMisReservas = async () => {
             </div>`;
     });
     html += '</div>';
+
+    if (numPasadas > 0) {
+        html += `
+            <div style="display:flex;justify-content:center;margin-top:1.25rem;">
+                <button onclick="toggleReservasPasadas()"
+                    style="background:none;border:1px solid rgba(154,154,154,0.3);color:var(--text-muted-custom);
+                           font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;padding:7px 20px;
+                           border-radius:20px;cursor:pointer;transition:all .2s;"
+                    onmouseover="this.style.borderColor='rgba(201,168,76,0.5)';this.style.color='var(--gold)'"
+                    onmouseout="this.style.borderColor='rgba(154,154,154,0.3)';this.style.color='var(--text-muted-custom)'">
+                    ${ocultarPasadas ? '▼ Ver ' + numPasadas + ' reserva' + (numPasadas !== 1 ? 's' : '') + ' pasada' + (numPasadas !== 1 ? 's' : '') : '▲ Ocultar reservas pasadas'}
+                </button>
+            </div>`;
+    }
+
     container.innerHTML = html;
 };
 
@@ -455,11 +462,10 @@ window.cerrarGestionRS = () => {
     if (m) m.remove();
 };
 
-window.limpiarReservasPasadas = () => {
-    localStorage.setItem('ocultar_reservas_pasadas', '1');
-    document.querySelectorAll('.reserva-card--pasada').forEach(el => el.remove());
-    var wrap = document.getElementById('btn-limpiar-wrap');
-    if (wrap) wrap.remove();
+window.toggleReservasPasadas = () => {
+    var ocultas = localStorage.getItem('ocultar_reservas_pasadas') !== '0';
+    localStorage.setItem('ocultar_reservas_pasadas', ocultas ? '0' : '1');
+    showMisReservas();
 };
 
 window.guardarPedidoRS = async (reservaId) => {

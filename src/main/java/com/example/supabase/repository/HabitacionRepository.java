@@ -23,8 +23,11 @@ public interface HabitacionRepository extends JpaRepository<Habitacion, Long> {
     boolean existsByNumero(String numero);
 
     @Query("SELECT h FROM Habitacion h WHERE h.tipo = :tipo " +
-           "AND h.id NOT IN (SELECT r.habitacion.id FROM Reserva r, Pago p WHERE p.reservaId = r.id AND p.estado = com.example.supabase.domain.EstadoPago.COMPLETADO " +
-           "AND r.fechaEntrada < :fechaSalida AND r.fechaSalida > :fechaEntrada) " +
+           "AND h.id NOT IN (" +
+           "  SELECT r.habitacion.id FROM Reserva r " +
+           "  WHERE r.fechaEntrada < :fechaSalida AND r.fechaSalida > :fechaEntrada " +
+           "  AND (EXISTS (SELECT p FROM Pago p WHERE p.reservaId = r.id AND p.estado = com.example.supabase.domain.EstadoPago.COMPLETADO) " +
+           "       OR NOT EXISTS (SELECT p FROM Pago p WHERE p.reservaId = r.id))) " +
            "ORDER BY h.id ASC")
     List<Habitacion> findAvailableByTipo(
             @Param("tipo") TipoHabitacion tipo,
@@ -33,8 +36,11 @@ public interface HabitacionRepository extends JpaRepository<Habitacion, Long> {
             Pageable pageable);
 
     @Query("SELECT COUNT(h) FROM Habitacion h WHERE h.tipo = :tipo " +
-           "AND h.id NOT IN (SELECT r.habitacion.id FROM Reserva r, Pago p WHERE p.reservaId = r.id AND p.estado = com.example.supabase.domain.EstadoPago.COMPLETADO " +
-           "AND r.fechaEntrada < :fechaSalida AND r.fechaSalida > :fechaEntrada)")
+           "AND h.id NOT IN (" +
+           "  SELECT r.habitacion.id FROM Reserva r " +
+           "  WHERE r.fechaEntrada < :fechaSalida AND r.fechaSalida > :fechaEntrada " +
+           "  AND (EXISTS (SELECT p FROM Pago p WHERE p.reservaId = r.id AND p.estado = com.example.supabase.domain.EstadoPago.COMPLETADO) " +
+           "       OR NOT EXISTS (SELECT p FROM Pago p WHERE p.reservaId = r.id)))")
     long countAvailableByTipo(
             @Param("tipo") TipoHabitacion tipo,
             @Param("fechaEntrada") LocalDate fechaEntrada,

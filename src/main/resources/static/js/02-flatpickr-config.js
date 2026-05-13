@@ -11,14 +11,17 @@ function initFancyMonthDropdown(instance) {
         value: parseInt(o.value)
     }));
 
+    var listId = 'fp-month-list-' + Math.random().toString(36).slice(2);
+
     var btn = document.createElement('span');
     btn.className = 'fp-month-btn';
-    // Use the longhand month name from l10n to ensure correctness
+    btn.dataset.listId = listId;
     btn.textContent = instance.l10n.months.longhand[instance.currentMonth] + ' ▾';
 
     var list = document.createElement('div');
+    list.id = listId;
     list.className = 'fp-month-list';
-    list.style.cssText = 'display:none;position:fixed;z-index:999999;';
+    list.style.cssText = 'display:none;position:fixed;z-index:999999;overflow-y:auto;max-height:220px;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;';
     list.innerHTML = monthsData.map(m =>
         `<div class="fp-month-item${m.value === instance.currentMonth ? ' active' : ''}" data-month="${m.value}">${m.text}</div>`
     ).join('');
@@ -28,40 +31,47 @@ function initFancyMonthDropdown(instance) {
     wrap.className = 'fp-month-wrap';
     wrap.appendChild(btn);
 
-    btn.addEventListener('mousedown', (e) => e.stopPropagation());
-    btn.addEventListener('click', (e) => {
+    function closeList() { list.style.display = 'none'; }
+
+    btn.addEventListener('mousedown', e => e.stopPropagation());
+    btn.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+    btn.addEventListener('click', e => {
         e.stopPropagation();
-        var isOpen = list.style.display === 'block';
-        if (isOpen) { list.style.display = 'none'; return; }
+        if (list.style.display === 'block') { closeList(); return; }
         var rect = btn.getBoundingClientRect();
         list.style.top  = (rect.bottom + 4) + 'px';
         list.style.left = rect.left + 'px';
         list.style.display = 'block';
+        var active = list.querySelector('.fp-month-item.active');
+        if (active) active.scrollIntoView({ block: 'nearest' });
     });
 
-    list.addEventListener('mousedown', (e) => e.stopPropagation());
-    list.addEventListener('click', (e) => {
+    // Evitar que scroll/touch dentro de la lista la cierre
+    list.addEventListener('mousedown', e => e.stopPropagation());
+    list.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+    list.addEventListener('touchmove', e => e.stopPropagation(), { passive: true });
+    list.addEventListener('click', e => {
         e.stopPropagation();
         var item = e.target.closest('.fp-month-item');
         if (!item) return;
         var targetMonth = parseInt(item.dataset.month);
         instance.changeMonth(targetMonth - instance.currentMonth);
-        list.style.display = 'none';
+        closeList();
     });
 
-    document.addEventListener('click', () => { list.style.display = 'none'; });
+    document.addEventListener('click', closeList);
     select.parentNode.insertBefore(wrap, select);
 }
 
 function syncFancyMonth(instance) {
     var wrap = instance.calendarContainer.querySelector('.fp-month-wrap');
     if (!wrap) return;
-    
-    // Always use the fixed localization array to get the month name by absolute index
-    var monthName = instance.l10n.months.longhand[instance.currentMonth];
-    wrap.querySelector('.fp-month-btn').textContent = monthName + ' ▾';
-    
-    wrap.querySelectorAll('.fp-month-item').forEach(el =>
+    var btn = wrap.querySelector('.fp-month-btn');
+    if (!btn) return;
+    btn.textContent = instance.l10n.months.longhand[instance.currentMonth] + ' ▾';
+    var list = document.getElementById(btn.dataset.listId);
+    if (!list) return;
+    list.querySelectorAll('.fp-month-item').forEach(el =>
         el.classList.toggle('active', parseInt(el.dataset.month) === instance.currentMonth)
     );
 }

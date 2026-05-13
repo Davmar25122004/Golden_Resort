@@ -15,12 +15,14 @@
     -webkit-backdrop-filter: blur(16px);
 }
 .navbar-brand-custom {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.6rem;
-    font-weight: 600;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 400;
     color: var(--gold) !important;
-    letter-spacing: 2px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     text-decoration: none;
+    white-space: nowrap;
 }
 .nav-link-custom {
     color: var(--cream) !important;
@@ -82,8 +84,8 @@ footer {
         flex-wrap: nowrap;
     }
     .navbar-brand-custom {
-        font-size: 1rem !important;
-        letter-spacing: 1.5px;
+        font-size: 0.85rem !important;
+        letter-spacing: 0.06em;
         gap: 6px !important;
         white-space: nowrap;
         flex: 1;
@@ -229,7 +231,8 @@ footer {
 /* ── NAVBAR DESKTOP (restaurar layout original) ── */
 @media (min-width: 768px) {
     .nav-drawer-header { display: none; }
-    .nav-acc-btn { display: none !important; }
+    .nav-acc-btn--mobile { display: none !important; }
+    .nav-acc-btn--desktop { display: inline-flex !important; }
     .navbar-brand-custom { justify-content: flex-start; flex: unset; }
 
     #navbar .container {

@@ -58,6 +58,26 @@ public class HabitacionService {
         return disponibilidad;
     }
 
+    public List<Map<String, Object>> obtenerPorTipoConDisponibilidad(
+            TipoHabitacion tipo, LocalDate fechaEntrada, LocalDate fechaSalida) {
+        if (!fechaEntrada.isBefore(fechaSalida)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "fechaEntrada debe ser anterior a fechaSalida");
+        }
+        List<Habitacion> habitaciones = new java.util.ArrayList<>(habitacionRepository.findByTipo(tipo));
+        habitaciones.sort(java.util.Comparator.comparing(Habitacion::getNumero));
+        return habitaciones.stream().map(h -> {
+            long solapadas = reservaRepository.contarReservasSolapadas(h, fechaEntrada, fechaSalida);
+            java.util.Map<String, Object> m = new java.util.HashMap<>();
+            m.put("id",          h.getId());
+            m.put("numero",      h.getNumero());
+            m.put("tipo",        h.getTipo().name());
+            m.put("precioNoche", h.getPrecioNoche());
+            m.put("disponible",  solapadas == 0);
+            return m;
+        }).collect(java.util.stream.Collectors.toList());
+    }
+
     public Habitacion crear(Habitacion habitacion) {
         if (habitacion.getNumero() != null && habitacionRepository.existsByNumero(habitacion.getNumero())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una habitación con ese número");

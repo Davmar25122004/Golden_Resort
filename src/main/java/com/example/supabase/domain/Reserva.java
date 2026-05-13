@@ -36,7 +36,7 @@ public class Reserva {
     private Habitacion habitacion;
 
     // Relación con ReservaServicio:
-    @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReservaServicio> servicios;
 
     // Petición especial del cliente

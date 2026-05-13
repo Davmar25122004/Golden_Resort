@@ -128,10 +128,34 @@ window.handleLogin = async (e) => {
 
     const res = await fetch('/login', { method: 'POST', body: form });
 
-    if (res.url && res.url.includes('error')) {
+    if (res.url && res.url.includes('NOT_VERIFIED')) {
+        var params = new URL(res.url).searchParams;
+        var emailNoVerificado = params.get('email') || email;
+        var errEl = document.getElementById('auth-error');
+        errEl.classList.remove('d-none');
+        errEl.innerHTML = 'Debes verificar tu email antes de iniciar sesión.' +
+            '<br><button type="button" id="btn-reenviar-verif" style="margin-top:8px;background:none;border:1px solid rgba(201,168,76,0.6);color:var(--gold,#c9a84c);padding:5px 14px;border-radius:4px;font-size:0.78rem;cursor:pointer;letter-spacing:1px;">Reenviar email de verificación</button>';
+        document.getElementById('btn-reenviar-verif').addEventListener('click', async () => {
+            var btn = document.getElementById('btn-reenviar-verif');
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+            try {
+                var r = await fetch('/api/auth/reenviar-verificacion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: emailNoVerificado })
+                });
+                btn.textContent = r.ok ? 'Email enviado. Revisa tu bandeja.' : 'Error al enviar. Inténtalo de nuevo.';
+            } catch (_) {
+                btn.textContent = 'Error de conexión.';
+            }
+        });
+    } else if (res.url && res.url.includes('error')) {
         mostrarErrorAuth('Email o contraseña incorrectos.');
     } else if (res.ok || res.redirected) {
-        window.location.href = res.url || '/';
+        var loginRedirect = sessionStorage.getItem('loginRedirect');
+        sessionStorage.removeItem('loginRedirect');
+        window.location.href = loginRedirect || res.url || '/';
     } else {
         mostrarErrorAuth(t('auth_error_login'));
     }
@@ -231,7 +255,9 @@ window.handleRegister = async (e) => {
             if (data.message === 'CHECK_EMAIL') {
                 _mostrarMensajeVerificacion(email);
             } else {
-                window.location.reload();
+                var regRedirect = sessionStorage.getItem('loginRedirect');
+                sessionStorage.removeItem('loginRedirect');
+                window.location.href = regRedirect || window.location.href;
             }
         } else {
             const msg = await res.text();

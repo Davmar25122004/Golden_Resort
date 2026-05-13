@@ -3,6 +3,7 @@ package com.example.supabase.controller;
 import com.example.supabase.domain.EstadoPago;
 import com.example.supabase.domain.Pago;
 import com.example.supabase.domain.Usuario;
+import com.example.supabase.dto.ReservarYPagarRequest;
 import com.example.supabase.repository.PagoRepository;
 import com.example.supabase.repository.ReservaRepository;
 import com.example.supabase.repository.UsuarioRepository;
@@ -191,6 +192,44 @@ public class PagoController {
                         .contentType(MediaType.TEXT_PLAIN)
                         .body(("Error al generar factura: " + id).getBytes(java.nio.charset.StandardCharsets.UTF_8));
             }
+        }
+    }
+
+    @PostMapping("/validar-descuento")
+    public ResponseEntity<?> validarDescuento(@RequestBody Map<String, Object> body, Authentication auth) {
+        Usuario u = usuario(auth);
+        if (u == null) return ResponseEntity.status(401).body("No autenticado.");
+        java.math.BigDecimal subtotal = body.get("subtotal") instanceof Number n
+                ? new java.math.BigDecimal(n.toString()) : java.math.BigDecimal.ZERO;
+        String codigo = (String) body.get("codigoDescuento");
+        try {
+            return ResponseEntity.ok(pagoService.validarDescuento(subtotal, codigo));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/reservar-y-pagar")
+    public ResponseEntity<?> reservarYPagar(@RequestBody ReservarYPagarRequest req, Authentication auth,
+                                             HttpServletRequest request) {
+        if (!rateLimitService.bucketPago(request.getRemoteAddr()).tryConsume(1))
+            return ResponseEntity.status(429).body("Demasiados intentos de pago. Espera un momento.");
+        Usuario u = usuario(auth);
+        if (u == null) return ResponseEntity.status(401).body("No autenticado.");
+        if (req.metodoPagoId == null) return ResponseEntity.badRequest().body("Selecciona un método de pago.");
+        try {
+            Pago p = pagoService.procesarConReserva(req, u.getId(), u.getEmail());
+            Map<String, Object> out = new HashMap<>();
+            out.put("id",          p.getId());
+            out.put("referencia",  p.getReferencia());
+            out.put("total",       p.getTotal());
+            out.put("estado",      p.getEstado().name());
+            out.put("completedAt", p.getCompletedAt());
+            return ResponseEntity.ok(out);
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 

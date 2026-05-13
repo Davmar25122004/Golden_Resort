@@ -377,7 +377,7 @@ window.showPerfil = async () => {
                         <div id="perfil-tab-guardadas" class="perfil-tab-panel">
                             <div class="perfil-card" style="margin-bottom:0;">
                                 <div class="perfil-card-title">Habitaciones Guardadas</div>
-                                <p style="font-size:0.85rem;color:var(--text-muted-custom);margin-bottom:32px;line-height:1.6;">Estas habitaciones están reservadas temporalmente para ti. Completa el pago para asegurar tu estancia.</p>
+                                <p style="font-size:0.85rem;color:var(--text-muted-custom);margin-bottom:32px;line-height:1.6;">Aquí puedes ver tus habitaciones favoritas.</p>
                                 <div id="guardadas-lista"><div style="padding:4rem;text-align:center;"><div class="perfil-spinner" style="width:32px;height:32px;margin:0 auto;"></div></div></div>
                             </div>
                         </div>
@@ -816,8 +816,9 @@ window.cargarMisReservas = async () => {
             PASADA:   { color: 'var(--text-muted-custom)', border: 'rgba(154,154,154,0.3)', label: 'Pasada' }
         };
 
-        var ocultarPasadas = localStorage.getItem('ocultar_reservas_perfil') === '1';
-        var hayPasadas = reservas.some(rv => calcularEstado(rv.fechaEntrada, rv.fechaSalida) === 'PASADA');
+        // Pasadas ocultas por defecto; '0' significa que el usuario las expandió
+        var ocultarPasadas = localStorage.getItem('ocultar_reservas_perfil') !== '0';
+        var numPasadas = reservas.filter(rv => calcularEstado(rv.fechaEntrada, rv.fechaSalida) === 'PASADA').length;
 
         // Ordenar: en curso > próximas > pasadas
         var estadoOrder = { EN_CURSO: 0, PROXIMA: 1, PASADA: 2 };
@@ -829,21 +830,7 @@ window.cargarMisReservas = async () => {
             return new Date(b.fechaEntrada) - new Date(a.fechaEntrada);
         });
 
-        var html = '';
-        if (hayPasadas && !ocultarPasadas) {
-            html += `<div id="btn-limpiar-perfil-wrap" style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
-                <button onclick="limpiarReservasPerfil()"
-                    style="background:none;border:1px solid rgba(154,154,154,0.3);color:var(--text-muted-custom);
-                           font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;padding:6px 16px;
-                           border-radius:20px;cursor:pointer;transition:all .2s;"
-                    onmouseover="this.style.borderColor='rgba(201,168,76,0.5)';this.style.color='var(--gold)'"
-                    onmouseout="this.style.borderColor='rgba(154,154,154,0.3)';this.style.color='var(--text-muted-custom)'">
-                    ✕ Limpiar reservas pasadas
-                </button>
-            </div>`;
-        }
-
-        html += reservas.map(rv => {
+        var html = reservas.map(rv => {
             var estado = calcularEstado(rv.fechaEntrada, rv.fechaSalida);
             if (ocultarPasadas && estado === 'PASADA') return '';
             var est = estadoStyles[estado];
@@ -872,6 +859,20 @@ window.cargarMisReservas = async () => {
             </div>`;
         }).join('');
 
+        if (numPasadas > 0) {
+            html += `
+                <div style="display:flex;justify-content:center;margin-top:1.25rem;">
+                    <button onclick="toggleReservasPerfil()"
+                        style="background:none;border:1px solid rgba(154,154,154,0.3);color:var(--text-muted-custom);
+                               font-size:0.7rem;letter-spacing:2px;text-transform:uppercase;padding:7px 20px;
+                               border-radius:20px;cursor:pointer;transition:all .2s;"
+                        onmouseover="this.style.borderColor='rgba(201,168,76,0.5)';this.style.color='var(--gold)'"
+                        onmouseout="this.style.borderColor='rgba(154,154,154,0.3)';this.style.color='var(--text-muted-custom)'">
+                        ${ocultarPasadas ? '▼ Ver ' + numPasadas + ' reserva' + (numPasadas !== 1 ? 's' : '') + ' pasada' + (numPasadas !== 1 ? 's' : '') : '▲ Ocultar reservas pasadas'}
+                    </button>
+                </div>`;
+        }
+
         cont.innerHTML = html;
     } catch (_) {
         if (cont) cont.innerHTML = `<p style="color:#e74c3c;font-size:0.8rem;">Error al cargar.</p>`;
@@ -898,11 +899,10 @@ window.cancelarReservaPerfil = async (id) => {
     }
 };
 
-window.limpiarReservasPerfil = () => {
-    localStorage.setItem('ocultar_reservas_perfil', '1');
-    document.querySelectorAll('.perfil-reserva--pasada').forEach(el => el.remove());
-    var wrap = document.getElementById('btn-limpiar-perfil-wrap');
-    if (wrap) wrap.remove();
+window.toggleReservasPerfil = () => {
+    var ocultas = localStorage.getItem('ocultar_reservas_perfil') !== '0';
+    localStorage.setItem('ocultar_reservas_perfil', ocultas ? '0' : '1');
+    cargarMisReservas();
 };
 
 window.descargarFacturaReserva = async (reservaId) => {
@@ -925,71 +925,54 @@ window.cargarHabitacionesGuardadas = async () => {
     var badge = document.getElementById('guardadas-count-badge');
     if (!cont) return;
     try {
-        var r = await fetch('/api/reservas/guardadas');
+        var r = await fetch('/api/guardadas');
         if (!r.ok) { cont.innerHTML = ''; return; }
-        var reservas = await r.json();
+        var guardadas = await r.json();
 
         if (badge) {
-            if (reservas.length > 0) { badge.style.display = 'inline-block'; badge.textContent = reservas.length; }
+            if (guardadas.length > 0) { badge.style.display = 'inline-block'; badge.textContent = guardadas.length; }
             else { badge.style.display = 'none'; }
         }
 
-        if (!reservas.length) {
-            cont.innerHTML = `<p style="color:var(--text-muted-custom);font-size:0.82rem;">No tienes ninguna habitaci\u00f3n guardada pendiente de pago.</p>`;
+        if (!guardadas.length) {
+            cont.innerHTML = `<p style="color:var(--text-muted-custom);font-size:0.82rem;">No tienes ninguna habitaci\u00f3n guardada.</p>`;
             return;
         }
 
-        var tipoLabels = { NORMAL: 'Normal', DOBLE: 'Doble', SUITE: 'Suite', LUJO: 'Lujo' };
-        cont.innerHTML = reservas.map(rv => {
-            var label = tipoLabels[rv.habitacionTipo] || rv.habitacionTipo;
-            var img   = (TIPO_IMAGES[rv.habitacionTipo] || [])[0] || '';
-            var noches = Math.max(1, Math.round(
-                (new Date(rv.fechaSalida + 'T00:00:00') - new Date(rv.fechaEntrada + 'T00:00:00')) / 86400000
-            ));
-            var total = rv.total ? parseFloat(rv.total).toFixed(2) : (parseFloat(rv.precioNoche) * noches).toFixed(2);
+        var tipoLabels = { NORMAL: t('tipo_normal'), DOBLE: t('tipo_doble'), SUITE: t('tipo_suite'), LUJO: t('tipo_lujo') };
+        cont.innerHTML = guardadas.map(g => {
+            var tipo  = g.tipo;
+            var label = tipoLabels[tipo] || tipo;
+            var img   = (TIPO_IMAGES[tipo] || [])[0] || '';
             return `
             <div class="guardada-card">
-                ${img ? `<img src="${img}" style="width:88px;height:66px;object-fit:cover;border-radius:8px;flex-shrink:0;">` : ''}
-                <div style="flex:1; min-width:0;">
-                    <p style="color:var(--gold);font-size:0.68rem;letter-spacing:2px;margin-bottom:2px;">${rv.habitacionTipo}</p>
-                    <p style="color:var(--cream);font-size:0.92rem;font-weight:600;margin-bottom:3px;">${label} &middot; N&ordm; ${rv.habitacionNumero}</p>
-                    <p style="color:var(--text-muted-custom);font-size:0.75rem;">${rv.fechaEntrada} &rarr; ${rv.fechaSalida} &middot; ${noches} noche${noches > 1 ? 's' : ''}</p>
-                    <p style="color:var(--gold);font-size:0.88rem;font-weight:700;margin-top:4px;">${total} &euro;</p>
-                    <div id="avail-badge-${rv.id}" style="margin-top:5px;"></div>
+                ${img ? `<img class="guardada-card-img" src="${img}" alt="${label}">` : ''}
+                <div class="guardada-card-info">
+                    <p class="guardada-card-nombre">${label}</p>
                 </div>
-                <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;">
-                    <button onclick="abrirPago(${rv.id})" style="background:var(--gold);color:var(--dark);border:none;padding:8px 18px;border-radius:6px;font-size:0.75rem;letter-spacing:1px;cursor:pointer;font-weight:700;">Pagar</button>
-                    <button onclick="abrirEditarGuardada(${rv.id},'${rv.habitacionTipo}','${rv.fechaEntrada}','${rv.fechaSalida}')" style="background:transparent;color:var(--cream);border:1px solid rgba(185,149,77,0.4);padding:6px 14px;border-radius:6px;font-size:0.72rem;cursor:pointer;letter-spacing:1px;">Editar</button>
-                    <button onclick="eliminarGuardada(${rv.id})" style="background:transparent;color:var(--text-muted-custom);border:1px solid rgba(154,154,154,0.2);padding:6px 14px;border-radius:6px;font-size:0.72rem;cursor:pointer;letter-spacing:1px;">Eliminar</button>
+                <div class="guardada-card-actions">
+                    <button onclick="window.location.href='/habitacion/${tipo.toLowerCase()}'"
+                        style="background:var(--gold);color:var(--dark);border:none;padding:8px 18px;border-radius:6px;font-size:0.75rem;letter-spacing:1px;cursor:pointer;font-weight:700;">
+                        Reservar
+                    </button>
+                    <button onclick="quitarHabitacionGuardada('${tipo}')"
+                        style="background:transparent;color:var(--text-muted-custom);border:1px solid rgba(154,154,154,0.2);padding:6px 14px;border-radius:6px;font-size:0.72rem;cursor:pointer;letter-spacing:1px;">
+                        Eliminar
+                    </button>
                 </div>
             </div>`;
         }).join('');
-
-        // Disponibilidad por cada reserva
-        reservas.forEach(async (rv) => {
-            var b2 = document.getElementById('avail-badge-' + rv.id);
-            if (!b2) return;
-            try {
-                var dr = await fetch('/api/habitaciones/disponibles?fechaEntrada=' + rv.fechaEntrada + '&fechaSalida=' + rv.fechaSalida);
-                if (!dr.ok) return;
-                var disp = await dr.json();
-                var libres = disp[rv.habitacionTipo] !== undefined ? parseInt(disp[rv.habitacionTipo]) : 0;
-                b2.innerHTML = libres > 0
-                    ? `<span class="guardada-avail" style="background:rgba(185,149,77,0.15);color:var(--gold);border:1px solid rgba(185,149,77,0.25);">${libres} habitaci${libres===1?'ó':'o'}n${libres===1?'':'es'} disponible${libres===1?'':'s'}</span>`
-                    : `<span class="guardada-avail" style="background:rgba(139,26,26,0.2);color:#e74c3c;border:1px solid rgba(192,57,43,0.3);">Sin disponibilidad en estas fechas</span>`;
-            } catch (_) {}
-        });
     } catch (_) {
         if (cont) cont.innerHTML = `<p style="color:#e74c3c;font-size:0.8rem;">Error al cargar.</p>`;
     }
 };
 
-window.eliminarGuardada = async (id) => {
-    if (!confirm('\u00bfEliminar esta reserva guardada?')) return;
+window.quitarHabitacionGuardada = async (tipo) => {
+    if (!confirm('\u00bfEliminar esta habitaci\u00f3n de guardadas?')) return;
     try {
-        var r = await fetch('/api/reservas/' + id, { method: 'DELETE' });
+        var r = await fetch('/api/guardadas/' + tipo, { method: 'DELETE' });
         if (r.ok || r.status === 204) { cargarHabitacionesGuardadas(); }
-        else { alert('No se pudo eliminar la reserva.'); }
+        else { alert('No se pudo eliminar.'); }
     } catch (_) { alert('Error de conexi\u00f3n.'); }
 };
 
@@ -1094,41 +1077,18 @@ function renderMetodoCard(m) {
     `;
 }
 
+// Las funciones cardBrandSVG, bizumSVG, bankSVG están en 17-pago.js (global)
+
 function miniTarjetaHTML(marca, ultimos) {
-    var cls = 'mini-card--default', logo = '<span class="mini-card-text">CARD</span>';
-    if (marca === 'Visa')             { cls = 'mini-card--visa';       logo = '<span class="mini-card-text" style="font-style:italic;">VISA</span>'; }
-    else if (marca === 'Mastercard')  { cls = 'mini-card--mastercard'; logo = '<span class="mini-card-mc"><span></span><span></span></span>'; }
-    else if (marca === 'American Express') { cls = 'mini-card--amex';  logo = '<span class="mini-card-text">AMEX</span>'; }
-    return `
-        <div class="mini-card ${cls}">
-            <div class="mini-card-chip"></div>
-            <div class="mini-card-logo">${logo}</div>
-            <div class="mini-card-num">•• ${ultimos || '----'}</div>
-        </div>
-    `;
+    return '<div class="mp-card-icon">' + cardBrandSVG(marca, 48) + '</div>';
 }
 
 function miniBizumHTML() {
-    return `
-        <div class="mini-card mini-card--bizum">
-            <div class="mini-card-logo" style="justify-content:center;align-items:center;display:flex;height:100%;">
-                <span class="mini-card-text" style="font-size:11px;">bizum</span>
-            </div>
-        </div>
-    `;
+    return '<div class="mp-card-icon">' + bizumSVG(36) + '</div>';
 }
 
 function miniBancoHTML() {
-    return `
-        <div class="mini-card mini-card--bank">
-            <div class="mini-card-logo" style="justify-content:center;align-items:center;display:flex;height:100%;flex-direction:column;">
-                <svg width="20" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 10l9-6 9 6"/>
-                    <path d="M5 10v8M12 10v8M19 10v8M3 20h18"/>
-                </svg>
-            </div>
-        </div>
-    `;
+    return '<div class="mp-card-icon">' + bankSVG(36) + '</div>';
 }
 
 window.abrirModalTipoPago = () => {
@@ -1578,10 +1538,11 @@ async function phFetch(desde, hasta) {
 
 function phRenderMes(anyo, mes, dias) {
     var porFecha = {};
-    dias.forEach(d => porFecha[d.fecha] = d);
+    dias.forEach(d => { porFecha[d.fecha] = d; _phDayMap[d.fecha] = d; });
     var total  = phDiasEnMes(anyo, mes);
     var primer = (new Date(anyo, mes, 1).getDay() + 6) % 7;
     var hoy    = new Date();
+    var compact = window.innerWidth <= 520;
     var html   = '<div class="ph-cal-grid">';
     _PH_DIAS.forEach(l => html += `<div class="ph-cal-hdr">${l}</div>`);
     for (var i = 0; i < primer; i++) html += '<div class="ph-cal-celda ph-cal-vacia"></div>';
@@ -1590,20 +1551,31 @@ function phRenderMes(anyo, mes, dias) {
         var info  = porFecha[fecha];
         var color = info && info.color ? info.color : null;
         var esHoy = (anyo === hoy.getFullYear() && mes === hoy.getMonth() && d === hoy.getDate());
-        var slotsHtml = '';
-        if (info && info.slots && info.slots.length) {
-            slotsHtml = info.slots.map(s => `<span class="ph-slot">${s.from}–${s.to}</span>`).join('');
+
+        if (compact) {
+            var cursor = info && info.perfil_nombre ? 'cursor:pointer;' : 'cursor:default;';
+            var noPerf = !color ? 'opacity:0.35;' : '';
+            html += `<div class="ph-cal-celda ph-cal-celda--mini ${esHoy ? 'ph-cal-hoy' : ''}"
+                        style="${color ? 'background:'+color+'33;border-bottom:2px solid '+color+';' : ''}${cursor}${noPerf}"
+                        onclick="phClickDia('${fecha}')">
+                        <span class="ph-cal-num">${d}</span>
+                    </div>`;
+        } else {
+            var slotsHtml = '';
+            if (info && info.slots && info.slots.length) {
+                slotsHtml = info.slots.map(s => `<span class="ph-slot">${s.from}–${s.to}</span>`).join('');
+            }
+            var borderStyle = color ? `border-bottom: 3px solid ${color};` : '';
+            var bgStyle     = color ? `background: linear-gradient(180deg, rgba(0,0,0,0) 70%, ${color}22 100%);` : '';
+            html += `
+            <div class="ph-cal-celda ${esHoy ? 'ph-cal-hoy' : ''} ${color ? 'ph-cal-con-perfil' : ''}"
+                 style="${borderStyle}${bgStyle}"
+                 onclick="phMostrarDetalle('${fecha}', ${JSON.stringify(info || null).replace(/"/g,'&quot;')})">
+                <span class="ph-cal-num">${d}</span>
+                ${info && info.perfil_nombre ? `<span class="ph-cal-perf" style="color:${color||'#c9a96e'}">${info.perfil_nombre}</span>` : ''}
+                <div class="ph-cal-slots">${slotsHtml}</div>
+            </div>`;
         }
-        var borderStyle = color ? `border-bottom: 3px solid ${color};` : '';
-        var bgStyle     = color ? `background: linear-gradient(180deg, rgba(0,0,0,0) 70%, ${color}22 100%);` : '';
-        html += `
-        <div class="ph-cal-celda ${esHoy ? 'ph-cal-hoy' : ''} ${color ? 'ph-cal-con-perfil' : ''}"
-             style="${borderStyle}${bgStyle}"
-             onclick="phMostrarDetalle('${fecha}', ${JSON.stringify(info || null).replace(/"/g,'&quot;')})">
-            <span class="ph-cal-num">${d}</span>
-            ${info && info.perfil_nombre ? `<span class="ph-cal-perf" style="color:${color||'#c9a96e'}">${info.perfil_nombre}</span>` : ''}
-            <div class="ph-cal-slots">${slotsHtml}</div>
-        </div>`;
     }
     html += '</div>';
     return html;

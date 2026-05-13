@@ -163,9 +163,42 @@ init().then(() => {
         loadServicios();
     } else if (_path.startsWith('/habitacion/')) {
         var tipo = decodeURIComponent(_path.split('/')[2]);
+        // Mostrar skeleton inmediatamente para evitar pantalla negra
+        var _skMc = document.getElementById('main-content');
+        if (_skMc) _skMc.style.display = 'block';
+        var _skDv = document.getElementById('dynamic-view');
+        if (_skDv) _skDv.innerHTML = [
+            '<div class="detail-view-container">',
+            '<div class="skeleton-block" style="width:110px;height:12px;margin-bottom:20px;"></div>',
+            '<div class="skeleton-block" style="width:250px;height:34px;margin-bottom:12px;"></div>',
+            '<div class="skeleton-block" style="width:54px;height:3px;margin-bottom:36px;"></div>',
+            '<div class="skeleton-block" style="width:100%;height:420px;border-radius:12px;margin-bottom:28px;"></div>',
+            '<div class="skeleton-block" style="width:130px;height:28px;margin-bottom:20px;"></div>',
+            '<div class="skeleton-block" style="width:100%;height:13px;margin-bottom:10px;"></div>',
+            '<div class="skeleton-block" style="width:88%;height:13px;margin-bottom:10px;"></div>',
+            '<div class="skeleton-block" style="width:76%;height:13px;margin-bottom:36px;"></div>',
+            '<div class="skeleton-block" style="width:100%;height:44px;border-radius:8px;margin-bottom:12px;"></div>',
+            '</div>'
+        ].join('');
         loadAndShowRoom(tipo);
     } else if (_path.startsWith('/servicio/')) {
         var slug = decodeURIComponent(_path.split('/')[2]);
+        // Mostrar skeleton inmediatamente para evitar pantalla negra
+        var _skMcSrv = document.getElementById('main-content');
+        if (_skMcSrv) _skMcSrv.style.display = 'block';
+        var _skDvSrv = document.getElementById('dynamic-view');
+        if (_skDvSrv) _skDvSrv.innerHTML = [
+            '<div class="servicio-detail-page" style="max-width:860px;margin:0 auto;padding:40px 20px 80px;">',
+            '<div class="skeleton-block" style="width:80px;height:12px;margin-bottom:28px;"></div>',
+            '<div class="skeleton-block" style="width:220px;height:32px;margin-bottom:8px;"></div>',
+            '<div class="skeleton-block" style="width:54px;height:3px;margin-bottom:36px;"></div>',
+            '<div class="skeleton-block" style="width:100%;height:420px;border-radius:12px;margin-bottom:32px;"></div>',
+            '<div class="skeleton-block" style="width:100%;height:13px;margin-bottom:10px;"></div>',
+            '<div class="skeleton-block" style="width:92%;height:13px;margin-bottom:10px;"></div>',
+            '<div class="skeleton-block" style="width:80%;height:13px;margin-bottom:36px;"></div>',
+            '<div class="skeleton-block" style="width:180px;height:44px;border-radius:8px;"></div>',
+            '</div>'
+        ].join('');
         loadAndShowServicio(slug);
     } else if (_path === '/mis-reservas') {
         showMisReservas();

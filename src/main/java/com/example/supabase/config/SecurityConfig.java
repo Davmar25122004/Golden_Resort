@@ -26,6 +26,9 @@ public class SecurityConfig {
     @Autowired
     private CustomAuthSuccessHandler customAuthSuccessHandler;
 
+    @Autowired
+    private CustomAuthFailureHandler customAuthFailureHandler;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -80,6 +83,7 @@ public class SecurityConfig {
                         .loginPage("/")
                         .loginProcessingUrl("/login")
                         .successHandler(customAuthSuccessHandler)
+                        .failureHandler(customAuthFailureHandler)
                         .permitAll())
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(authorization -> authorization

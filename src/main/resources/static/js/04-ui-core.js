@@ -42,10 +42,16 @@ function actualizarNavbar() {
     // del código (auth, reservas, peticiones, etc.) tenga la info correcta.
     if (s.autenticado) {
         state.token = 'session';
+        var _staffRoles = ['ADMIN','RECEPCION','LIMPIEZA','GIMNASIO','SPA','COCHE','HOSTELERIA','ROOMSERVICE'];
+        var _rolDetectado = 'CLIENTE';
+        for (var _i = 0; _i < s.roles.length; _i++) {
+            var _r = s.roles[_i].replace(/^ROLE_/, '').toUpperCase();
+            if (_staffRoles.indexOf(_r) !== -1) { _rolDetectado = _r; break; }
+        }
         state.user  = {
             email: s.usuario,
             roles: s.roles,
-            rol:   s.esAdmin ? 'ADMIN' : (s.roles.indexOf('ROLE_RECEPCION') !== -1 ? 'RECEPCION' : 'CLIENTE'),
+            rol:   _rolDetectado,
         };
     } else {
         state.token = null;

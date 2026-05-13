@@ -5,6 +5,8 @@
     // ── State ──────────────────────────────────────────────────────────────────
     var _state = {
         year: new Date().getFullYear(),
+        month: new Date().getMonth(),  // 0-11
+        view: 'anual',                 // 'anual' | 'mensual'
         rangeStart: null,   // Date
         rangeEnd:   null,   // Date
         clientes:   [],
@@ -60,6 +62,10 @@
     <!-- ── Columna izquierda: Calendario ── -->
     <div class="rm-col-left">
       <div class="rm-card rm-cal-card">
+        <div class="rm-cal-view-tabs">
+          <button class="rm-cal-tab rm-cal-tab--active" data-view="anual" onclick="rmCalSetView('anual')">Calendario</button>
+          <button class="rm-cal-tab" data-view="mensual" onclick="rmCalSetView('mensual')">Mes</button>
+        </div>
         <div class="rm-cal-nav">
           <button class="rm-icon-btn" onclick="rmCalPrev()">&#8249;</button>
           <span id="rm-cal-year" class="rm-cal-year-label"></span>
@@ -117,20 +123,28 @@
 
     // ── Calendar render ────────────────────────────────────────────────────────
     function _renderCalendar() {
-        document.getElementById('rm-cal-year').textContent = _state.year;
-        var grid = document.getElementById('rm-cal-grid');
+        var label = document.getElementById('rm-cal-year');
+        var grid  = document.getElementById('rm-cal-grid');
         grid.innerHTML = '';
 
-        for (var m = 0; m < 12; m++) {
-            grid.appendChild(_buildMonth(m));
+        if (_state.view === 'mensual') {
+            label.textContent = MONTH_NAMES[_state.month] + ' ' + _state.year;
+            grid.className = 'rm-cal-grid rm-cal-grid--mensual';
+            grid.appendChild(_buildMonth(_state.month, true));
+        } else {
+            label.textContent = _state.year;
+            grid.className = 'rm-cal-grid';
+            for (var m = 0; m < 12; m++) {
+                grid.appendChild(_buildMonth(m, false));
+            }
         }
         _updateRangeLabel();
     }
 
-    function _buildMonth(monthIdx) {
+    function _buildMonth(monthIdx, large) {
         var year  = _state.year;
         var wrap  = document.createElement('div');
-        wrap.className = 'rm-month';
+        wrap.className = 'rm-month' + (large ? ' rm-month--lg' : '');
 
         var title = document.createElement('div');
         title.className = 'rm-month-title';
@@ -490,8 +504,27 @@
         _hideMsg();
     };
 
-    window.rmCalPrev = function() { _state.year--; _renderCalendar(); };
-    window.rmCalNext = function() { _state.year++; _renderCalendar(); };
+    window.rmCalPrev = function() {
+        if (_state.view === 'mensual') {
+            _state.month--;
+            if (_state.month < 0) { _state.month = 11; _state.year--; }
+        } else { _state.year--; }
+        _renderCalendar();
+    };
+    window.rmCalNext = function() {
+        if (_state.view === 'mensual') {
+            _state.month++;
+            if (_state.month > 11) { _state.month = 0; _state.year++; }
+        } else { _state.year++; }
+        _renderCalendar();
+    };
+    window.rmCalSetView = function(v) {
+        _state.view = v;
+        document.querySelectorAll('.rm-cal-tab').forEach(function(b) {
+            b.classList.toggle('rm-cal-tab--active', b.dataset.view === v);
+        });
+        _renderCalendar();
+    };
 
     // ── Helpers ────────────────────────────────────────────────────────────────
     function _isoDate(d) {
@@ -539,7 +572,7 @@
 /* Header */
 .rm-header { display:flex; align-items:flex-start; }
 .rm-title { font-family:'Cormorant Garamond',Georgia,serif; color:#c9a84c; font-size:1.5rem; letter-spacing:1px; margin:0 0 .2rem; }
-.rm-subtitle { font-size:.75rem; color:var(--text-muted-custom,#6c757d); letter-spacing:.5px; margin:0; }
+.rm-subtitle { font-size:.75rem; color:var(--text-muted-custom,#6c757d); letter-spacing:.5px; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
 /* Two-column layout */
 .rm-layout { display:grid; grid-template-columns:minmax(0,1fr) 380px; gap:1.25rem; align-items:start; }
@@ -558,6 +591,12 @@
 .rm-right-empty-icon { font-size:2.5rem; color:rgba(201,168,76,.3); }
 .rm-right-empty-txt { font-size:.8rem; color:#6c757d; line-height:1.6; letter-spacing:.3px; }
 
+/* Calendar view tabs */
+.rm-cal-view-tabs { display:flex; gap:0; margin-bottom:.75rem; border:1px solid rgba(201,168,76,.2); border-radius:6px; overflow:hidden; }
+.rm-cal-tab { flex:1; background:none; border:none; color:#6c757d; font-size:.65rem; letter-spacing:2px; text-transform:uppercase; padding:.45rem .5rem; cursor:pointer; transition:all .2s; }
+.rm-cal-tab--active { background:rgba(201,168,76,.15); color:#c9a84c; }
+.rm-cal-tab:hover:not(.rm-cal-tab--active) { color:#c8bfa8; }
+
 /* Calendar nav */
 .rm-cal-nav { display:flex; align-items:center; justify-content:center; gap:1.5rem; margin-bottom:1rem; }
 .rm-cal-year-label { font-family:'Cormorant Garamond',Georgia,serif; font-size:1.3rem; color:#c9a84c; letter-spacing:2px; min-width:60px; text-align:center; }
@@ -568,6 +607,11 @@
 .rm-cal-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.6rem; }
 @media(max-width:820px){ .rm-cal-grid{ grid-template-columns:repeat(4,1fr); } }
 @media(max-width:600px){ .rm-cal-grid{ grid-template-columns:repeat(2,1fr); } }
+.rm-cal-grid--mensual { grid-template-columns:1fr !important; }
+.rm-month--lg { padding:1rem; }
+.rm-month--lg .rm-month-title { font-size:.85rem; margin-bottom:.6rem; }
+.rm-month--lg .rm-week-hdr span { font-size:.72rem; }
+.rm-month--lg .rm-day { font-size:.88rem; padding:8px 0; }
 
 .rm-month { background:rgba(0,0,0,.2); border:1px solid rgba(201,168,76,.08); border-radius:8px; padding:.6rem .5rem; }
 .rm-month-title { text-align:center; font-size:.72rem; letter-spacing:2px; text-transform:uppercase; color:#c9a84c; margin-bottom:.4rem; font-weight:600; }

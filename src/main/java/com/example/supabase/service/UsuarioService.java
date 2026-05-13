@@ -59,22 +59,22 @@ public class UsuarioService {
         // Unicidad de documento (solo contra usuarios verificados)
         if (numDocumento != null && !numDocumento.isBlank()) {
             String docNorm = numDocumento.trim().toUpperCase();
-            if (usuarioRepository.findByNumDocumento(docNorm).isPresent())
+            if (usuarioRepository.findFirstByNumDocumento(docNorm).isPresent())
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Ya existe una cuenta registrada con ese número de documento.");
             // Liberar documento de registros pendientes no verificados
-            pendingRepository.findByNumDocumento(docNorm).ifPresent(pendingRepository::delete);
+            pendingRepository.findFirstByNumDocumento(docNorm).ifPresent(pendingRepository::delete);
             numDocumento = docNorm;
         }
 
         // Unicidad de teléfono (solo contra usuarios verificados)
         if (telefono != null && !telefono.isBlank()) {
             String telNorm = telefono.trim().replaceAll("\\s+", "");
-            if (usuarioRepository.findByTelefono(telNorm).isPresent())
+            if (usuarioRepository.findFirstByTelefono(telNorm).isPresent())
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                     "Ya existe una cuenta registrada con ese número de teléfono.");
             // Liberar teléfono de registros pendientes no verificados
-            pendingRepository.findByTelefono(telNorm).ifPresent(pendingRepository::delete);
+            pendingRepository.findFirstByTelefono(telNorm).ifPresent(pendingRepository::delete);
             telefono = telNorm;
         }
 

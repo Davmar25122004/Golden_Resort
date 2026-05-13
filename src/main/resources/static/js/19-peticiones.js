@@ -24,7 +24,6 @@ async function peticionesInit() {
                 <button class="pet-filter-btn active" data-filtro="TODAS"       onclick="peticionesFiltrar('TODAS')">Todas</button>
                 <button class="pet-filter-btn"         data-filtro="EN_ESTANCIA" onclick="peticionesFiltrar('EN_ESTANCIA')">En estancia</button>
                 <button class="pet-filter-btn"         data-filtro="PROXIMAS"   onclick="peticionesFiltrar('PROXIMAS')">Próximas</button>
-                <button class="pet-filter-btn"         data-filtro="PASADAS"    onclick="peticionesFiltrar('PASADAS')">Pasadas</button>
             </div>
             <div id="pet-grid" class="pet-grid">
                 <div class="pet-empty">Cargando…</div>
@@ -61,6 +60,7 @@ function peticionesFiltrar(filtro) {
         if (filtro === 'EN_ESTANCIA') return entrada <= hoy && salida > hoy;
         if (filtro === 'PROXIMAS')   return entrada > hoy;
         if (filtro === 'PASADAS')    return salida <= hoy;
+        if (filtro === 'TODAS')      return salida > hoy; // excluir pasadas por defecto
         return true;
     });
 

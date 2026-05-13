@@ -1245,7 +1245,7 @@ window.persVerHorario = async (empId, nombre) => {
         <div class="pers-week-table">
             ${out.map((d, i) => `
                 <div class="pers-week-day-row">
-                    <span class="pers-week-day-name">${PERS_DIAS[i]} <small class="text-muted">${d.fecha.slice(5)}</small></span>
+                    <span class="pers-week-day-name">${PERS_DIAS[i]} <small style="color:var(--cream);opacity:0.6;">${d.fecha.slice(5)}</small></span>
                     <span class="pers-week-day-perf" style="${d.libre ? 'color:#555;font-style:italic;' : ''}">${d.libre ? 'Día libre' : (d.perfil_nombre || '—')}</span>
                     <div class="pers-week-day-slots">
                         ${d.libre ? '<span class="text-muted" style="color:#555">Sin horario</span>' :

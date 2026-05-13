@@ -45,6 +45,14 @@ public class HabitacionController {
         return ResponseEntity.ok(habitacionService.obtenerDisponibles(fechaEntrada, fechaSalida));
     }
 
+    @GetMapping("/tipo/{tipo}/con-disponibilidad")
+    public ResponseEntity<?> conDisponibilidad(
+            @PathVariable TipoHabitacion tipo,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaEntrada,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaSalida) {
+        return ResponseEntity.ok(habitacionService.obtenerPorTipoConDisponibilidad(tipo, fechaEntrada, fechaSalida));
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> crear(@RequestBody Habitacion habitacion) {

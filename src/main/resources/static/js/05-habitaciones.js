@@ -111,6 +111,17 @@ async function loadRooms() {
 }
 
 function navigateToRoom(tipo) {
+    if (!state.token) {
+        sessionStorage.setItem('loginRedirect', '/habitacion/' + tipo.toLowerCase());
+        if (state.searchDates) sessionStorage.setItem('searchDates', JSON.stringify(state.searchDates));
+        abrirModalAuth();
+        return;
+    }
+    var STAFF_ROLES = ['ADMIN','RECEPCION','LIMPIEZA','GIMNASIO','SPA','COCHE','HOSTELERIA','ROOMSERVICE'];
+    if (state.user && state.user.rol && STAFF_ROLES.indexOf(String(state.user.rol).replace(/^ROLE_/, '').toUpperCase()) !== -1) {
+        alert('Las cuentas de personal del hotel no pueden hacer reservas.');
+        return;
+    }
     if (state.searchDates) sessionStorage.setItem('searchDates', JSON.stringify(state.searchDates));
     window.location.href = '/habitacion/' + tipo.toLowerCase();
 }

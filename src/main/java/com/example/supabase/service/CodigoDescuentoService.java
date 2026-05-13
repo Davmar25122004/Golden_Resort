@@ -54,6 +54,14 @@ public class CodigoDescuentoService {
     public void registrarUso(CodigoDescuento codigo) {
         if (codigo == null) return;
         codigo.setUsos(codigo.getUsos() + 1);
-        repo.save(codigo);
+
+        // Si alcanza el máximo de usos, desactivar y eliminar
+        if (codigo.getUsoMaximo() != null && codigo.getUsos() >= codigo.getUsoMaximo()) {
+            codigo.setActivo(false);
+            repo.save(codigo);
+            repo.delete(codigo);
+        } else {
+            repo.save(codigo);
+        }
     }
 }

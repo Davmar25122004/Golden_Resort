@@ -595,18 +595,18 @@ public class AdminController {
         String numDoc = datos.get("numDocumento");
         if (numDoc != null && !numDoc.isBlank()) {
             String docNorm = numDoc.trim().toUpperCase();
-            if (usuarioRepository.findByNumDocumento(docNorm).isPresent())
+            if (usuarioRepository.findFirstByNumDocumento(docNorm).isPresent())
                 return ResponseEntity.status(409).body("Ya existe una cuenta con ese número de documento.");
-            pendingRegistrationRepository.findByNumDocumento(docNorm).ifPresent(pendingRegistrationRepository::delete);
+            pendingRegistrationRepository.findFirstByNumDocumento(docNorm).ifPresent(pendingRegistrationRepository::delete);
             numDoc = docNorm;
         }
 
         String telefono = datos.get("telefono");
         if (telefono != null && !telefono.isBlank()) {
             String telNorm = telefono.trim().replaceAll("\\s+", "");
-            if (usuarioRepository.findByTelefono(telNorm).isPresent())
+            if (usuarioRepository.findFirstByTelefono(telNorm).isPresent())
                 return ResponseEntity.status(409).body("Ya existe una cuenta con ese número de teléfono.");
-            pendingRegistrationRepository.findByTelefono(telNorm).ifPresent(pendingRegistrationRepository::delete);
+            pendingRegistrationRepository.findFirstByTelefono(telNorm).ifPresent(pendingRegistrationRepository::delete);
             telefono = telNorm;
         }
 

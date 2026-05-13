@@ -643,7 +643,8 @@ body.has-admin-sidebar > #admin-sidebar {
 @media (min-width: 901px) {
     .admin-nav-drawer-header { display: none; }
     .admin-nav-backdrop { display: none !important; }
-    .admin-nav-header .nav-acc-btn { display: none !important; }
+    .admin-nav-header .nav-acc-btn--mobile { display: none !important; }
+    .admin-nav-header .nav-acc-btn:not(.nav-acc-btn--mobile) { display: inline-flex !important; }
     .admin-nav-collapse {
         display: contents !important;
         position: static !important;
