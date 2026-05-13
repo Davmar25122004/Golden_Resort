@@ -37,4 +37,5 @@ build/
 .env.*
 !.env.example
 .mcp.json.local
-.claude/settings.local.json
+.claude/
+.agents/
