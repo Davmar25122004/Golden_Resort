@@ -15,8 +15,12 @@ public class MetodoPago {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "usuario_id", nullable = false)
     private Long usuarioId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", insertable = false, updatable = false)
+    private Usuario usuario;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

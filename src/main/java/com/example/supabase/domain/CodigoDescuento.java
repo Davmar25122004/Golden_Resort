@@ -42,7 +42,12 @@ public class CodigoDescuento {
     private boolean activo = true;
 
     /** Si no es null, solo este usuario puede usar el código. */
+    @Column(name = "usuario_asignado_id")
     private Long usuarioAsignadoId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_asignado_id", insertable = false, updatable = false)
+    private Usuario usuarioAsignado;
 
     /** Nombre del usuario asignado (solo para mostrar en admin, no para lógica). */
     @Transient

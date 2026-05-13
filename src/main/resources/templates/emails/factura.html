@@ -209,22 +209,6 @@
                     </td>
                 </tr>
 
-                <!-- QR Code -->
-                <tr th:if="${qrUrl != null}">
-                    <td style="padding:32px 40px 0; text-align:center;">
-                        <div style="color:#C9A84C; font-family: Georgia, serif; font-size:16px; margin-bottom:8px;">
-                            Tu código de acceso
-                        </div>
-                        <div style="color:#9A9A9A; font-size:11px; letter-spacing:2px; text-transform:uppercase; margin-bottom:14px;">
-                            <span th:text="${habitacionTipo}">SUITE</span>
-                            <span th:if="${habitacionNumero}"> · Nº <span th:text="${habitacionNumero}">301</span></span>
-                        </div>
-                        <img th:src="${qrUrl}" alt="Código QR de la reserva" style="width:180px; height:180px; border:6px solid #ffffff; border-radius:8px; display:block; margin: 0 auto; background:#ffffff;">
-                        <div style="color:#9A9A9A; font-size:11px; letter-spacing:1px; margin-top:10px;">
-                            Ref · <span style="color:#C9A84C;" th:text="${referencia}">GR-XXXX</span>
-                        </div>
-                    </td>
-                </tr>
 
                 <!-- Foto de la habitación -->
                 <tr th:if="${habitacionUrl != null}">

@@ -17,13 +17,26 @@ public class Pago {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "reserva_id", nullable = false)
     private Long reservaId;
 
-    @Column(nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reserva_id", insertable = false, updatable = false)
+    private Reserva reserva;
+
+    @Column(name = "usuario_id", nullable = false)
     private Long usuarioId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", insertable = false, updatable = false)
+    private Usuario usuario;
+
+    @Column(name = "metodo_pago_id")
     private Long metodoPagoId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "metodo_pago_id", insertable = false, updatable = false)
+    private MetodoPago metodoPago;
 
     @Column(precision = 10, scale = 2, nullable = false)
     private BigDecimal subtotal;

@@ -20,8 +20,16 @@ public class Mensaje {
     @Column(name = "conversacion_id", nullable = false)
     private Long conversacionId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "conversacion_id", insertable = false, updatable = false)
+    private Conversacion conversacion;
+
     @Column(name = "autor_id", nullable = false)
     private Long autorId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "autor_id", insertable = false, updatable = false)
+    private Usuario autor;
 
     @Column(name = "autor_rol", nullable = false, length = 20)
     private String autorRol;   // 'CLIENTE' | 'RECEPCION'

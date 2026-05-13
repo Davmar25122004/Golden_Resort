@@ -17,6 +17,10 @@ public class TurnoPlanDiaTramo {
     @Column(name = "plan_id", nullable = false)
     private Long planId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "plan_id", insertable = false, updatable = false)
+    private TurnoPlan plan;
+
     @Column(nullable = false)
     private LocalDate fecha;
 
