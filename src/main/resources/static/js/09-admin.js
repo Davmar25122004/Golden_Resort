@@ -550,8 +550,17 @@ window.adminCalAbrirDia = async (fecha) => {
     titulo.textContent = 'Reservas del ' + adminCalFechaLarga(adminCalParseYmd(fecha));
     body.innerHTML = '<div class="text-center py-4 text-muted">Cargando…</div>';
 
+    // Limpiar backdrops huérfanos y estado residual del body antes de abrir
+    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+
     var modalEl = document.getElementById('adminCalDiaModal');
-    var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    // Dispose instancia previa si existe para evitar estado corrupto
+    var oldInst = bootstrap.Modal.getInstance(modalEl);
+    if (oldInst) { try { oldInst.dispose(); } catch (_) {} }
+    var modal = new bootstrap.Modal(modalEl);
     modal.show();
 
     try {
@@ -719,24 +728,24 @@ window.adminCalEditarReserva = async (id) => {
         if (modalEl) {
             var inst = bootstrap.Modal.getInstance(modalEl);
             if (inst) {
-                // Espera al cierre antes de abrir el siguiente modal para evitar conflictos de backdrop
-                modalEl.addEventListener('hidden.bs.modal', function once() {
-                    modalEl.removeEventListener('hidden.bs.modal', once);
+                var _opened = false;
+                function _openOnce() {
+                    if (_opened) return;
+                    _opened = true;
                     document.body.classList.remove('modal-open');
                     document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
                     try { adminModificarReserva(r); }
                     catch (e) { console.error('adminModificarReserva fallo:', e); alert('Error al abrir el modal: ' + e.message); }
+                }
+                modalEl.addEventListener('hidden.bs.modal', function once() {
+                    modalEl.removeEventListener('hidden.bs.modal', once);
+                    _openOnce();
                 });
                 inst.hide();
-                // Fallback: si por algún motivo no dispara hidden en 400ms, abrimos igual
-                setTimeout(() => {
-                    if (!document.getElementById('modal-mod-reserva')) {
-                        document.body.classList.remove('modal-open');
-                        document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
-                        try { adminModificarReserva(r); }
-                        catch (e) { console.error(e); alert('Error: ' + e.message); }
-                    }
-                }, 400);
+                // Fallback: si por algún motivo no dispara hidden en 500ms, abrimos igual
+                setTimeout(_openOnce, 500);
                 return;
             }
         }
@@ -972,11 +981,11 @@ window.adminModificarReserva = async (r) => {
                 <div class="mb-3 d-flex gap-2">
                     <div style="flex:1;">
                         <label class="admin-form-label">${t('adm_mod_arrival')}</label>
-                        <input type="date" id="mod-llegada" class="admin-form-input" value="${dIn}" required>
+                        <input type="text" id="mod-llegada" class="admin-form-input" value="${dIn}" readonly required>
                     </div>
                     <div style="flex:1;">
                         <label class="admin-form-label">${t('adm_mod_departure')}</label>
-                        <input type="date" id="mod-salida" class="admin-form-input" value="${dOut}" required>
+                        <input type="text" id="mod-salida" class="admin-form-input" value="${dOut}" readonly required>
                     </div>
                 </div>
 
@@ -998,16 +1007,29 @@ window.adminModificarReserva = async (r) => {
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 
     // Inicializar Flatpickr en los nuevos inputs del modal
-    flatpickr('#mod-llegada', FP_CONFIG);
-    flatpickr('#mod-salida', FP_CONFIG);
+    flatpickr('#mod-llegada', Object.assign({}, FP_CONFIG, {
+        dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y',
+        defaultDate: dIn, allowInput: false
+    }));
+    flatpickr('#mod-salida', Object.assign({}, FP_CONFIG, {
+        dateFormat: 'Y-m-d', altInput: true, altFormat: 'd/m/Y',
+        defaultDate: dOut, allowInput: false
+    }));
 };
 
 window.cerrarModalModRe = () => {
+    // Destruir instancias Flatpickr del modal antes de eliminarlo
     var el = document.getElementById('modal-mod-reserva');
-    if (el) el.remove();
+    if (el) {
+        el.querySelectorAll('input').forEach(function(inp) {
+            if (inp._flatpickr) { try { inp._flatpickr.destroy(); } catch(_) {} }
+        });
+        el.remove();
+    }
     document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
     document.body.classList.remove('modal-open');
     document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
 };
 
 window.guardarModificacionReserva = async (id) => {
@@ -1032,16 +1054,20 @@ window.guardarModificacionReserva = async (id) => {
         });
 
         if (res.ok) {
+            // Actualizar caché de reservas en background sin bloquear la UI
+            fetch('/api/reservas').then(function(rr) {
+                if (rr.ok) return rr.json();
+            }).then(function(data) {
+                if (data) _cachedReservasAdmin = data;
+            }).catch(function() {});
+
             if (btn) { btn.textContent = '¡Guardado!'; btn.style.background = '#2ecc71'; }
             setTimeout(() => {
                 cerrarModalModRe();
+                // Solo invalidar cache y re-renderizar calendario, NO recargar todo el DOM del tab
+                // (loadAdminReservas reemplaza body.innerHTML y destruye modales abiertos)
                 if (typeof adminCalInvalidarCache === 'function') adminCalInvalidarCache();
-                var activa = document.querySelector('.admin-tab-btn.active');
-                var tab = activa && activa.id ? activa.id.replace(/^atab-/, '') : 'reservas';
-                if (tab === 'dashboard')      loadAdminDashboard();
-                else if (tab === 'reservas')  loadAdminReservas();
-                else                          loadAdminReservas();
-                if (typeof adminChartsLoad === 'function') adminChartsLoad();
+                if (typeof adminCalRender === 'function') adminCalRender();
             }, 700);
         } else {
             var msg = await res.text();
