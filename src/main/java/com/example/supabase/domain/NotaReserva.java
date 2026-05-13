@@ -20,8 +20,16 @@ public class NotaReserva {
     @Column(name = "reserva_id", nullable = false)
     private Long reservaId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reserva_id", insertable = false, updatable = false)
+    private Reserva reserva;
+
     @Column(name = "autor_id", nullable = false)
     private Long autorId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "autor_id", insertable = false, updatable = false)
+    private Usuario autor;
 
     @Column(name = "autor_email", length = 255)
     private String autorEmail;

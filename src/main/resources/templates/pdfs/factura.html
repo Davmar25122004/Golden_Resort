@@ -129,33 +129,6 @@
         }
         .desc-tag { color: #C9A84C; font-weight: bold; }
         .desc-value { color: #C9A84C; text-align: right; }
-        .qr-box { text-align: center; padding-top: 8pt; }
-        .qr-title {
-            color: #C9A84C;
-            font-family: Georgia, serif;
-            font-size: 12pt;
-            margin-bottom: 6pt;
-        }
-        .qr-sub {
-            color: #9A9A9A;
-            font-size: 8pt;
-            letter-spacing: 1.5pt;
-            text-transform: uppercase;
-            margin-bottom: 10pt;
-        }
-        .qr-img {
-            width: 130pt;
-            height: 130pt;
-            border: 5pt solid #ffffff;
-            background: #ffffff;
-        }
-        .qr-ref {
-            color: #9A9A9A;
-            font-size: 8pt;
-            letter-spacing: 1pt;
-            margin-top: 8pt;
-        }
-        .qr-ref .gold { color: #C9A84C; }
         .room-img-box { text-align: center; padding-top: 14pt; }
         .room-img-title {
             color: #C9A84C;
@@ -344,20 +317,6 @@
             <span th:if="${metodoTipo == 'BIZUM'}">Bizum</span>
             <span th:if="${metodoTipo == 'CUENTA_BANCARIA'}">Cuenta bancaria</span>
         </div>
-
-        <!-- QR -->
-        <th:block th:if="${qrDataUri != null}">
-            <div class="pad qr-box">
-                <div class="qr-title">Tu c&#243;digo de acceso</div>
-                <div class="qr-sub">
-                    <span th:text="${habitacionTipo}">SUITE</span><th:block th:if="${habitacionNumero}"> &#183; N&#186; <span th:text="${habitacionNumero}">301</span></th:block>
-                </div>
-                <img th:src="${qrDataUri}" alt="QR" class="qr-img"/>
-                <div class="qr-ref">
-                    Ref &#183; <span class="gold" th:text="${referencia}">GR-XXXX</span>
-                </div>
-            </div>
-        </th:block>
 
         <!-- Foto habitación -->
         <th:block th:if="${habitacionImgDataUri != null}">

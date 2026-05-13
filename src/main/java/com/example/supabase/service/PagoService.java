@@ -62,7 +62,6 @@ public class PagoService {
     private final ReservaService reservaService;
     private final CodigoDescuentoService codigoDescuentoService;
     private final EmailService emailService;
-    private final QrGenerator qrGenerator;
     private final TemplateEngine templateEngine;
     private final PedidoRoomServiceRepository pedidoRoomServiceRepository;
     private final RoomServiceItemRepository roomServiceItemRepository;
@@ -74,7 +73,6 @@ public class PagoService {
                        ReservaService reservaService,
                        CodigoDescuentoService codigoDescuentoService,
                        EmailService emailService,
-                       QrGenerator qrGenerator,
                        TemplateEngine templateEngine,
                        PedidoRoomServiceRepository pedidoRoomServiceRepository,
                        RoomServiceItemRepository roomServiceItemRepository) {
@@ -85,7 +83,6 @@ public class PagoService {
         this.reservaService              = reservaService;
         this.codigoDescuentoService      = codigoDescuentoService;
         this.emailService                = emailService;
-        this.qrGenerator                 = qrGenerator;
         this.templateEngine              = templateEngine;
         this.pedidoRoomServiceRepository = pedidoRoomServiceRepository;
         this.roomServiceItemRepository   = roomServiceItemRepository;
@@ -107,16 +104,6 @@ public class PagoService {
         long noches = ChronoUnit.DAYS.between(r.getFechaEntrada(), r.getFechaSalida());
         BigDecimal habitacionTotal = r.getHabitacion().getPrecioNoche().multiply(BigDecimal.valueOf(noches));
 
-        String qrContenido = "GOLDEN RESORT\n"
-                + "Ref: "         + pago.getReferencia() + "\n"
-                + "Reserva: "     + r.getId()            + "\n"
-                + "Habitación: "  + r.getHabitacion().getTipo().name()
-                + " · Nº "        + r.getHabitacion().getNumero() + "\n"
-                + "Entrada: "     + r.getFechaEntrada().format(df) + "\n"
-                + "Salida: "      + r.getFechaSalida().format(df)  + "\n"
-                + "Total: "       + pago.getTotal() + " €";
-        String qrDataUri = qrGenerator.generarDataUri(qrContenido, 300);
-
         Context ctx = new Context();
         ctx.setVariable("nombreCliente",    r.getUsuario().getNombre() != null ? r.getUsuario().getNombre() : r.getUsuario().getEmail());
         ctx.setVariable("referencia",       pago.getReferencia());
@@ -135,7 +122,6 @@ public class PagoService {
         ctx.setVariable("metodoTipo",       pago.getMetodoTipo());
         ctx.setVariable("metodoMarca",      pago.getMetodoMarca());
         ctx.setVariable("metodoUltimos",    pago.getMetodoUltimosCuatro());
-        ctx.setVariable("qrDataUri",        qrDataUri);
 
         byte[] imgHab = leerImagenClasspath(imagenHabitacion(r.getHabitacion().getTipo().name()));
         if (imgHab.length > 0) {
@@ -405,15 +391,6 @@ public class PagoService {
             variables.put("metodoMarca",      pago.getMetodoMarca());
             variables.put("metodoUltimos",    pago.getMetodoUltimosCuatro());
 
-            String qrContenido = "GOLDEN RESORT\n"
-                    + "Ref: "         + pago.getReferencia() + "\n"
-                    + "Reserva: "     + r.getId()            + "\n"
-                    + "Habitación: "  + r.getHabitacion().getTipo().name()
-                    + " · Nº "        + r.getHabitacion().getNumero() + "\n"
-                    + "Entrada: "     + r.getFechaEntrada().format(df) + "\n"
-                    + "Salida: "      + r.getFechaSalida().format(df)  + "\n"
-                    + "Total: "       + pago.getTotal() + " €";
-            variables.put("qrUrl",          publicUrl + "/api/pagos/qr/" + pago.getReferencia() + ".png");
             variables.put("habitacionUrl",  publicUrl + "/images/" + imagenHabitacion(r.getHabitacion().getTipo().name()));
             variables.put("logoUrl",        publicUrl + "/images/logo.png");
             variables.put("servicios",      r.getServicios());

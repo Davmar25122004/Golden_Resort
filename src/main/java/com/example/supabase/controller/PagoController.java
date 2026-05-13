@@ -8,7 +8,6 @@ import com.example.supabase.repository.PagoRepository;
 import com.example.supabase.repository.ReservaRepository;
 import com.example.supabase.repository.UsuarioRepository;
 import com.example.supabase.service.PagoService;
-import com.example.supabase.service.QrGenerator;
 import com.example.supabase.service.RateLimitService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -36,42 +35,17 @@ public class PagoController {
     private final PagoRepository pagoRepository;
     private final ReservaRepository reservaRepository;
     private final RateLimitService rateLimitService;
-    private final QrGenerator qrGenerator;
 
     public PagoController(PagoService pagoService,
                           UsuarioRepository usuarioRepository,
                           PagoRepository pagoRepository,
                           ReservaRepository reservaRepository,
-                          RateLimitService rateLimitService,
-                          QrGenerator qrGenerator) {
+                          RateLimitService rateLimitService) {
         this.pagoService        = pagoService;
         this.usuarioRepository  = usuarioRepository;
         this.pagoRepository     = pagoRepository;
         this.reservaRepository  = reservaRepository;
         this.rateLimitService   = rateLimitService;
-        this.qrGenerator        = qrGenerator;
-    }
-
-    /** Endpoint público para el QR de una reserva (usado en correos) */
-    @GetMapping(value = "/qr/{referencia}.png", produces = MediaType.IMAGE_PNG_VALUE)
-    public ResponseEntity<byte[]> qrPng(@PathVariable String referencia) {
-        return pagoRepository.findByReferencia(referencia).flatMap(pago ->
-            reservaRepository.findById(pago.getReservaId()).map(r -> {
-                var df = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
-                String contenido = "GOLDEN RESORT\n"
-                        + "Ref: "        + pago.getReferencia() + "\n"
-                        + "Reserva: "    + r.getId() + "\n"
-                        + "Habitación: " + r.getHabitacion().getTipo().name()
-                        + " · Nº "       + r.getHabitacion().getNumero() + "\n"
-                        + "Entrada: "    + r.getFechaEntrada().format(df) + "\n"
-                        + "Salida: "     + r.getFechaSalida().format(df) + "\n"
-                        + "Total: "      + pago.getTotal() + " €";
-                byte[] png = qrGenerator.generarPng(contenido, 320);
-                return ResponseEntity.ok()
-                        .header(HttpHeaders.CACHE_CONTROL, "public, max-age=86400")
-                        .body(png);
-            })
-        ).orElse(ResponseEntity.notFound().build());
     }
 
     private Usuario usuario(Authentication auth) {

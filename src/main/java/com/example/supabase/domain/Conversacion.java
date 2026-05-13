@@ -20,6 +20,10 @@ public class Conversacion {
     @Column(name = "cliente_id", nullable = false, unique = true)
     private Long clienteId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cliente_id", insertable = false, updatable = false)
+    private Usuario cliente;
+
     @Column(name = "creada_en", nullable = false)
     private LocalDateTime creadaEn;
 

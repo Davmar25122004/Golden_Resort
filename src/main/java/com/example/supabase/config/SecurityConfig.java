@@ -63,7 +63,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/mensajeria/mi-conversacion", "/api/mensajeria/mi-conversacion/**").authenticated()
                         .requestMatchers("/api/enums", "/api/enums/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/lib/**", "/images/**", "/docs/**", "/error").permitAll()
-                        .requestMatchers("/api/pagos/qr/**").permitAll()
                         .requestMatchers("/habitacion/**", "/servicio/**").permitAll()
                         .requestMatchers("/api/habitaciones", "/api/habitaciones/**").permitAll()
                         .requestMatchers("/api/servicios").permitAll()
