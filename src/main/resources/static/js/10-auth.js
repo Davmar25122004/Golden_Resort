@@ -8,11 +8,14 @@ const _docPlaceholders = {
     '':          'Selecciona un tipo primero'
 };
 
+const _docMaxLengths = { 'DNI': 9, 'NIE': 9, 'PASAPORTE': 9, 'TIE': 9, '': 20 };
+
 window.actualizarPlaceholderDoc = () => {
     const tipo  = document.getElementById('reg-tipo-doc').value;
     const input = document.getElementById('reg-num-doc');
     if (input) {
         input.placeholder = _docPlaceholders[tipo] || '';
+        input.maxLength = _docMaxLengths[tipo] || 20;
         input.value = '';
     }
 };
@@ -269,6 +272,8 @@ window.handleRegister = async (e) => {
 };
 
 function _mostrarMensajeVerificacion(email) {
+    var errEl = document.getElementById('auth-error');
+    if (errEl) errEl.classList.add('d-none');
     document.getElementById('form-register').innerHTML = `
         <div class="text-center py-3">
             <div style="font-size:2.5rem">📧</div>

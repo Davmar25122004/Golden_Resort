@@ -46,7 +46,7 @@
             <div class="modal-content">
                 <div class="modal-body">
                     <h3 class="serif text-gold mb-1" style="font-size:1.4rem;">Asignar limpieza extra</h3>
-                    <p class="text-muted mb-3" style="font-size:0.78rem; letter-spacing:0.05em;">Cuando un cliente alojado pide limpieza, asigna a un miembro del equipo que esté de turno.</p>
+                    <p class="mb-3" style="font-size:0.78rem; letter-spacing:0.05em; color:#aaa;">Cuando un cliente alojado pide limpieza, asigna a un miembro del equipo que esté de turno.</p>
                     <div id="al-error" class="alert alert-danger d-none py-2" style="font-size:0.8rem;"></div>
                     <div id="al-success" class="alert alert-success d-none py-2" style="font-size:0.85rem;"></div>
 
@@ -63,14 +63,14 @@
                                 <div class="text-center text-muted py-3" style="font-size:0.85rem;">Cargando…</div>
                             </div>
 
-                            <label class="form-label small text-muted mt-2">Tipo</label>
+                            <label class="form-label small mt-2" style="color:#aaa;">Tipo</label>
                             <select class="form-select form-select-sm" id="al-tipo">
                                 <option value="DIARIA">Limpieza diaria (a petición)</option>
                                 <option value="MANTENIMIENTO">Mantenimiento</option>
                                 <option value="OTRA" selected>Otra</option>
                             </select>
 
-                            <label class="form-label small text-muted mt-2">Prioridad</label>
+                            <label class="form-label small mt-2" style="color:#aaa;">Prioridad</label>
                             <select class="form-select form-select-sm" id="al-prioridad">
                                 <option value="BAJA">Baja</option>
                                 <option value="NORMAL" selected>Normal</option>
@@ -78,7 +78,7 @@
                                 <option value="URGENTE">Urgente</option>
                             </select>
 
-                            <label class="form-label small text-muted mt-2">Notas</label>
+                            <label class="form-label small mt-2" style="color:#aaa;">Notas</label>
                             <textarea class="form-control form-control-sm" id="al-notas" rows="2" placeholder="Ej: Cliente solicita reposición de toallas"></textarea>
 
                             <button class="btn-gold mt-3 w-100" onclick="recepcionGuardarAsignacion()">Asignar tarea</button>

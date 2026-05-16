@@ -194,23 +194,6 @@ window.selectRoom = async (tipo, precio, descripcion) => {
                 ${t('detail_confirm')}
             </button>
 
-            <button id="btn-guardar-habitacion" onclick="toggleGuardarHabitacion('${tipo}')"
-                style="display:flex; align-items:center; justify-content:center; gap:9px;
-                       background:transparent; border:1px solid rgba(185,149,77,0.35);
-                       color:var(--text-muted-custom); padding:13px 24px; border-radius:8px;
-                       font-size:0.78rem; letter-spacing:2px; cursor:pointer; margin-top:12px;
-                       width:100%; transition: border-color 0.2s, color 0.2s; font-family:inherit;">
-                <svg id="icon-guardar" xmlns="http://www.w3.org/2000/svg" width="17" height="17"
-                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                </svg>
-                <span id="label-guardar">Guardar habitaci\u00f3n</span>
-            </button>
-            <p id="msg-guardada" style="display:none; font-size:0.78rem; letter-spacing:1.5px;
-               color:var(--gold); margin-top:10px; text-align:center;">
-                La habitaci\u00f3n est\u00e1 guardada
-            </p>
         </div>
     `;
 
@@ -322,49 +305,7 @@ window.selectRoom = async (tipo, precio, descripcion) => {
 
     // Estado inicial del botón guardar (solo si hay sesión)
     if (state.token) {
-        (async () => {
-            try {
-                var gr = await fetch('/api/guardadas/' + tipo + '/estado');
-                if (gr.ok) { var gd = await gr.json(); _actualizarBtnGuardar(gd.guardada); }
-            } catch (_) {}
-        })();
     }
-};
-
-function _actualizarBtnGuardar(guardada) {
-    var btn   = document.getElementById('btn-guardar-habitacion');
-    var icon  = document.getElementById('icon-guardar');
-    var label = document.getElementById('label-guardar');
-    var msg   = document.getElementById('msg-guardada');
-    if (!btn) return;
-    if (guardada) {
-        btn.style.borderColor = 'rgba(185,149,77,0.7)';
-        btn.style.color       = 'var(--gold)';
-        if (icon)  icon.setAttribute('fill', 'currentColor');
-        if (label) label.textContent = 'Habitaci\u00f3n guardada';
-        if (msg)   msg.style.display = 'block';
-    } else {
-        btn.style.borderColor = 'rgba(185,149,77,0.35)';
-        btn.style.color       = 'var(--text-muted-custom)';
-        if (icon)  icon.setAttribute('fill', 'none');
-        if (label) label.textContent = 'Guardar habitaci\u00f3n';
-        if (msg)   msg.style.display = 'none';
-    }
-}
-
-window.toggleGuardarHabitacion = async (tipo) => {
-    if (!state.token) { abrirModalAuth(); return; }
-    var btn   = document.getElementById('btn-guardar-habitacion');
-    var icon  = document.getElementById('icon-guardar');
-    var guardadaActual = icon && icon.getAttribute('fill') === 'currentColor';
-    if (btn) btn.disabled = true;
-    try {
-        var method = guardadaActual ? 'DELETE' : 'POST';
-        var r = await fetch('/api/guardadas/' + tipo, { method });
-        if (r.status === 401 || r.status === 403) { abrirModalAuth(); if (btn) btn.disabled = false; return; }
-        if (r.ok) { _actualizarBtnGuardar(!guardadaActual); }
-    } catch (_) {}
-    if (btn) btn.disabled = false;
 };
 
 window.confirmarReserva = (tipo) => {

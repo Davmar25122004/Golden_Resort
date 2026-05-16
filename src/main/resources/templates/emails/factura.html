@@ -31,8 +31,11 @@
                         <div style="font-family: Georgia, serif; font-size:22px; color:#F5F0E8; margin-bottom:10px;">
                             Gracias por tu reserva, <span th:text="${nombreCliente}">cliente</span>.
                         </div>
-                        <p style="font-size:14px; line-height:1.6; color:#9A9A9A; margin:0;">
+                        <p th:if="${pagoEnRecepcion == null or !pagoEnRecepcion}" style="font-size:14px; line-height:1.6; color:#9A9A9A; margin:0;">
                             Tu pago se ha procesado correctamente. A continuación tienes el detalle de tu factura.
+                        </p>
+                        <p th:if="${pagoEnRecepcion != null and pagoEnRecepcion}" style="font-size:14px; line-height:1.6; color:#9A9A9A; margin:0;">
+                            Tu reserva ha sido creada. A continuación tienes el detalle. El pago deberás realizarlo en la <strong style="color:#C9A84C;">recepción del hotel</strong> a tu llegada.
                         </p>
                     </td>
                 </tr>
@@ -206,9 +209,21 @@
                         </span>
                         <span th:if="${metodoTipo == 'BIZUM'}">Bizum</span>
                         <span th:if="${metodoTipo == 'CUENTA_BANCARIA'}">Cuenta bancaria</span>
+                        <span th:if="${metodoTipo == 'RECEPCION'}">Pagado en recepción</span>
                     </td>
                 </tr>
 
+                <!-- Aviso pago pendiente en recepción -->
+                <tr th:if="${pagoEnRecepcion != null and pagoEnRecepcion}">
+                    <td style="padding:24px 40px 0; text-align:center;">
+                        <div style="background:rgba(201,168,76,0.15); border:1px solid rgba(201,168,76,0.3); border-radius:8px; padding:18px 24px;">
+                            <div style="color:#C9A84C; font-family:Georgia,serif; font-size:16px; margin-bottom:6px;">Pago pendiente</div>
+                            <div style="color:#F5F0E8; font-size:13px; line-height:1.6;">
+                                Tu reserva ha sido creada correctamente. El pago de <strong th:text="${total + ' €'}">0 €</strong> deberás realizarlo en la <strong>recepción del hotel</strong> a tu llegada.
+                            </div>
+                        </div>
+                    </td>
+                </tr>
 
                 <!-- Foto de la habitación -->
                 <tr th:if="${habitacionUrl != null}">

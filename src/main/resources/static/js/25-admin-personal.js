@@ -48,7 +48,6 @@ async function persRenderHorarios() {
                         <div class="pers-card-head">
                             <div>
                                 <div class="pers-card-title">${esc(h.nombre)}</div>
-                                <div class="pers-card-sub">${esc(h.descripcion || '')}</div>
                             </div>
                             <div class="pers-card-actions">
                                 <button class="pers-btn-ghost" onclick='persEditarHorario(${JSON.stringify(h)})'>Editar</button>
@@ -90,8 +89,6 @@ window.persEditarHorario = (h) => {
         <h3 class="pers-modal-title">${editar ? 'Editar' : 'Nuevo'} horario</h3>
         <label class="pers-label">Nombre</label>
         <input id="ph-nombre" class="pers-input" value="${editar ? esc(h.nombre) : ''}">
-        <label class="pers-label">Descripción</label>
-        <input id="ph-desc" class="pers-input" value="${editar ? esc(h.descripcion || '') : ''}">
         <div class="pers-label" style="margin-top:14px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
             <span>Tramos por día</span>
             <button type="button" class="pers-quick-btn pers-quick-btn--gold" onclick="persRellenar247()">24/7</button>
@@ -150,7 +147,7 @@ window.persLimpiarTramos = () => {
 window.persGuardarHorario = async (id) => {
     const body = {
         nombre: document.getElementById('ph-nombre').value,
-        descripcion: document.getElementById('ph-desc').value,
+        descripcion: '',
         tramos: []
     };
     document.querySelectorAll('.pers-tramo-row').forEach(row => {
@@ -197,7 +194,6 @@ async function persRenderPerfiles() {
                         <div class="pers-card-head">
                             <div>
                                 <div class="pers-card-title">${esc(p.nombre)}</div>
-                                <div class="pers-card-sub">${esc(p.descripcion || '')}</div>
                             </div>
                             <div class="pers-card-actions">
                                 <button class="pers-btn-ghost" onclick='persEditarPerfil(${JSON.stringify(p)})'>Editar</button>
@@ -251,8 +247,6 @@ window.persEditarPerfil = (p) => {
         <h3 class="pers-modal-title">${p ? 'Editar' : 'Nuevo'} tipo de jornada</h3>
         <label class="pers-label">Nombre</label>
         <input id="pp-nombre" class="pers-input" value="${p ? esc(p.nombre) : ''}">
-        <label class="pers-label">Descripción</label>
-        <input id="pp-desc" class="pers-input" value="${p ? esc(p.descripcion || '') : ''}">
         <label class="pers-label" style="margin-top:14px;">Color de identificación</label>
         <div class="pers-color-row">
             <input type="color" id="pp-color" class="pers-color-input" value="${colorActual}"
@@ -278,7 +272,7 @@ window.persGuardarPerfil = async (id) => {
     const horarios = Array.from(document.querySelectorAll('.pers-checks input:checked')).map(c => parseInt(c.value, 10));
     const body = {
         nombre: document.getElementById('pp-nombre').value,
-        descripcion: document.getElementById('pp-desc').value,
+        descripcion: '',
         color: document.getElementById('pp-color').value,
         horarios
     };
@@ -353,7 +347,6 @@ async function persRenderPlanes() {
                 <div class="pers-cuad-plan-list">
                     ${planes.map(p => `<div class="pers-cuad-side-card ${p.id === _persCuadSelectedId ? 'active' : ''}" data-plan="${p.id}" onclick="persSelectCuadrante(${p.id})">
                         <div class="pers-cuad-side-card-name">${esc(p.nombre)}</div>
-                        ${p.descripcion ? `<div class="pers-cuad-side-card-desc">${esc(p.descripcion)}</div>` : ''}
                         ${p.perfil_default_nombre ? `<div class="pers-cuad-side-card-default"><span class="pers-pill-gold" style="font-size:0.62rem;padding:2px 8px;">${esc(p.perfil_default_nombre)}</span></div>` : ''}
                     </div>`).join('')}
                 </div>
@@ -385,7 +378,6 @@ function persCuadMainSkeleton(p) {
     return `<div class="pers-cuad-main-hdr">
         <div class="pers-cuad-main-title">
             <span class="pers-cuad-main-nom">${esc(p.nombre)}</span>
-            ${p.descripcion ? `<span class="pers-cuad-main-desc">${esc(p.descripcion)}</span>` : ''}
             ${p.perfil_default_nombre ? `<span class="pers-cuad-main-desc">Por defecto: <span class="pers-pill-gold">${esc(p.perfil_default_nombre)}</span></span>` : ''}
         </div>
         <div class="pers-cuad-main-controls">
@@ -422,7 +414,6 @@ function persPlanCardSkeleton(p) {
         <div class="pers-card-head">
             <div>
                 <div class="pers-card-title">${esc(p.nombre)}</div>
-                <div class="pers-card-sub">${esc(p.descripcion || '')}</div>
                 ${p.perfil_default_nombre ? `<div class="pers-card-sub">Por defecto: <span class="pers-pill-gold">${esc(p.perfil_default_nombre)}</span></div>` : ''}
             </div>
             <div class="pers-card-actions">
@@ -896,15 +887,17 @@ window.persLimpiarRango = async (planId, tipo) => {
     const st = _persPlanState[planId] || { anyo: new Date().getFullYear(), mes: new Date().getMonth() };
     let url, msg;
     if (tipo === 'mes') {
-        url = `/api/planes-turno/${planId}/calendario?year=${st.anyo}&month=${st.mes+1}`;
-        msg = `¿Borrar todos los overrides y tramos de ${st.mes+1}/${st.anyo}?`;
+        url = `/api/planes-turno/${planId}/calendario?year=${st.anyo}&month=${st.mes+1}&patron=true`;
+        msg = `¿Borrar todo el mes ${st.mes+1}/${st.anyo}? Se eliminará el patrón semanal y el perfil por defecto.`;
     } else {
-        url = `/api/planes-turno/${planId}/calendario?year=${st.anyo}`;
-        msg = `¿Borrar todos los overrides y tramos del año ${st.anyo}?`;
+        url = `/api/planes-turno/${planId}/calendario?year=${st.anyo}&patron=true`;
+        msg = `¿Borrar todo el año ${st.anyo}? Se eliminará el patrón semanal y el perfil por defecto.`;
     }
     if (!confirm(msg)) return;
     const r = await fetch(url, { method: 'DELETE' });
     if (!r.ok) { alert(await r.text() || 'Error.'); return; }
+    // Invalidar cache del calendario para forzar recarga
+    _persPlanDayData[planId] = {};
     fetch('/api/planes-turno/' + planId).then(rr => rr.json()).then(persPlanRender);
 };
 
@@ -944,9 +937,6 @@ window.persEditarPlan = (p) => {
                 <label class="pers-plan-create-label">Nombre</label>
                 <input id="pl-nombre" class="pers-plan-create-input" placeholder="Ej: Recepción Rotativo 2026" autocomplete="off">
 
-                <label class="pers-plan-create-label">Descripción <span class="pers-plan-create-optional">(opcional)</span></label>
-                <textarea id="pl-desc" class="pers-plan-create-input pers-plan-create-textarea" rows="2" placeholder="Describe el cuadrante…"></textarea>
-
                 <label class="pers-plan-create-label">Perfil por defecto <span class="pers-plan-create-optional">(días sin asignación)</span></label>
                 <select id="pl-default" class="pers-plan-create-input pers-plan-create-select">${optsPerfiles(null)}</select>
 
@@ -969,8 +959,6 @@ window.persEditarPlan = (p) => {
         <h3 class="pers-modal-title">Editar — ${esc(p.nombre)}</h3>
         <label class="pers-label">Nombre</label>
         <input id="pl-nombre" class="pers-input" value="${esc(p.nombre)}">
-        <label class="pers-label">Descripción</label>
-        <input id="pl-desc" class="pers-input" value="${esc(p.descripcion || '')}">
         <label class="pers-label" style="margin-top:14px;">Perfil por defecto</label>
         <select id="pl-default" class="pers-input">${optsPerfiles(p.perfil_default_id)}</select>
 
@@ -1100,7 +1088,6 @@ async function persRenderAsignacion() {
                     <div class="pers-asig-plan-card" id="asig-card-${p.id}" data-plan-id="${p.id}"
                          onclick="persAsigSeleccionarPlan(${p.id}, '${esc(p.nombre)}')">
                         <div class="pers-asig-plan-card-name">${esc(p.nombre)}</div>
-                        ${p.descripcion ? `<div class="pers-asig-plan-card-desc">${esc(p.descripcion)}</div>` : ''}
                     </div>`).join('')}
                 </div>
             </aside>
@@ -1184,7 +1171,7 @@ window.persAsigSeleccionarPlan = (planId, planNom) => {
 };
 
 window.persAsignarPlanSeleccionado = async (empId) => {
-    if (_persSelectedPlanId === null && _persSelectedPlanNom !== null) return; // sin selección
+    if (_persSelectedPlanId === null) return; // sin selección
     const bodyReq = { plan_id: _persSelectedPlanId || null, departamento: null };
     const r = await fetch(`/api/empleados/${empId}/plan`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(bodyReq)

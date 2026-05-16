@@ -17,9 +17,12 @@ public class RoomServiceMonitorController {
     private static final String SERVICIO_RS = "Room Service";
 
     private final ReservaRepository reservaRepository;
+    private final com.example.supabase.repository.PedidoRoomServiceRepository pedidoRoomServiceRepository;
 
-    public RoomServiceMonitorController(ReservaRepository reservaRepository) {
+    public RoomServiceMonitorController(ReservaRepository reservaRepository,
+                                        com.example.supabase.repository.PedidoRoomServiceRepository pedidoRoomServiceRepository) {
         this.reservaRepository = reservaRepository;
+        this.pedidoRoomServiceRepository = pedidoRoomServiceRepository;
     }
 
     @GetMapping("/roomservice")
@@ -42,6 +45,7 @@ public class RoomServiceMonitorController {
         LocalDate hasta = LocalDate.parse(to);
 
         List<Reserva> reservas = reservaRepository.findSolapanRango(desde, hasta);
+        Set<Long> reservasConPedidos = pedidoRoomServiceRepository.findAllReservaIdsConPedidos();
 
         List<Map<String, Object>> dias = desde.datesUntil(hasta.plusDays(1))
             .map(dia -> {
@@ -55,9 +59,11 @@ public class RoomServiceMonitorController {
                 m.put("reservas", activas.size());
                 m.put("checkIn",  activas.stream().anyMatch(r -> r.getFechaEntrada().isEqual(dia)));
                 m.put("checkOut", activas.stream().anyMatch(r -> r.getFechaSalida().isEqual(dia)));
-                m.put("conRoomService", activas.stream().anyMatch(r ->
+                boolean tieneServicioRS = activas.stream().anyMatch(r ->
                     r.getServicios() != null && r.getServicios().stream()
-                        .anyMatch(s -> SERVICIO_RS.equals(s.getServicio().getNombre()))));
+                        .anyMatch(s -> SERVICIO_RS.equals(s.getServicio().getNombre())));
+                boolean tienePedidosRS = activas.stream().anyMatch(r -> reservasConPedidos.contains(r.getId()));
+                m.put("conRoomService", tieneServicioRS || tienePedidosRS);
                 return m;
             })
             .filter(Objects::nonNull)
@@ -100,6 +106,22 @@ public class RoomServiceMonitorController {
             }
             m.put("servicios",      servicios);
             m.put("conRoomService", servicios.stream().anyMatch(s -> Boolean.TRUE.equals(s.get("esRoomService"))));
+
+            // Pedidos de room service (platos)
+            List<Map<String, Object>> pedidos = new ArrayList<>();
+            var pedidosRS = pedidoRoomServiceRepository.findByReservaId(r.getId());
+            if (pedidosRS != null) {
+                pedidosRS.forEach(p -> {
+                    Map<String, Object> pm = new LinkedHashMap<>();
+                    pm.put("id",       p.getId());
+                    pm.put("nombre",   p.getItem().getNombre());
+                    pm.put("precio",   p.getItem().getPrecio());
+                    pm.put("cantidad", p.getCantidad());
+                    pm.put("fecha",    p.getFechaPedido() != null ? p.getFechaPedido().toString() : null);
+                    pedidos.add(pm);
+                });
+            }
+            m.put("pedidosRS", pedidos);
             return m;
         }).collect(Collectors.toList());
 

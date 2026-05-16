@@ -11,7 +11,9 @@ function configurarScrollNavbar() {
 window.desplazarASeccion = (id) => {
     var el = document.getElementById(id);
     if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
+        var navbarHeight = document.getElementById('navbar') ? document.getElementById('navbar').offsetHeight : 70;
+        var top = el.getBoundingClientRect().top + window.scrollY - navbarHeight - 10;
+        window.scrollTo({ top: top, behavior: 'smooth' });
     } else {
         window.location.href = '/#' + id;
     }

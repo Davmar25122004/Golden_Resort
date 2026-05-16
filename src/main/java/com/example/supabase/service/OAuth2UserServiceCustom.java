@@ -25,6 +25,12 @@ public class OAuth2UserServiceCustom extends DefaultOAuth2UserService {
     @Autowired
     private MensajeriaService mensajeriaService;
 
+    @Autowired
+    private EmailService emailService;
+
+    @org.springframework.beans.factory.annotation.Value("${app.public-url:http://localhost:8080}")
+    private String publicUrl;
+
     @Override
     @org.springframework.transaction.annotation.Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -50,6 +56,19 @@ public class OAuth2UserServiceCustom extends DefaultOAuth2UserService {
             });
 
             usuario = usuarioRepository.save(nuevoUsuario);
+
+            // Enviar email de bienvenida al registrarse con Google
+            try {
+                java.util.Map<String, Object> vars = new java.util.HashMap<>();
+                vars.put("nombreCliente", nombre != null ? nombre : email);
+                vars.put("logoUrl", publicUrl + "/images/logo.png");
+                vars.put("siteUrl", publicUrl);
+                emailService.enviarConPlantilla(
+                        email,
+                        "Bienvenido/a a Golden Resort",
+                        "emails/bienvenida",
+                        vars);
+            } catch (Exception ignored) {}
         } else {
             usuario = usuarioOpt.get(); // El usuario ya existía en la DB
         }

@@ -53,11 +53,9 @@ public class LimpiezaService {
     public ObjetoPerdido crearObjeto(Long habitacionId, String descripcion,
                                      String imagenUrl, LocalDateTime encontradoEn,
                                      Usuario reportador) {
-        if (descripcion == null || descripcion.isBlank())
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Descripción requerida.");
         ObjetoPerdido o = new ObjetoPerdido();
         if (habitacionId != null) o.setHabitacion(habitacionRepository.findById(habitacionId).orElse(null));
-        o.setDescripcion(descripcion.trim());
+        o.setDescripcion(descripcion != null ? descripcion.trim() : "");
         o.setImagenUrl(imagenUrl);
         o.setEncontradoEn(encontradoEn != null ? encontradoEn : LocalDateTime.now());
         o.setEstado(ObjetoPerdido.Estado.DISPONIBLE);

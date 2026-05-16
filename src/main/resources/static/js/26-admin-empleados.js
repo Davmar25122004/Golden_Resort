@@ -247,12 +247,12 @@ function _nempDateField(label, id) {
 
 function _nempSelect(label, id, options) {
     var opts = options.map(function (o) {
-        return '<option value="' + o[0] + '" style="background:#1a2030;color:#e0d4b0;">' + o[1] + '</option>';
+        return '<option value="' + o[0] + '">' + o[1] + '</option>';
     }).join('');
     return (
         '<div>' +
             '<span style="' + _nempLabelStyle + '">' + label + '</span>' +
-            '<select id="' + id + '" style="' + _nempInputStyle + 'cursor:pointer;color-scheme:dark;" ' +
+            '<select id="' + id + '" style="' + _nempInputStyle + 'cursor:pointer;background:#111;color:#e0d4b0;-webkit-appearance:auto;appearance:auto;" ' +
             'onfocus="this.style.borderColor=\'rgba(201,168,76,0.5)\'" ' +
             'onblur="this.style.borderColor=\'rgba(255,255,255,0.12)\'">' +
             opts +
