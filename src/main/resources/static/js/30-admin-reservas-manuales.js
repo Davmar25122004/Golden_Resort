@@ -108,7 +108,18 @@
       <div id="rm-confirm-section" class="rm-card d-none" style="margin-top:0;">
         <label class="rm-label">Petición especial <span style="color:var(--text-muted-custom)">(opcional)</span></label>
         <textarea id="rm-peticion" class="rm-textarea" rows="2" placeholder="Ej: cuna, planta alta, alergias..."></textarea>
-        <div style="display:flex;flex-direction:column;gap:.5rem;">
+
+        <label class="rm-label" style="margin-top:14px;">Servicios adicionales <span style="color:var(--text-muted-custom)">(opcional)</span></label>
+        <div id="rm-servicios-list" style="background:rgba(255,255,255,0.03);border:1px solid rgba(185,149,77,0.2);border-radius:8px;padding:12px;max-height:180px;overflow-y:auto;">
+            <span style="color:var(--text-muted-custom);font-size:0.8rem;">Cargando...</span>
+        </div>
+
+        <label class="rm-label" style="margin-top:14px;">Room Service <span style="color:var(--text-muted-custom)">(opcional)</span></label>
+        <div id="rm-roomservice-list" style="background:rgba(255,255,255,0.03);border:1px solid rgba(185,149,77,0.2);border-radius:8px;padding:12px;max-height:180px;overflow-y:auto;">
+            <span style="color:var(--text-muted-custom);font-size:0.8rem;">Cargando...</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:14px;">
           <button id="rm-btn-guardar" class="rm-btn-ghost" onclick="rmConfirmarReserva(false)">GUARDAR COMO PENDIENTE</button>
           <button id="rm-btn-confirmar" class="rm-btn-gold" onclick="rmConfirmarReserva(true)">✓ CONFIRMAR · PAGAR EN RECEPCIÓN</button>
         </div>
@@ -419,7 +430,44 @@
         sel.classList.remove('d-none');
 
         document.getElementById('rm-confirm-section').classList.remove('d-none');
+        _cargarServiciosYRS();
     };
+
+    async function _cargarServiciosYRS() {
+        // Servicios
+        try {
+            var r = await fetch('/api/servicios');
+            var servicios = r.ok ? await r.json() : [];
+            var cont = document.getElementById('rm-servicios-list');
+            if (servicios.length === 0) {
+                cont.innerHTML = '<span style="color:var(--text-muted-custom);font-size:0.8rem;">No hay servicios disponibles.</span>';
+            } else {
+                cont.innerHTML = servicios.filter(function(s) { return !s.nombre.toLowerCase().includes('room service'); }).map(function(s) {
+                    return '<label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:0.82rem;color:var(--cream);cursor:pointer;">' +
+                        '<input type="checkbox" class="rm-serv-check" value="' + s.id + '" style="accent-color:var(--gold);width:16px;height:16px;">' +
+                        s.nombre + ' (+' + parseFloat(s.precio).toFixed(2) + ' €)' +
+                        '</label>';
+                }).join('');
+            }
+        } catch (_) { document.getElementById('rm-servicios-list').innerHTML = '<span style="color:#e74c3c;font-size:0.8rem;">Error al cargar.</span>'; }
+
+        // Room Service
+        try {
+            var r2 = await fetch('/api/room-service/items');
+            var items = r2.ok ? await r2.json() : [];
+            var cont2 = document.getElementById('rm-roomservice-list');
+            if (items.length === 0) {
+                cont2.innerHTML = '<span style="color:var(--text-muted-custom);font-size:0.8rem;">No hay items de room service.</span>';
+            } else {
+                cont2.innerHTML = items.filter(function(i) { return i.disponible; }).map(function(i) {
+                    return '<label style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:0.82rem;color:var(--cream);cursor:pointer;">' +
+                        '<input type="checkbox" class="rm-rs-check" value="' + i.id + '" style="accent-color:var(--gold);width:16px;height:16px;">' +
+                        i.nombre + ' (' + parseFloat(i.precio).toFixed(2) + ' €)' +
+                        '</label>';
+                }).join('');
+            }
+        } catch (_) { document.getElementById('rm-roomservice-list').innerHTML = '<span style="color:#e74c3c;font-size:0.8rem;">Error al cargar.</span>'; }
+    }
 
     window.rmLimpiarCliente = function() {
         _state.clienteSel = null;
@@ -445,6 +493,13 @@
 
         var peticion = (document.getElementById('rm-peticion').value || '').trim();
 
+        var servicios = Array.from(document.querySelectorAll('.rm-serv-check:checked')).map(function(c) {
+            return { servicioId: parseInt(c.value), cantidad: 1 };
+        });
+        var roomServiceItems = Array.from(document.querySelectorAll('.rm-rs-check:checked')).map(function(c) {
+            return { itemId: parseInt(c.value), cantidad: 1 };
+        });
+
         try {
             var res = await fetch('/api/admin/reservas/manual/habitacion', {
                 method: 'POST',
@@ -455,7 +510,9 @@
                     fechaEntrada:     _isoDate(_state.rangeStart),
                     fechaSalida:      _isoDate(_state.rangeEnd),
                     peticionEspecial: peticion || null,
-                    confirmar:        confirmar
+                    confirmar:        confirmar,
+                    servicios:        servicios,
+                    roomService:      roomServiceItems
                 })
             });
 

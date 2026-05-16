@@ -50,6 +50,11 @@ function loadAdminHome() {
 
     var _ico = function(d) { return '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>'; };
     var widgets = [
+        // ── HOTEL ──
+        { section: 'HOTEL' },
+        { href: '/#habitaciones', icon: _ico('<path d="M3 21V11l9-6 9 6v10"/><path d="M9 21v-6h6v6"/>'), title: 'Habitaciones', desc: 'Ver habitaciones del hotel' },
+        { href: '/#servicios',    icon: _ico('<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/>'), title: 'Servicios', desc: 'Ver servicios disponibles' },
+        { href: '/#contacto',     icon: _ico('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'), title: 'Contacto', desc: 'Ubicación y datos de contacto' },
         // ── ADMIN ──
         { section: 'ADMIN' },
         { tab: 'dashboard',         icon: _ico('<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>'), title: 'Dashboard', desc: 'Estadísticas, gráficos e ingresos' },
@@ -1288,7 +1293,6 @@ async function loadAdminServicios() {
 
     body.innerHTML = `
         <div class="mb-3">
-            <button class="admin-btn" onclick="abrirModalServicio(null)">${t('adm_svc_new')}</button>
         </div>
         <div class="admin-svc-list">
             ${servicios.map(s => `

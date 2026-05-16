@@ -79,11 +79,13 @@
                 <div class="gold-line mx-auto"></div>
             </div>
             <div id="no-rooms-msg" data-i18n="room_no_rooms">No hay habitaciones disponibles para esas fechas.</div>
-            <div class="swiper roomSwiper" data-aos="fade-up" data-aos-delay="100">
-                <div class="swiper-wrapper" id="rooms-wrapper"></div>
-                <div class="swiper-pagination"></div>
-                <div class="swiper-button-next"></div>
-                <div class="swiper-button-prev"></div>
+            <div class="rooms-swiper-wrap">
+                <div class="swiper-button-prev rooms-nav"></div>
+                <div class="swiper roomSwiper" data-aos="fade-up" data-aos-delay="100">
+                    <div class="swiper-wrapper" id="rooms-wrapper"></div>
+                    <div class="swiper-pagination"></div>
+                </div>
+                <div class="swiper-button-next rooms-nav"></div>
             </div>
         </div>
     </section>
@@ -139,7 +141,7 @@
                             <p class="contact-label" data-i18n="contact_contact">Contáctanos</p>
                             <p class="contact-value">
                                 +34 900 123 456<br>
-                                <a href="mailto:hgoldenresort@gmail.com" class="contacto-email-link">hgoldenresort@gmail.com</a>
+                                <span class="contacto-email-link" style="cursor:default;">hgoldenresort@gmail.com</span>
                             </p>
                         </div>
                         <div class="contact-info-item">

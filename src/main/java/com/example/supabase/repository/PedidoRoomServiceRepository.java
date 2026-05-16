@@ -8,6 +8,9 @@ import java.util.List;
 
 public interface PedidoRoomServiceRepository extends JpaRepository<PedidoRoomService, Long> {
     List<PedidoRoomService> findByReservaId(Long reservaId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT DISTINCT p.reserva.id FROM PedidoRoomService p")
+    java.util.Set<Long> findAllReservaIdsConPedidos();
     
     @Modifying
     @Transactional

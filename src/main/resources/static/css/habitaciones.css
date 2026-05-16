@@ -224,6 +224,41 @@ section { padding: 100px 0; }
 }
 .btn-room:hover { background: var(--gold); color: var(--dark); }
 .swiper-pagination-bullet { background: var(--gold) !important; }
-.swiper-button-next, .swiper-button-prev { color: var(--gold) !important; }
+
+.rooms-swiper-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: relative;
+}
+.rooms-swiper-wrap .roomSwiper {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+.rooms-nav.swiper-button-next,
+.rooms-nav.swiper-button-prev {
+    position: static !important;
+    flex-shrink: 0;
+    width: 44px !important;
+    height: 44px !important;
+    margin-top: 0 !important;
+    color: var(--gold) !important;
+    background: rgba(185,149,77,0.08);
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+.rooms-nav.swiper-button-next:hover,
+.rooms-nav.swiper-button-prev:hover {
+    background: rgba(185,149,77,0.2);
+}
+.rooms-nav.swiper-button-next::after,
+.rooms-nav.swiper-button-prev::after {
+    font-size: 18px !important;
+}
+@media (max-width: 768px) {
+    .rooms-nav { display: none !important; }
+}
+
 #no-rooms-msg { display: none; color: var(--text-muted-custom); text-align: center; padding: 40px; }
 

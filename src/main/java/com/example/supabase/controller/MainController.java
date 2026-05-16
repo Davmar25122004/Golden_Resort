@@ -305,6 +305,111 @@ public class MainController {
         }
     }
 
+    @PutMapping("/api/perfil/datos")
+    @ResponseBody
+    public ResponseEntity<?> actualizarDatosPerfil(@RequestBody Map<String, String> datos,
+                                                    Authentication auth) {
+        if (auth == null || !auth.isAuthenticated())
+            return ResponseEntity.status(401).body("No autenticado.");
+
+        String email = auth instanceof OAuth2AuthenticationToken token
+                ? (String) token.getPrincipal().getAttributes().get("email")
+                : auth.getName();
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if (usuario == null) return ResponseEntity.status(404).body("Usuario no encontrado.");
+
+        String nombre = datos.get("nombre");
+        if (nombre != null && !nombre.isBlank() && nombre.trim().length() >= 2) usuario.setNombre(nombre.trim());
+
+        String tipoDocumento = datos.get("tipoDocumento");
+        if (tipoDocumento != null && !tipoDocumento.isBlank()) usuario.setTipoDocumento(tipoDocumento.trim());
+
+        String numDocumento = datos.get("numDocumento");
+        if (numDocumento != null && !numDocumento.isBlank()) {
+            String numUpper = numDocumento.trim().toUpperCase();
+            var existente = usuarioRepository.findAll().stream()
+                    .filter(u -> !u.getId().equals(usuario.getId()))
+                    .filter(u -> numUpper.equalsIgnoreCase(u.getNumDocumento()))
+                    .findFirst();
+            if (existente.isPresent()) {
+                return ResponseEntity.status(409).body("Ya existe un usuario con ese número de documento.");
+            }
+            usuario.setNumDocumento(numUpper);
+        }
+
+        String fechaNac = datos.get("fechaNacimiento");
+        if (fechaNac != null && !fechaNac.isBlank()) {
+            try { usuario.setFechaNacimiento(LocalDate.parse(fechaNac)); }
+            catch (Exception ignored) {}
+        }
+
+        String telefonoPrefijo = datos.get("telefonoPrefijo");
+        if (telefonoPrefijo != null) usuario.setTelefonoPrefijo(telefonoPrefijo.trim());
+
+        String telefono = datos.get("telefono");
+        if (telefono != null && !telefono.isBlank()) usuario.setTelefono(telefono.trim());
+
+        usuarioRepository.save(usuario);
+        return ResponseEntity.ok(Map.of("message", "Datos actualizados correctamente."));
+    }
+
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager entityManager;
+
+    @DeleteMapping("/api/perfil/eliminar-cuenta")
+    @ResponseBody
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<?> eliminarCuenta(@RequestBody Map<String, String> datos,
+                                            Authentication auth,
+                                            jakarta.servlet.http.HttpServletRequest request) {
+        if (auth == null || !auth.isAuthenticated())
+            return ResponseEntity.status(401).body("No autenticado.");
+
+        String email = auth instanceof OAuth2AuthenticationToken token
+                ? (String) token.getPrincipal().getAttributes().get("email")
+                : auth.getName();
+        var usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if (usuario == null) return ResponseEntity.status(404).body("Usuario no encontrado.");
+
+        boolean esOAuth = "OAUTH2_USER".equals(usuario.getPassword());
+        if (!esOAuth) {
+            String password = datos.get("password");
+            if (password == null || password.isBlank())
+                return ResponseEntity.badRequest().body("Introduce tu contraseña.");
+            if (!passwordEncoder.matches(password, usuario.getPassword()))
+                return ResponseEntity.badRequest().body("Contraseña incorrecta.");
+        }
+
+        Long uid = usuario.getId();
+        try {
+            entityManager.createNativeQuery("DELETE FROM mensaje WHERE autor_id = :uid").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM conversacion WHERE cliente_id = :uid").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM mensaje_staff ms USING conversacion_staff cs WHERE ms.conversacion_id = cs.id AND cs.staff_usuario_id = :uid").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM conversacion_staff WHERE staff_usuario_id = :uid").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM nota_reserva WHERE autor_id = :uid").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM objeto_reclamacion WHERE usuario_id = :uid").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM pedido_room_service WHERE reserva_id IN (SELECT id FROM reserva WHERE usuario_id = :uid)").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM reserva_servicio WHERE reserva_id IN (SELECT id FROM reserva WHERE usuario_id = :uid)").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM tarea_limpieza WHERE asignado_a = :uid").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM pagos WHERE usuario_id = :uid").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM reserva WHERE usuario_id = :uid").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM metodos_pago WHERE usuario_id = :uid").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM password_reset_tokens WHERE usuario_id = :uid").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM codigos_descuento WHERE usuario_asignado_id = :uid").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM empleados WHERE usuario_id = :uid").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM usuarios_roles WHERE usuario_id = :uid").setParameter("uid", uid).executeUpdate();
+            entityManager.createNativeQuery("DELETE FROM usuarios WHERE id = :uid").setParameter("uid", uid).executeUpdate();
+
+            // Invalidar sesión
+            request.getSession().invalidate();
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+
+            return ResponseEntity.ok(Map.of("message", "Cuenta eliminada."));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al eliminar la cuenta: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/api/perfil/metodos-pago")
     @ResponseBody
     public ResponseEntity<?> listarMetodosPago(Authentication auth) {

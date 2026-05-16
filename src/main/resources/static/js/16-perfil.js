@@ -307,11 +307,6 @@ window.showPerfil = async () => {
                             <span class="perfil-menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
                             Mis Reservas
                         </button>
-                        <button class="perfil-menu-item" onclick="perfilShowTab('guardadas',this)">
-                            <span class="perfil-menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
-                            Habitaciones Guardadas
-                            <span id="guardadas-count-badge" class="perfil-menu-badge" style="display:none;"></span>
-                        </button>
                         <button class="perfil-menu-item" onclick="perfilShowTab('pagos',this)">
                             <span class="perfil-menu-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>
                             M\u00e9todos de Pago
@@ -351,15 +346,46 @@ window.showPerfil = async () => {
                             </div>` : `
                             <div class="perfil-card" style="margin-top:20px;margin-bottom:0;">
                                 <div class="perfil-card-title">Datos Personales</div>
-                                ${_pfGrid([
-                                    ['Nombre', data.nombre],
-                                    ['Email', data.email],
-                                    ['F. Nacimiento', data.fechaNacimiento],
-                                    ['Tipo documento', data.tipoDocumento],
-                                    ['Nº documento', data.numDocumento],
-                                    ['Teléfono', (data.telefonoPrefijo ? data.telefonoPrefijo + ' ' : '') + (data.telefono || '')]
-                                ])}
-                                ${!data.tipoDocumento ? `<p style="font-size:0.82rem;color:var(--text-muted-custom);margin:16px 0 0;">Algunos datos están pendientes de completar. <a href="/completar-perfil" style="color:var(--gold);">Completar ahora →</a></p>` : ''}
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;margin-top:12px;">
+                                    <div>
+                                        <div class="perfil-field-label">Nombre</div>
+                                        <input type="text" id="pf-nombre" class="perfil-form-input" value="${data.nombre || ''}" maxlength="80">
+                                    </div>
+                                    <div>
+                                        <div class="perfil-field-label">Email</div>
+                                        <input type="email" class="perfil-form-input" value="${data.email || ''}" disabled style="opacity:0.5;cursor:not-allowed;">
+                                    </div>
+                                    <div>
+                                        <div class="perfil-field-label">Tipo documento</div>
+                                        <input type="text" class="perfil-form-input" value="${data.tipoDocumento || '—'}" disabled style="opacity:0.5;cursor:not-allowed;">
+                                    </div>
+                                    <div>
+                                        <div class="perfil-field-label">Nº documento</div>
+                                        <input type="text" class="perfil-form-input" value="${data.numDocumento || '—'}" disabled style="opacity:0.5;cursor:not-allowed;">
+                                    </div>
+                                    <div>
+                                        <div class="perfil-field-label">Fecha de nacimiento</div>
+                                        <input type="text" class="perfil-form-input" value="${data.fechaNacimiento || '—'}" disabled style="opacity:0.5;cursor:not-allowed;">
+                                    </div>
+                                    <div>
+                                        <div class="perfil-field-label">Teléfono</div>
+                                        <div style="display:flex;gap:6px;">
+                                            <select id="pf-prefijo" class="perfil-form-input" style="max-width:90px;padding:8px 4px;font-size:0.8rem;">
+                                                <option value="+34" ${(data.telefonoPrefijo||'+34')==='+34'?'selected':''}>+34</option>
+                                                <option value="+1" ${data.telefonoPrefijo==='+1'?'selected':''}>+1</option>
+                                                <option value="+44" ${data.telefonoPrefijo==='+44'?'selected':''}>+44</option>
+                                                <option value="+33" ${data.telefonoPrefijo==='+33'?'selected':''}>+33</option>
+                                                <option value="+49" ${data.telefonoPrefijo==='+49'?'selected':''}>+49</option>
+                                                <option value="+39" ${data.telefonoPrefijo==='+39'?'selected':''}>+39</option>
+                                                <option value="+351" ${data.telefonoPrefijo==='+351'?'selected':''}>+351</option>
+                                                <option value="+52" ${data.telefonoPrefijo==='+52'?'selected':''}>+52</option>
+                                            </select>
+                                            <input type="tel" id="pf-telefono" class="perfil-form-input" value="${data.telefono || ''}" maxlength="15" style="flex:1;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onclick="guardarDatosPerfil()" style="margin-top:20px;background:var(--gold);color:#0d0d0d;border:none;padding:10px 28px;border-radius:6px;font-weight:700;font-size:0.82rem;letter-spacing:1px;cursor:pointer;">Guardar cambios</button>
+                                <div id="pf-datos-msg" style="display:none;margin-top:12px;font-size:0.82rem;padding:10px 14px;border-radius:6px;"></div>
                             </div>`}
                         </div>
 
@@ -374,14 +400,6 @@ window.showPerfil = async () => {
                         </div>
 
                         <!-- TAB: GUARDADAS -->
-                        <div id="perfil-tab-guardadas" class="perfil-tab-panel">
-                            <div class="perfil-card" style="margin-bottom:0;">
-                                <div class="perfil-card-title">Habitaciones Guardadas</div>
-                                <p style="font-size:0.85rem;color:var(--text-muted-custom);margin-bottom:32px;line-height:1.6;">Aquí puedes ver tus habitaciones favoritas.</p>
-                                <div id="guardadas-lista"><div style="padding:4rem;text-align:center;"><div class="perfil-spinner" style="width:32px;height:32px;margin:0 auto;"></div></div></div>
-                            </div>
-                        </div>
-
                         <!-- TAB: PAGOS -->
                         <div id="perfil-tab-pagos" class="perfil-tab-panel">
                             <div class="perfil-card" style="margin-bottom:0;">
@@ -500,6 +518,29 @@ window.showPerfil = async () => {
                                    <div id="alert-pass" class="perfil-alert"></div>`
                                 }
                             </div>
+                            ${esCliente ? `
+                            <div class="perfil-card" style="margin-top:24px;margin-bottom:0;border:1px solid rgba(231,76,60,0.2);">
+                                <div class="perfil-card-title" style="color:#e74c3c;">Eliminar cuenta</div>
+                                <p style="font-size:0.82rem;color:var(--text-muted-custom);margin-bottom:16px;line-height:1.6;">
+                                    Esta acci\u00f3n es <strong style="color:#e74c3c;">permanente e irreversible</strong>. Se eliminar\u00e1n todos tus datos, reservas, pagos y mensajes.
+                                </p>
+                                ${esOAuth && !data.tienePasswordLocal ? '' : `<div class="mb-3">
+                                    <div class="perfil-field-label mb-2">Introduce tu contrase\u00f1a para confirmar</div>
+                                    <input type="password" id="input-eliminar-pass" class="perfil-form-input" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" style="padding:12px 16px;">
+                                </div>`}
+                                <button id="btn-eliminar-cuenta" onclick="confirmarEliminarCuenta()" style="background:#e74c3c;color:#fff;border:none;padding:10px 28px;border-radius:6px;font-weight:700;font-size:0.82rem;letter-spacing:1px;cursor:pointer;">
+                                    Eliminar mi cuenta
+                                </button>
+                                <div id="confirm-eliminar" style="display:none;margin-top:16px;padding:16px;background:rgba(231,76,60,0.1);border:1px solid rgba(231,76,60,0.3);border-radius:8px;">
+                                    <p style="color:#e74c3c;font-size:0.85rem;font-weight:700;margin-bottom:8px;">\u00bfEst\u00e1s seguro?</p>
+                                    <p style="color:var(--text-muted-custom);font-size:0.78rem;margin-bottom:12px;">Se eliminar\u00e1n permanentemente todos tus datos, reservas, pagos y mensajes. No podr\u00e1s recuperar tu cuenta.</p>
+                                    <div style="display:flex;gap:10px;">
+                                        <button onclick="eliminarMiCuenta()" style="background:#e74c3c;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-weight:700;font-size:0.78rem;cursor:pointer;">S\u00ed, eliminar mi cuenta</button>
+                                        <button onclick="cancelarEliminar()" style="background:none;border:1px solid #666;color:var(--text-muted-custom);padding:8px 20px;border-radius:6px;font-size:0.78rem;cursor:pointer;">Cancelar</button>
+                                    </div>
+                                </div>
+                                <div id="alert-eliminar" style="display:none;margin-top:12px;font-size:0.82rem;padding:10px 14px;border-radius:6px;"></div>
+                            </div>` : ''}
                         </div>
                     </main>
                 </div>
@@ -567,16 +608,6 @@ window.showPerfil = async () => {
                 <div id="alert-mp-editar" class="perfil-alert"></div>
             </div>
         </div>
-        <!-- Modal: editar reserva guardada -->
-        <div class="mp-modal-overlay" id="modal-editar-guardada" onclick="if(event.target.id==='modal-editar-guardada')cerrarEditarGuardada()">
-            <div class="mp-modal" onclick="event.stopPropagation()">
-                <button class="mp-modal-close" onclick="cerrarEditarGuardada()">&times;</button>
-                <h3 class="mp-modal-title">Modificar Fechas</h3>
-                <div id="editar-guardada-content" style="margin:1.5rem 0;"></div>
-                <button class="perfil-btn mp-btn-primary" onclick="guardarEdicionGuardada()" style="width:100%;">Actualizar Reserva</button>
-                <div id="alert-editar-guardada" class="perfil-alert"></div>
-            </div>
-        </div>
 
     `;
 
@@ -589,7 +620,7 @@ window.showPerfil = async () => {
     // Si la URL trae un hash tipo #horario / #seguridad / #pagos / etc.,
     // abrir directamente esa pestaña (usado desde el dropdown del navbar)
     // y hacer scroll suave al panel para que no quede oculto bajo la cabecera.
-    var validTabs = ['info','reservas','guardadas','pagos','mensajes','horario','seguridad','mensajes-admin'];
+    var validTabs = ['info','reservas','pagos','mensajes','horario','seguridad','mensajes-admin'];
     var hash = (window.location.hash || '').replace('#','').trim();
     if (hash && validTabs.indexOf(hash) !== -1) {
         var btn = document.querySelector(".perfil-menu-item[onclick*=\"'" + hash + "'\"]");
@@ -918,115 +949,95 @@ window.descargarFacturaReserva = async (reservaId) => {
     } catch (_) { alert('Error al obtener la factura.'); }
 };
 
-// ── HABITACIONES GUARDADAS ───────────────────────────────────────────────────────────────
+window.confirmarEliminarCuenta = () => {
+    var alertEl = document.getElementById('alert-eliminar');
+    alertEl.style.display = 'none';
 
-window.cargarHabitacionesGuardadas = async () => {
-    var cont  = document.getElementById('guardadas-lista');
-    var badge = document.getElementById('guardadas-count-badge');
-    if (!cont) return;
-    try {
-        var r = await fetch('/api/guardadas');
-        if (!r.ok) { cont.innerHTML = ''; return; }
-        var guardadas = await r.json();
-
-        if (badge) {
-            if (guardadas.length > 0) { badge.style.display = 'inline-block'; badge.textContent = guardadas.length; }
-            else { badge.style.display = 'none'; }
-        }
-
-        if (!guardadas.length) {
-            cont.innerHTML = `<p style="color:var(--text-muted-custom);font-size:0.82rem;">No tienes ninguna habitaci\u00f3n guardada.</p>`;
-            return;
-        }
-
-        var tipoLabels = { NORMAL: t('tipo_normal'), DOBLE: t('tipo_doble'), SUITE: t('tipo_suite'), LUJO: t('tipo_lujo') };
-        cont.innerHTML = guardadas.map(g => {
-            var tipo  = g.tipo;
-            var label = tipoLabels[tipo] || tipo;
-            var img   = (TIPO_IMAGES[tipo] || [])[0] || '';
-            return `
-            <div class="guardada-card">
-                ${img ? `<img class="guardada-card-img" src="${img}" alt="${label}">` : ''}
-                <div class="guardada-card-info">
-                    <p class="guardada-card-nombre">${label}</p>
-                </div>
-                <div class="guardada-card-actions">
-                    <button onclick="window.location.href='/habitacion/${tipo.toLowerCase()}'"
-                        style="background:var(--gold);color:var(--dark);border:none;padding:8px 18px;border-radius:6px;font-size:0.75rem;letter-spacing:1px;cursor:pointer;font-weight:700;">
-                        Reservar
-                    </button>
-                    <button onclick="quitarHabitacionGuardada('${tipo}')"
-                        style="background:transparent;color:var(--text-muted-custom);border:1px solid rgba(154,154,154,0.2);padding:6px 14px;border-radius:6px;font-size:0.72rem;cursor:pointer;letter-spacing:1px;">
-                        Eliminar
-                    </button>
-                </div>
-            </div>`;
-        }).join('');
-    } catch (_) {
-        if (cont) cont.innerHTML = `<p style="color:#e74c3c;font-size:0.8rem;">Error al cargar.</p>`;
+    // Si tiene campo de contraseña, validar que no esté vacío
+    var passInput = document.getElementById('input-eliminar-pass');
+    if (passInput && !passInput.value) {
+        alertEl.textContent = 'Introduce tu contraseña.';
+        alertEl.style.display = 'block'; alertEl.style.background = 'rgba(220,53,69,0.15)'; alertEl.style.color = '#eb5757';
+        return;
     }
+
+    // Mostrar panel de confirmación, ocultar botón original
+    document.getElementById('confirm-eliminar').style.display = 'block';
+    document.getElementById('btn-eliminar-cuenta').style.display = 'none';
 };
 
-window.quitarHabitacionGuardada = async (tipo) => {
-    if (!confirm('\u00bfEliminar esta habitaci\u00f3n de guardadas?')) return;
+window.cancelarEliminar = () => {
+    document.getElementById('confirm-eliminar').style.display = 'none';
+    document.getElementById('btn-eliminar-cuenta').style.display = 'inline-block';
+};
+
+window.eliminarMiCuenta = async () => {
+    var pass = (document.getElementById('input-eliminar-pass') || {}).value || '';
+    var alertEl = document.getElementById('alert-eliminar');
+
     try {
-        var r = await fetch('/api/guardadas/' + tipo, { method: 'DELETE' });
-        if (r.ok || r.status === 204) { cargarHabitacionesGuardadas(); }
-        else { alert('No se pudo eliminar.'); }
-    } catch (_) { alert('Error de conexi\u00f3n.'); }
-};
-
-window._editGuardadaId = null;
-
-window.abrirEditarGuardada = (id, tipo, fechaEntrada, fechaSalida) => {
-    window._editGuardadaId = id;
-    var cont = document.getElementById('editar-guardada-content');
-    if (!cont) return;
-    cont.innerHTML = `
-        <p style="font-size:0.7rem;letter-spacing:2px;color:var(--text-muted-custom);margin-bottom:12px;">${tipo}</p>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
-            <div>
-                <div class="perfil-field-label mb-1">Fecha de entrada</div>
-                <input type="text" id="eg-in" class="perfil-form-input" value="${fechaEntrada}" style="width:150px;">
-            </div>
-            <div>
-                <div class="perfil-field-label mb-1">Fecha de salida</div>
-                <input type="text" id="eg-out" class="perfil-form-input" value="${fechaSalida}" style="width:150px;">
-            </div>
-        </div>`;
-    // Flatpickr si está disponible
-    if (typeof flatpickr !== 'undefined' && typeof FP_CONFIG !== 'undefined') {
-        flatpickr('#eg-in',  { ...FP_CONFIG, minDate: 'today' });
-        flatpickr('#eg-out', { ...FP_CONFIG, minDate: 'today' });
-    }
-    document.getElementById('modal-editar-guardada').classList.add('is-open');
-};
-
-window.cerrarEditarGuardada = () => {
-    var m = document.getElementById('modal-editar-guardada');
-    if (m) m.classList.remove('is-open');
-};
-
-window.guardarEdicionGuardada = async () => {
-    var id  = window._editGuardadaId;
-    var inD = document.getElementById('eg-in')?.value;
-    var outD= document.getElementById('eg-out')?.value;
-    var alertEl = document.getElementById('alert-editar-guardada');
-    if (!inD || !outD) { if(alertEl){alertEl.textContent='Selecciona ambas fechas.';alertEl.className='perfil-alert perfil-alert--err';alertEl.style.display='block';} return; }
-    try {
-        var r = await fetch('/api/reservas/' + id + '/fechas', {
-            method: 'PATCH',
+        var r = await fetch('/api/perfil/eliminar-cuenta', {
+            method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fechaEntrada: inD, fechaSalida: outD })
+            body: JSON.stringify({ password: pass })
         });
         if (r.ok) {
-            cerrarEditarGuardada();
-            cargarHabitacionesGuardadas();
+            document.getElementById('confirm-eliminar').style.display = 'none';
+            alertEl.textContent = 'Cuenta eliminada correctamente. Redirigiendo...';
+            alertEl.style.display = 'block'; alertEl.style.background = 'rgba(40,167,69,0.15)'; alertEl.style.color = '#6fcf97';
+            setTimeout(function() { window.location.href = '/'; }, 1500);
         } else {
             var msg = await r.text();
-            if(alertEl){alertEl.textContent=msg||'Error al guardar.';alertEl.className='perfil-alert perfil-alert--err';alertEl.style.display='block';}
+            alertEl.textContent = msg || 'Error al eliminar la cuenta.';
+            alertEl.style.display = 'block'; alertEl.style.background = 'rgba(220,53,69,0.15)'; alertEl.style.color = '#eb5757';
         }
-    } catch (_) { if(alertEl){alertEl.textContent='Error de conexi\u00f3n.';alertEl.className='perfil-alert perfil-alert--err';alertEl.style.display='block';} }
+    } catch (_) {
+        alertEl.textContent = 'Error de conexión.';
+        alertEl.style.display = 'block'; alertEl.style.background = 'rgba(220,53,69,0.15)'; alertEl.style.color = '#eb5757';
+    }
+};
+
+window.guardarDatosPerfil = async () => {
+    var msgEl = document.getElementById('pf-datos-msg');
+    msgEl.style.display = 'none';
+
+    var payload = {
+        nombre:          (document.getElementById('pf-nombre') || {}).value || '',
+        tipoDocumento:   (document.getElementById('pf-tipo-doc') || {}).value || '',
+        numDocumento:    (document.getElementById('pf-num-doc') || {}).value || '',
+        fechaNacimiento: (document.getElementById('pf-fecha-nac') || {}).value || '',
+        telefonoPrefijo: (document.getElementById('pf-prefijo') || {}).value || '',
+        telefono:        (document.getElementById('pf-telefono') || {}).value || ''
+    };
+
+    if (!payload.nombre || payload.nombre.trim().length < 2) {
+        msgEl.textContent = 'El nombre debe tener al menos 2 caracteres.';
+        msgEl.style.display = 'block'; msgEl.style.background = 'rgba(220,53,69,0.15)'; msgEl.style.color = '#eb5757';
+        return;
+    }
+
+    try {
+        var r = await fetch('/api/perfil/datos', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (r.ok) {
+            msgEl.textContent = 'Datos actualizados correctamente.';
+            msgEl.style.display = 'block'; msgEl.style.background = 'rgba(40,167,69,0.15)'; msgEl.style.color = '#6fcf97';
+        } else if (r.status === 409) {
+            var msg = await r.text();
+            msgEl.textContent = msg || 'Ya existe un usuario con ese número de documento.';
+            msgEl.style.display = 'block'; msgEl.style.background = 'rgba(220,53,69,0.15)'; msgEl.style.color = '#eb5757';
+        } else {
+            var msg = await r.text();
+            msgEl.textContent = msg || 'Error al guardar.';
+            msgEl.style.display = 'block'; msgEl.style.background = 'rgba(220,53,69,0.15)'; msgEl.style.color = '#eb5757';
+        }
+    } catch (_) {
+        msgEl.textContent = 'Error de conexión.';
+        msgEl.style.display = 'block'; msgEl.style.background = 'rgba(220,53,69,0.15)'; msgEl.style.color = '#eb5757';
+    }
 };
 
 window.cargarMetodosPago = async () => {
@@ -1124,7 +1135,7 @@ window.abrirModalForm = (tipo) => {
             <div class="row g-3 mb-3">
                 <div class="col-6">
                     <div class="perfil-field-label mb-1">Vencimiento (MM/AA) *</div>
-                    <input type="text" id="mp-caducidad" class="perfil-form-input" placeholder="MM/AA" maxlength="5">
+                    <input type="text" id="mp-caducidad" class="perfil-form-input" placeholder="MM/AA" maxlength="5" oninput="var v=this.value.replace(/[^0-9]/g,'');if(v.length>=2)v=v.slice(0,2)+'/'+v.slice(2);this.value=v;">
                 </div>
                 <div class="col-6">
                     <div class="perfil-field-label mb-1">CVV *</div>
@@ -1188,6 +1199,11 @@ window.guardarMetodoPago = async () => {
         }
         if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(payload.caducidad)) {
             mostrarAlerta(alertEl, 'err', 'Vencimiento inválido (MM/AA).'); return;
+        }
+        var _parts = payload.caducidad.split('/');
+        var _expM = parseInt(_parts[0]), _expY = 2000 + parseInt(_parts[1]), _now = new Date();
+        if (_expY < _now.getFullYear() || (_expY === _now.getFullYear() && _expM < _now.getMonth() + 1)) {
+            mostrarAlerta(alertEl, 'err', 'La tarjeta está caducada.'); return;
         }
     } else if (tipo === 'BIZUM') {
         payload.telefono = (document.getElementById('mp-telefono') || {}).value || '';

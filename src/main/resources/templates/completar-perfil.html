@@ -10,7 +10,7 @@
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <link rel="stylesheet" th:href="@{/css/flatpickr.css}">
     <style>
-        body { background: #0D0D0D; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+        body { background: #0D0D0D; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px; }
         .card {
             background: #1A1A1A;
             border: 1px solid #2a2a2a;
@@ -116,10 +116,12 @@
 <script th:src="@{/lib/flatpickr/l10n/es.js}"></script>
 <script>
 const _placeholders = { DNI: '12345678A', NIE: 'X1234567A', PASAPORTE: 'ABC123456', TIE: 'X1234567A', '': 'Selecciona un tipo primero' };
+const _maxLengths = { DNI: 9, NIE: 9, PASAPORTE: 9, TIE: 9, '': 20 };
 function actualizarPlaceholder() {
     var tipo = document.getElementById('cp-tipo-doc').value;
     var inp = document.getElementById('cp-num-doc');
     inp.placeholder = _placeholders[tipo] || '';
+    inp.maxLength = _maxLengths[tipo] || 20;
     inp.value = '';
 }
 
@@ -184,6 +186,5 @@ async function enviar(e) {
 }
 </script>
 
-<div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

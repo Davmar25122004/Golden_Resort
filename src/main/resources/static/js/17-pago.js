@@ -164,20 +164,29 @@ function renderPago() {
                 sub    = m.iban || '';
             }
             return `
-                <div class="pago-metodo ${sel}" onclick="seleccionarMetodoPago(${m.id})">
+                <div class="pago-metodo ${sel}" onclick="seleccionarMetodoPago(${m.id})" style="position:relative;">
                     <div class="pago-metodo-radio"></div>
                     <div class="pago-metodo-icon">${m.tipo === 'BIZUM' ? bizumSVG(28) : (m.tipo === 'CUENTA_BANCARIA' ? bankSVG(28) : cardBrandSVG(m.marca, 36))}</div>
                     <div class="pago-metodo-body">
                         <div class="pago-metodo-title">${titulo}</div>
                         <div class="pago-metodo-sub">${sub}</div>
                     </div>
+                    <button onclick="event.stopPropagation();pagoEliminarMetodo(${m.id})" title="Eliminar" style="position:absolute;top:8px;right:8px;background:none;border:none;color:#999;cursor:pointer;font-size:1rem;padding:4px 6px;border-radius:4px;transition:color .2s;" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='#999'">&times;</button>
                 </div>
             `;
         }).join('')
         : `<div class="pago-metodo-empty">
                No tienes métodos de pago guardados.
-               <br><a href="/perfil" style="color:var(--gold);">Añadir uno en tu perfil →</a>
+               <br><button onclick="pagoAbrirModalTipo()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-size:inherit;text-decoration:underline;margin-top:6px;">+ Añadir método de pago</button>
            </div>`;
+
+    // Botón de añadir extra si ya hay métodos
+    if (metodos.length > 0) {
+        metodosHTML += `<button onclick="pagoAbrirModalTipo()" style="display:block;margin-top:10px;background:none;border:1px solid rgba(185,149,77,0.3);color:var(--gold);padding:8px 16px;border-radius:6px;font-size:0.75rem;letter-spacing:1px;cursor:pointer;width:100%;transition:border-color .2s;" onmouseover="this.style.borderColor='rgba(185,149,77,0.7)'" onmouseout="this.style.borderColor='rgba(185,149,77,0.3)'">+ Añadir otro método</button>`;
+    }
+
+    // Asegurar que los modales de pago inline existen
+    if (!document.getElementById('pago-modal-tipo')) _inyectarModalesPagoInline();
 
     var descuentoRow = (s.descuento && parseFloat(s.descuento) > 0) ? `
         <div class="pago-row pago-row--descuento">
@@ -468,3 +477,170 @@ function renderExito(pago) {
         </div>
     `;
 }
+
+// ── MODALES INLINE PARA AÑADIR MÉTODO DE PAGO DESDE CHECKOUT ─────────────
+
+function _inyectarModalesPagoInline() {
+    if (document.getElementById('pago-modal-tipo')) return;
+    var html = `
+    <div class="mp-modal-overlay" id="pago-modal-tipo" onclick="pagoCerrarModales(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99999;align-items:center;justify-content:center;">
+        <div class="mp-modal" onclick="event.stopPropagation()" style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:28px 24px;max-width:400px;width:90%;position:relative;">
+            <button onclick="pagoCerrarModalesForzar()" style="position:absolute;top:12px;right:16px;background:none;border:none;color:#999;font-size:1.4rem;cursor:pointer;">&times;</button>
+            <h3 style="color:var(--cream);font-family:Georgia,serif;font-size:1.1rem;margin-bottom:1.2rem;">Método de Pago</h3>
+            <button class="mp-tipo-btn" onclick="pagoAbrirForm('TARJETA')" style="display:flex;align-items:center;gap:12px;width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(185,149,77,0.2);border-radius:8px;padding:14px;cursor:pointer;margin-bottom:8px;color:var(--cream);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                <div style="flex:1;text-align:left;"><div style="font-weight:600;font-size:0.88rem;">Tarjeta</div><div style="font-size:0.7rem;color:#999;">Crédito o débito</div></div>
+            </button>
+            <button class="mp-tipo-btn" onclick="pagoAbrirForm('BIZUM')" style="display:flex;align-items:center;gap:12px;width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(185,149,77,0.2);border-radius:8px;padding:14px;cursor:pointer;margin-bottom:8px;color:var(--cream);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color:#00bcd4;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/><circle cx="12" cy="12" r="5"/></svg>
+                <div style="flex:1;text-align:left;"><div style="font-weight:600;font-size:0.88rem;">Bizum</div><div style="font-size:0.7rem;color:#999;">Pago instantáneo</div></div>
+            </button>
+            <button class="mp-tipo-btn" onclick="pagoAbrirForm('CUENTA_BANCARIA')" style="display:flex;align-items:center;gap:12px;width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(185,149,77,0.2);border-radius:8px;padding:14px;cursor:pointer;color:var(--cream);">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 10h18M5 10v11M12 10v11M19 10v11M3 7l9-4 9 4"/></svg>
+                <div style="flex:1;text-align:left;"><div style="font-weight:600;font-size:0.88rem;">Cuenta Bancaria</div><div style="font-size:0.7rem;color:#999;">Transferencia SEPA</div></div>
+            </button>
+        </div>
+    </div>
+    <div class="mp-modal-overlay" id="pago-modal-form" onclick="pagoCerrarModales(event)" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100000;align-items:center;justify-content:center;">
+        <div class="mp-modal" onclick="event.stopPropagation()" style="background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:28px 24px;max-width:420px;width:90%;position:relative;">
+            <button onclick="pagoVolverTipo()" style="position:absolute;top:12px;left:16px;background:none;border:none;color:#999;font-size:1.2rem;cursor:pointer;">←</button>
+            <button onclick="pagoCerrarModalesForzar()" style="position:absolute;top:12px;right:16px;background:none;border:none;color:#999;font-size:1.4rem;cursor:pointer;">&times;</button>
+            <h3 id="pago-mp-title" style="color:var(--cream);font-family:Georgia,serif;font-size:1.1rem;margin-bottom:1.2rem;">Añadir método</h3>
+            <div id="pago-mp-content"></div>
+            <button onclick="pagoGuardarMetodo()" style="width:100%;background:var(--gold);color:#0d0d0d;border:none;padding:12px;border-radius:6px;font-weight:700;font-size:0.85rem;letter-spacing:1px;cursor:pointer;margin-top:8px;">Añadir Método</button>
+            <div id="pago-mp-alert" style="font-size:0.8rem;margin-top:10px;display:none;padding:8px 12px;border-radius:6px;"></div>
+        </div>
+    </div>`;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+window._pagoMpTipo = null;
+
+window.pagoAbrirModalTipo = () => {
+    _inyectarModalesPagoInline();
+    var el = document.getElementById('pago-modal-tipo');
+    el.style.display = 'flex';
+};
+
+window.pagoVolverTipo = () => {
+    document.getElementById('pago-modal-form').style.display = 'none';
+    document.getElementById('pago-modal-tipo').style.display = 'flex';
+};
+
+window.pagoCerrarModalesForzar = () => {
+    var t = document.getElementById('pago-modal-tipo');
+    var f = document.getElementById('pago-modal-form');
+    if (t) t.style.display = 'none';
+    if (f) f.style.display = 'none';
+};
+
+window.pagoCerrarModales = (ev) => {
+    if (ev && ev.target && ev.target.id !== 'pago-modal-tipo' && ev.target.id !== 'pago-modal-form') return;
+    pagoCerrarModalesForzar();
+};
+
+window.pagoAbrirForm = (tipo) => {
+    window._pagoMpTipo = tipo;
+    document.getElementById('pago-modal-tipo').style.display = 'none';
+
+    var title = document.getElementById('pago-mp-title');
+    var cont  = document.getElementById('pago-mp-content');
+    var labelStyle = 'display:block;font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;color:#999;margin-bottom:4px;';
+    var inputStyle = 'width:100%;background:#111;border:1px solid #333;color:#f5f0e8;padding:10px 12px;border-radius:6px;font-size:0.88rem;';
+
+    if (tipo === 'TARJETA') {
+        title.textContent = 'Añadir tarjeta';
+        cont.innerHTML = `
+            <div style="margin-bottom:12px;"><label style="${labelStyle}">Número de tarjeta *</label><input type="text" id="pmp-numero" style="${inputStyle}" placeholder="1234 5678 9012 3456" maxlength="23"></div>
+            <div style="display:flex;gap:12px;margin-bottom:12px;">
+                <div style="flex:1;"><label style="${labelStyle}">Vencimiento (MM/AA) *</label><input type="text" id="pmp-caducidad" style="${inputStyle}" placeholder="MM/AA" maxlength="5" oninput="var v=this.value.replace(/[^0-9]/g,'');if(v.length>=2)v=v.slice(0,2)+'/'+v.slice(2);this.value=v;"></div>
+                <div style="flex:1;"><label style="${labelStyle}">CVV *</label><input type="text" id="pmp-cvv" style="${inputStyle}" placeholder="123" maxlength="4"></div>
+            </div>
+            <div style="margin-bottom:12px;"><label style="${labelStyle}">Nombre en la tarjeta *</label><input type="text" id="pmp-titular" style="${inputStyle}" placeholder="Nombre completo" maxlength="80"></div>
+            <div style="margin-bottom:12px;"><label style="${labelStyle}">Dirección de facturación</label><input type="text" id="pmp-direccion" style="${inputStyle}" placeholder="Calle, número, ciudad, CP" maxlength="200"></div>`;
+    } else if (tipo === 'BIZUM') {
+        title.textContent = 'Añadir Bizum';
+        cont.innerHTML = `
+            <div style="margin-bottom:12px;"><label style="${labelStyle}">Teléfono *</label><input type="text" id="pmp-telefono" style="${inputStyle}" placeholder="+34 600 000 000" maxlength="20"></div>
+            <div style="margin-bottom:12px;"><label style="${labelStyle}">Nombre del titular *</label><input type="text" id="pmp-titular" style="${inputStyle}" placeholder="Nombre completo" maxlength="80"></div>`;
+    } else {
+        title.textContent = 'Añadir cuenta bancaria';
+        cont.innerHTML = `
+            <div style="margin-bottom:12px;"><label style="${labelStyle}">IBAN *</label><input type="text" id="pmp-iban" style="${inputStyle}" placeholder="ES00 0000 0000 00 0000000000" maxlength="34"></div>
+            <div style="margin-bottom:12px;"><label style="${labelStyle}">Titular *</label><input type="text" id="pmp-titular" style="${inputStyle}" placeholder="Nombre completo" maxlength="80"></div>`;
+    }
+
+    document.getElementById('pago-modal-form').style.display = 'flex';
+};
+
+window.pagoGuardarMetodo = async () => {
+    var tipo = window._pagoMpTipo;
+    var alertEl = document.getElementById('pago-mp-alert');
+    var titular = (document.getElementById('pmp-titular') || {}).value || '';
+
+    function showErr(msg) {
+        alertEl.textContent = msg;
+        alertEl.style.display = 'block';
+        alertEl.style.background = 'rgba(220,53,69,0.15)';
+        alertEl.style.color = '#eb5757';
+    }
+
+    if (!titular || titular.trim().length < 2) { showErr('Introduce el nombre del titular.'); return; }
+
+    var payload = { tipo: tipo, titular: titular };
+
+    if (tipo === 'TARJETA') {
+        payload.numero = (document.getElementById('pmp-numero') || {}).value || '';
+        payload.caducidad = (document.getElementById('pmp-caducidad') || {}).value || '';
+        payload.direccionFacturacion = (document.getElementById('pmp-direccion') || {}).value || '';
+        if (payload.numero.replace(/\s+/g, '').length < 13) { showErr('Número de tarjeta inválido.'); return; }
+        if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(payload.caducidad)) { showErr('Vencimiento inválido (MM/AA).'); return; }
+        var parts = payload.caducidad.split('/');
+        var expMonth = parseInt(parts[0]);
+        var expYear = 2000 + parseInt(parts[1]);
+        var now = new Date();
+        if (expYear < now.getFullYear() || (expYear === now.getFullYear() && expMonth < now.getMonth() + 1)) { showErr('La tarjeta está caducada.'); return; }
+    } else if (tipo === 'BIZUM') {
+        payload.telefono = (document.getElementById('pmp-telefono') || {}).value || '';
+        if (payload.telefono.trim().length < 6) { showErr('Teléfono inválido.'); return; }
+    } else if (tipo === 'CUENTA_BANCARIA') {
+        payload.iban = (document.getElementById('pmp-iban') || {}).value || '';
+        if (payload.iban.replace(/\s+/g, '').length < 16) { showErr('IBAN inválido.'); return; }
+    }
+
+    try {
+        var r = await fetch('/api/perfil/metodos-pago', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!r.ok) { showErr(await r.text() || 'Error al guardar.'); return; }
+        var nuevo = await r.json();
+        // Cerrar modales y recargar datos de pago
+        pagoCerrarModalesForzar();
+        // Recargar métodos y seleccionar el nuevo
+        var rMetodos = await fetch('/api/perfil/metodos-pago');
+        window._pagoState.metodos = rMetodos.ok ? await rMetodos.json() : [];
+        if (nuevo && nuevo.id) window._pagoState.metodoSeleccionadoId = nuevo.id;
+        else if (window._pagoState.metodos.length > 0) window._pagoState.metodoSeleccionadoId = window._pagoState.metodos[0].id;
+        renderPago();
+    } catch (_) {
+        showErr('Error de conexión.');
+    }
+};
+
+window.pagoEliminarMetodo = async (id) => {
+    if (!confirm('¿Eliminar este método de pago?')) return;
+    try {
+        var r = await fetch('/api/perfil/metodos-pago/' + id, { method: 'DELETE' });
+        if (r.ok || r.status === 204) {
+            var rMetodos = await fetch('/api/perfil/metodos-pago');
+            window._pagoState.metodos = rMetodos.ok ? await rMetodos.json() : [];
+            if (window._pagoState.metodoSeleccionadoId === id) {
+                var def = window._pagoState.metodos.find(function(m) { return m.esDefault; });
+                window._pagoState.metodoSeleccionadoId = def ? def.id : (window._pagoState.metodos.length > 0 ? window._pagoState.metodos[0].id : null);
+            }
+            renderPago();
+        }
+    } catch (_) {}
+};

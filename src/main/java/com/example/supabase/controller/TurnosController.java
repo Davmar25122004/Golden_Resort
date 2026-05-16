@@ -86,7 +86,8 @@ public class TurnosController {
                                           @RequestParam(value = "year", required = false) Integer year,
                                           @RequestParam(value = "month", required = false) Integer month,
                                           @RequestParam(value = "from", required = false) String from,
-                                          @RequestParam(value = "to", required = false) String to) {
+                                          @RequestParam(value = "to", required = false) String to,
+                                          @RequestParam(value = "patron", required = false, defaultValue = "false") boolean borrarPatron) {
         try {
             LocalDate desde, hasta;
             if (from != null && to != null) {
@@ -100,7 +101,7 @@ public class TurnosController {
             } else {
                 return ResponseEntity.badRequest().body("Especifica year (+month opcional) o from+to");
             }
-            service.limpiarRango(id, desde, hasta);
+            service.limpiarRango(id, desde, hasta, borrarPatron);
             return ResponseEntity.ok(Map.of("ok", true));
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getReason());

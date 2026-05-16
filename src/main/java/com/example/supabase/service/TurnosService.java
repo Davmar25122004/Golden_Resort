@@ -409,11 +409,16 @@ public class TurnosService {
     }
 
     @Transactional
-    public void limpiarRango(Long planId, LocalDate desde, LocalDate hasta) {
-        if (!planRepo.existsById(planId))
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan no encontrado");
+    public void limpiarRango(Long planId, LocalDate desde, LocalDate hasta, boolean borrarPatron) {
+        TurnoPlan p = planRepo.findById(planId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Plan no encontrado"));
         planDiaRepo.deleteByPlanIdAndFechaBetween(planId, desde, hasta);
         diaTramoRepo.deleteByPlanIdAndFechaBetween(planId, desde, hasta);
+        if (borrarPatron) {
+            p.getPatron().clear();
+            p.setPerfilDefault(null);
+            planRepo.save(p);
+        }
     }
 
     @Transactional

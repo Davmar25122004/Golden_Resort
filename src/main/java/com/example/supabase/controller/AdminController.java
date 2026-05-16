@@ -51,6 +51,14 @@ public class AdminController {
     private final ReservaRepository reservaRepository;
     private final PagoRepository pagoRepository;
     private final PendingRegistrationRepository pendingRegistrationRepository;
+    private final com.example.supabase.repository.ServicioRepository servicioRepository;
+    private final com.example.supabase.repository.ReservaServicioRepository reservaServicioRepository;
+    private final com.example.supabase.repository.RoomServiceItemRepository roomServiceItemRepository;
+    private final com.example.supabase.repository.PedidoRoomServiceRepository pedidoRoomServiceRepository;
+    private final com.example.supabase.service.EmailService emailService;
+
+    @org.springframework.beans.factory.annotation.Value("${app.public-url:http://localhost:8080}")
+    private String publicUrl;
 
     public AdminController(AdminService adminService,
                            CodigoDescuentoRepository codigoDescuentoRepository,
@@ -62,7 +70,12 @@ public class AdminController {
                            HabitacionRepository habitacionRepository,
                            ReservaRepository reservaRepository,
                            PagoRepository pagoRepository,
-                           PendingRegistrationRepository pendingRegistrationRepository) {
+                           PendingRegistrationRepository pendingRegistrationRepository,
+                           com.example.supabase.repository.ServicioRepository servicioRepository,
+                           com.example.supabase.repository.ReservaServicioRepository reservaServicioRepository,
+                           com.example.supabase.repository.RoomServiceItemRepository roomServiceItemRepository,
+                           com.example.supabase.repository.PedidoRoomServiceRepository pedidoRoomServiceRepository,
+                           com.example.supabase.service.EmailService emailService) {
         this.adminService = adminService;
         this.codigoDescuentoRepository = codigoDescuentoRepository;
         this.usuarioRepository = usuarioRepository;
@@ -74,6 +87,11 @@ public class AdminController {
         this.reservaRepository = reservaRepository;
         this.pagoRepository = pagoRepository;
         this.pendingRegistrationRepository = pendingRegistrationRepository;
+        this.servicioRepository = servicioRepository;
+        this.reservaServicioRepository = reservaServicioRepository;
+        this.roomServiceItemRepository = roomServiceItemRepository;
+        this.pedidoRoomServiceRepository = pedidoRoomServiceRepository;
+        this.emailService = emailService;
     }
 
     private String obtenerEmail(Authentication auth) {
@@ -745,23 +763,99 @@ public class AdminController {
 
             Reserva reserva = reservaService.crear(req, cliente.getEmail());
 
-            if (confirmar) {
-                Habitacion hab = habitacionRepository.findById(habitacionId).orElse(null);
-                BigDecimal precioNoche = hab != null ? hab.getPrecioNoche() : BigDecimal.ZERO;
-                BigDecimal total = precioNoche.multiply(BigDecimal.valueOf(noches));
+            // Añadir servicios si se enviaron
+            BigDecimal totalServicios = BigDecimal.ZERO;
+            var serviciosList = (java.util.List<Map<String, Object>>) datos.get("servicios");
+            if (serviciosList != null) {
+                for (var s : serviciosList) {
+                    Long sId = Long.parseLong(s.get("servicioId").toString());
+                    int cant = s.get("cantidad") != null ? Integer.parseInt(s.get("cantidad").toString()) : 1;
+                    var servicio = servicioRepository.findById(sId).orElse(null);
+                    if (servicio != null) {
+                        var rs = new com.example.supabase.domain.ReservaServicio();
+                        rs.setReserva(reserva);
+                        rs.setServicio(servicio);
+                        rs.setCantidad(cant);
+                        rs.setPrecioServicio(servicio.getPrecio());
+                        reservaServicioRepository.save(rs);
+                        totalServicios = totalServicios.add(servicio.getPrecio().multiply(BigDecimal.valueOf(cant)));
+                    }
+                }
+            }
 
+            // Añadir room service si se envió
+            BigDecimal totalRS = BigDecimal.ZERO;
+            var rsList = (java.util.List<Map<String, Object>>) datos.get("roomService");
+            if (rsList != null) {
+                for (var item : rsList) {
+                    Long iId = Long.parseLong(item.get("itemId").toString());
+                    int cant = item.get("cantidad") != null ? Integer.parseInt(item.get("cantidad").toString()) : 1;
+                    var rsItem = roomServiceItemRepository.findById(iId).orElse(null);
+                    if (rsItem != null) {
+                        var pedido = new com.example.supabase.domain.PedidoRoomService();
+                        pedido.setReserva(reserva);
+                        pedido.setItem(rsItem);
+                        pedido.setCantidad(cant);
+                        pedido.setFechaPedido(java.time.LocalDateTime.now());
+                        pedidoRoomServiceRepository.save(pedido);
+                        totalRS = totalRS.add(rsItem.getPrecio().multiply(BigDecimal.valueOf(cant)));
+                    }
+                }
+            }
+
+            Habitacion hab = habitacionRepository.findById(habitacionId).orElse(null);
+            BigDecimal precioNoche = hab != null ? hab.getPrecioNoche() : BigDecimal.ZERO;
+            BigDecimal totalHab = precioNoche.multiply(BigDecimal.valueOf(noches));
+            BigDecimal totalFinal = totalHab.add(totalServicios).add(totalRS);
+
+            if (confirmar) {
                 Pago pago = new Pago();
                 pago.setReservaId(reserva.getId());
                 pago.setUsuarioId(cliente.getId());
-                pago.setSubtotal(total);
+                pago.setSubtotal(totalFinal);
                 pago.setDescuento(BigDecimal.ZERO);
-                pago.setTotal(total);
+                pago.setTotal(totalFinal);
                 pago.setEstado(EstadoPago.COMPLETADO);
                 pago.setMetodoTipo("RECEPCION");
                 pago.setCompletedAt(java.time.LocalDateTime.now());
                 pago.setReferencia("ADM-" + reserva.getId());
                 pagoRepository.save(pago);
             }
+
+            // Recargar reserva con servicios para el email
+            Reserva reservaFresh = reservaRepository.findById(reserva.getId()).orElse(reserva);
+
+            // Enviar email de confirmación al cliente
+            try {
+                var df = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                var variables = new java.util.HashMap<String, Object>();
+                variables.put("nombreCliente", cliente.getNombre() != null ? cliente.getNombre() : cliente.getEmail());
+                variables.put("referencia", "ADM-" + reserva.getId());
+                variables.put("fecha", java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+                variables.put("habitacionTipo", hab != null ? hab.getTipo().name() : "");
+                variables.put("habitacionNumero", hab != null ? hab.getNumero() : "");
+                variables.put("fechaEntrada", fechaEntrada.format(df));
+                variables.put("fechaSalida", fechaSalida.format(df));
+                variables.put("noches", noches);
+                variables.put("precioNoche", precioNoche);
+                variables.put("habitacionTotal", totalHab);
+                variables.put("subtotal", totalFinal);
+                variables.put("descuento", BigDecimal.ZERO);
+                variables.put("total", totalFinal);
+                variables.put("metodoTipo", confirmar ? "RECEPCION" : null);
+                variables.put("habitacionUrl", publicUrl + "/images/" + (hab != null ? hab.getTipo().name().toLowerCase() : "normal") + "-1.jpg");
+                variables.put("logoUrl", publicUrl + "/images/logo.png");
+                variables.put("servicios", reservaFresh.getServicios());
+                variables.put("pedidosRS", pedidoRoomServiceRepository.findByReservaId(reserva.getId()));
+                variables.put("horaCheckin", "15:00");
+                variables.put("horaCheckout", "11:00");
+                variables.put("pagoEnRecepcion", !confirmar);
+                emailService.enviarConPlantilla(
+                        cliente.getEmail(),
+                        (confirmar ? "Confirmación de reserva" : "Reserva pendiente de pago") + " · Golden Resort · ADM-" + reserva.getId(),
+                        "emails/factura",
+                        variables);
+            } catch (Exception ignored) {}
 
             return ResponseEntity.ok(Map.of("id", reserva.getId(), "confirmada", confirmar));
         } catch (Exception e) {

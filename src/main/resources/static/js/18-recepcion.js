@@ -444,7 +444,7 @@ function renderAlHabitaciones(habs) {
 function renderAlLimpiadores(limps) {
     var box = document.getElementById('al-limpiadores');
     if (!limps || limps.length === 0) {
-        box.innerHTML = '<div class="text-muted text-center py-3" style="font-size:0.85rem;font-style:italic;">No hay limpiadores de turno ahora mismo.</div>';
+        box.innerHTML = '<div class="text-center py-3" style="font-size:0.85rem;font-style:italic;color:#aaa;">No hay limpiadores de turno ahora mismo.</div>';
         return;
     }
     box.innerHTML = limps.map(l => {

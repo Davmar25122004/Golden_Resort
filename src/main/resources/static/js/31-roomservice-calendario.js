@@ -215,6 +215,19 @@
                 }).join('')+'</div>';
         }
 
+        var pedidosHtml = '';
+        if (r.pedidosRS && r.pedidosRS.length > 0) {
+            pedidosHtml = '<div class="cal-dia-extra-line" style="margin-top:6px;">'
+                + '<span class="cal-dia-extra-key" style="color:'+RS_COLOR+';">'+RS_SVG+' Platos:</span>'
+                + '<div style="margin-top:4px;">'
+                + r.pedidosRS.map(function(p) {
+                    return '<div style="padding:3px 0;font-size:0.8rem;">'
+                        + '<span style="color:var(--cream);">'+escHtml(p.nombre)+' <span style="color:#999;">×'+p.cantidad+'</span></span>'
+                        + '</div>';
+                }).join('')
+                + '</div></div>';
+        }
+
         var peticionHtml = r.peticionEspecial
             ? '<div class="cal-dia-peticion"><svg class="cal-dia-peticion-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span class="cal-dia-peticion-key">Petición:</span> '+escHtml(r.peticionEspecial)+'</div>'
             : '';
@@ -226,7 +239,7 @@
             +   '<div class="cal-dia-cliente">'+escHtml(r.clienteNombre||r.clienteEmail||'—')+'</div>'
             +   emailHtml
             +   '<div class="cal-dia-fechas">'+fechaCorta(r.fechaEntrada)+' <span class="cal-dia-hora">'+checkin+'h</span> → '+fechaCorta(r.fechaSalida)+' <span class="cal-dia-hora">'+checkout+'h</span></div>'
-            +   serviciosHtml+peticionHtml
+            +   serviciosHtml+pedidosHtml+peticionHtml
             + '</div></div>';
     }
 
