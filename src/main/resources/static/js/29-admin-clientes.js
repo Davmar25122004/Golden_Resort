@@ -163,7 +163,6 @@ window.abrirModalNuevoCliente = function () {
                         <option value="DNI">DNI</option>
                         <option value="NIE">NIE</option>
                         <option value="PASAPORTE">Pasaporte</option>
-                        <option value="TIE">TIE</option>
                     </select>
                 </div>
                 <div class="col-7">

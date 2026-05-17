@@ -4,11 +4,10 @@ const _docPlaceholders = {
     'DNI':       '12345678A',
     'NIE':       'X1234567A',
     'PASAPORTE': 'ABC123456',
-    'TIE':       'X1234567A',
     '':          'Selecciona un tipo primero'
 };
 
-const _docMaxLengths = { 'DNI': 9, 'NIE': 9, 'PASAPORTE': 9, 'TIE': 9, '': 20 };
+const _docMaxLengths = { 'DNI': 9, 'NIE': 9, 'PASAPORTE': 9, '': 20 };
 
 window.actualizarPlaceholderDoc = () => {
     const tipo  = document.getElementById('reg-tipo-doc').value;
@@ -218,7 +217,7 @@ window.handleRegister = async (e) => {
         if (numDocumento[8].toUpperCase() !== letraNie) {
             mostrarErrorAuth('La letra del NIE no es correcta.'); return;
         }
-    } else if (tipoDocumento === 'PASAPORTE' || tipoDocumento === 'TIE') {
+    } else if (tipoDocumento === 'PASAPORTE') {
         if (!/^[A-Z0-9]{6,12}$/i.test(numDocumento)) {
             mostrarErrorAuth('El número de ' + tipoDocumento + ' debe tener entre 6 y 12 caracteres alfanuméricos.'); return;
         }

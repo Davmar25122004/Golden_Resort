@@ -69,7 +69,6 @@
                     <option value="DNI">DNI</option>
                     <option value="NIE">NIE</option>
                     <option value="PASAPORTE">Pasaporte</option>
-                    <option value="TIE">TIE</option>
                 </select>
             </div>
             <div class="col-7">
@@ -115,8 +114,8 @@
 <script th:src="@{/lib/flatpickr/flatpickr.min.js}"></script>
 <script th:src="@{/lib/flatpickr/l10n/es.js}"></script>
 <script>
-const _placeholders = { DNI: '12345678A', NIE: 'X1234567A', PASAPORTE: 'ABC123456', TIE: 'X1234567A', '': 'Selecciona un tipo primero' };
-const _maxLengths = { DNI: 9, NIE: 9, PASAPORTE: 9, TIE: 9, '': 20 };
+const _placeholders = { DNI: '12345678A', NIE: 'X1234567A', PASAPORTE: 'ABC123456', '': 'Selecciona un tipo primero' };
+const _maxLengths = { DNI: 9, NIE: 9, PASAPORTE: 9, '': 20 };
 function actualizarPlaceholder() {
     var tipo = document.getElementById('cp-tipo-doc').value;
     var inp = document.getElementById('cp-num-doc');
