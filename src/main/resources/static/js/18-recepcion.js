@@ -28,7 +28,6 @@ async function recepcionInit() {
                 </div>
                 <div class="rcp-actions">
                     <button class="rcp-btn" onclick="recepcionRecargar()">↻ Refrescar</button>
-                    <button class="rcp-btn" onclick="recepcionAbrirAsignarLimpieza()">Asignar limpieza</button>
                 </div>
             </div>
 
