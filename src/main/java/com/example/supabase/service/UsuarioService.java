@@ -86,20 +86,12 @@ public class UsuarioService {
             telefono = telNorm;
         }
 
-        String supabaseUid = null;
-        try {
-            supabaseUid = supabaseAuthService.signUp(email, password, previousUid);
-        } catch (Exception ignored) {
-            // Supabase puede fallar; no bloqueamos el registro por eso
-        }
-
         String token = java.util.UUID.randomUUID().toString();
 
         PendingRegistration pending = new PendingRegistration();
         pending.setEmail(email);
         pending.setNombre(nombre);
         pending.setPasswordHash(passwordEncoder.encode(password));
-        pending.setSupabaseUid(supabaseUid);
         pending.setCreatedAt(LocalDateTime.now());
         pending.setTipoDocumento(tipoDocumento);
         pending.setNumDocumento(numDocumento);

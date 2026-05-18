@@ -79,7 +79,7 @@ public class OAuth2UserServiceCustom extends DefaultOAuth2UserService {
             if (esCliente) mensajeriaService.obtenerOCrearConversacion(usuario);
         } catch (Exception ignored) {}
 
-        // Aquí está la solución clave: Fusionar los roles de Supabase (BD) con los de Google
+        
         java.util.Set<org.springframework.security.core.GrantedAuthority> authorities = new java.util.HashSet<>(oAuth2User.getAuthorities());
         
         if (usuario.getRoles() != null) {
@@ -88,13 +88,12 @@ public class OAuth2UserServiceCustom extends DefaultOAuth2UserService {
             }
         }
 
-        // Obtener el nombre del atributo de ID (usualmente "sub" o "email")
+       
         String userNameAttributeName = userRequest.getClientRegistration()
                                                   .getProviderDetails()
                                                   .getUserInfoEndpoint()
                                                   .getUserNameAttributeName();
 
-        // Devolvemos al Contexto de Seguridad al usuario con SUS ROLES de nuestra Base de Datos
         return new org.springframework.security.oauth2.core.user.DefaultOAuth2User(
                 authorities,
                 oAuth2User.getAttributes(),

@@ -71,9 +71,21 @@ function syncFancyMonth(instance) {
     btn.textContent = instance.l10n.months.longhand[instance.currentMonth] + ' ▾';
     var list = document.getElementById(btn.dataset.listId);
     if (!list) return;
-    list.querySelectorAll('.fp-month-item').forEach(el =>
-        el.classList.toggle('active', parseInt(el.dataset.month) === instance.currentMonth)
-    );
+
+    // Rebuild month list based on current year constraints
+    var select = instance.calendarContainer.querySelector('.flatpickr-monthDropdown-months');
+    if (select) {
+        var availableMonths = new Set(Array.from(select.options).map(o => parseInt(o.value)));
+        list.querySelectorAll('.fp-month-item').forEach(el => {
+            var m = parseInt(el.dataset.month);
+            el.style.display = availableMonths.has(m) ? '' : 'none';
+            el.classList.toggle('active', m === instance.currentMonth);
+        });
+    } else {
+        list.querySelectorAll('.fp-month-item').forEach(el =>
+            el.classList.toggle('active', parseInt(el.dataset.month) === instance.currentMonth)
+        );
+    }
 }
 
 var FP_CONFIG = {
@@ -81,5 +93,6 @@ var FP_CONFIG = {
     locale: 'es',
     onReady:       (_d, _s, instance) => initFancyMonthDropdown(instance),
     onMonthChange: (_d, _s, instance) => syncFancyMonth(instance),
+    onYearChange:  (_d, _s, instance) => syncFancyMonth(instance),
 };
 
